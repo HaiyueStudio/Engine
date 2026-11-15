@@ -5,6 +5,7 @@ import { EngineError, EngineErrorCode } from '../core/EngineError';
 import type { GpuDrivenMegaBatchRun } from '../renderer/GpuDrivenBatchBuffer';
 import type { GpuDrivenBatchBuffer } from '../renderer/GpuDrivenBatchBuffer';
 import type { Render3DRenderItem } from './Render3DContracts';
+import type { ForwardOcclusionScissors } from './Render3DForwardOcclusion';
 import { requiredItemAt } from '../math/arrayAccess';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 
@@ -92,9 +93,33 @@ export class Render3DSubmitter {
     viewProj: Float32Array,
     viewMatrix: Float32Array,
     options: Render3DSubmitterOptions,
+    scissors?: ForwardOcclusionScissors,
   ): void {
+    const drawRange = (start: number, count: number, batched: boolean): void => {
+      const draw = (first: number, length: number) => batched
+        ? this.drawItemRun(items, passEncoder, viewProj, viewMatrix, first, length, options)
+        : this.drawItemsRange(items, passEncoder, viewProj, viewMatrix, first, length, first, options);
+      if (!scissors) {
+        draw(start, count);
+        return;
+      }
+      let unscissoredStart = start;
+      for (let index = start; index < start + count; index++) {
+        const rectangle = scissors.rectangles.get(items[index]!);
+        if (!rectangle) continue;
+        if (index > unscissoredStart) draw(unscissoredStart, index - unscissoredStart);
+        passEncoder.setScissorRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+        try {
+          draw(index, 1);
+        } finally {
+          passEncoder.setScissorRect(0, 0, scissors.width, scissors.height);
+        }
+        unscissoredStart = index + 1;
+      }
+      if (unscissoredStart < start + count) draw(unscissoredStart, start + count - unscissoredStart);
+    };
     if (!options.gpuDrivenBatches || options.megaBatchRuns.length < 1) {
-      this.drawItems(items, passEncoder, viewProj, viewMatrix, 0, options);
+      drawRange(0, items.length, false);
       return;
     }
 
@@ -102,15 +127,15 @@ export class Render3DSubmitter {
     for (const run of options.megaBatchRuns) {
       if (run.firstBatch >= items.length) break;
       if (run.firstBatch > cursor) {
-        this.drawItemsRange(items, passEncoder, viewProj, viewMatrix, cursor, run.firstBatch - cursor, cursor, options);
+        drawRange(cursor, run.firstBatch - cursor, false);
       }
       const runCount = Math.min(run.batchCount, items.length - run.firstBatch);
       if (runCount <= 0) continue;
-      this.drawItemRun(items, passEncoder, viewProj, viewMatrix, run.firstBatch, runCount, options);
+      drawRange(run.firstBatch, runCount, true);
       cursor = run.firstBatch + runCount;
     }
     if (cursor < items.length) {
-      this.drawItemsRange(items, passEncoder, viewProj, viewMatrix, cursor, items.length - cursor, cursor, options);
+      drawRange(cursor, items.length - cursor, false);
     }
   }
 

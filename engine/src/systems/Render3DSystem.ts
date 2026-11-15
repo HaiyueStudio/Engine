@@ -694,6 +694,7 @@ export class Render3DSystem extends System {
         frameView.target.getRenderPassDescriptor(getRenderViewPassOptions(frameView)),
         frameView.loadOp,
       );
+      this._viewPreparation.selectView(viewIndex, this._viewCollectionOptions, graphPass.passClass === 'view-local');
       this._recordView(
         world,
         context,
@@ -752,7 +753,6 @@ export class Render3DSystem extends System {
     plannedView?: Render3DPlannedView,
   ): void {
     this._framePlan.clear();
-    this._viewPreparation.selectView(uniformSlot, this._viewCollectionOptions);
     this._reverseZ = frameView.reverseZ;
     this._msaaSamples = frameView.sampleCount;
     const basicRenderer = this._renderers.requireBasic();
@@ -863,8 +863,8 @@ export class Render3DSystem extends System {
     const stats = this._viewPreparation.sort(this.renderSettings, this.transparentSort);
     this.lastOpaqueSortMode = stats.mode;
     this.lastOpaqueSortCount = stats.itemCount;
+    this._viewPreparation.prepareForwardOcclusion(this._frameExecution, this._viewProjMatrix, this.materialRenderers, this.renderSettings, this._materialRenderContext.eyePosition, !getDeferredLightingBackend(this));
   };
-
   private readonly _prepareGpuDrivenBatchesPass = () => this._measureStage('batch-build', this._prepareGpuDrivenBatchesStage);
   private readonly _prepareGpuDrivenBatchesStage = () => {
     const state = this._frameExecution;
@@ -925,8 +925,8 @@ export class Render3DSystem extends System {
     const { world, context } = state;
     let { postSceneRequirements } = state;
     const { postProcessPasses } = state;
-    const opaqueItems = this._opaqueItems;
-    const transparentItems = this._transparentItems;
+    const opaqueItems = this._viewPreparation.forwardOpaqueItems;
+    const transparentItems = this._viewPreparation.forwardTransparentItems;
     const helperItems = this._helperItems;
     const viewProj = this._viewProjMatrix;
     const viewMatrix = this._viewMatrix;
@@ -969,7 +969,7 @@ export class Render3DSystem extends System {
         this.msaaSamples,
       );
 
-      this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions);
+      this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions, this._viewPreparation.forwardScissors);
       if (needsSceneColorCapture) {
         passEncoder.end();
         const sceneColor = this._postScenePasses.captureSceneColor(context.encoder);

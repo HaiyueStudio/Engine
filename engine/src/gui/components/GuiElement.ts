@@ -97,6 +97,10 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   getResolvedStyle(): GuiSkin {return resolveGuiSkin(this);}
   /** Content padding stays in logical pixels and shrinks proportionally in tiny controls. */
   getContentRect(): GuiRect {
+    // A root with the stock resolver and no resource/local skin has no insets.
+    // Avoid rebuilding that same empty skin once per arranged child.
+    if (this.parent === null && this.getResolvedStyle === GuiElement.prototype.getResolvedStyle &&
+        !this.themeResource && Object.keys(this.style).length === 0) return this.rect;
     const skin = this.getResolvedStyle();
     const insets = skin.contentInsets ?? (skin.nineSlice ? guiContentMetrics(this, 0, skin.fontSize ?? 14).insets : undefined);
     if (!insets) return this.rect;
@@ -228,7 +232,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   layout(parentRect: GuiRect): void {
     const assigned = assignedGuiRect(this);
     if (assigned) {
-      this.rect = {...assigned};
+      this.rect = assigned;
       if (isGuiLayoutHidden(this)) return;
       for (const child of this.children) child.layout(this.getContentRect());
       return;

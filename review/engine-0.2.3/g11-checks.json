@@ -1,14 +1,23 @@
 {
   "schemaVersion": 1,
   "goal": "g11-integration-candidate",
-  "goalStatus": "active",
+  "goalStatus": "complete",
   "generatedAt": "2026-11-07T09:03:41.192Z",
-  "sourceRevision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
-  "workingTree": "Qualification snapshot is clean and immutable; the integration worktree and acceptance index are maintained separately. Formal idle sampling has not started.",
-  "releaseQualified": false,
+  "originalIndexSourceRevision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+  "sourceRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "workingTree": "Qualification applies to the clean frozen revision and independently verified package bytes.",
+  "fullG11Complete": true,
+  "releaseQualified": true,
   "publishingIncluded": false,
   "publicationPerformed": false,
   "baselinePromoted": false,
+  "finalQualification": {
+    "status": "qualified-frozen-candidate",
+    "qualifiedOn": "2026-11-16",
+    "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/g11-final-qualification.json",
+    "bytes": 7027,
+    "sha256": "59eeb821d968920b835e0fe729e29cf8983776aa2d7e3594a15a5944350765c7"
+  },
   "versions": {
     "@haiyue/engine": "0.2.3",
     "@haiyue/extensions": "0.2.3",
@@ -314,7 +323,7 @@
     {
       "id": "deterministic-public-packages",
       "required": true,
-      "status": "passed-clean-candidate-307771a",
+      "status": "passed-exact-engine-4beb46f",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
@@ -340,6 +349,11 @@
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
           "bytes": 4687,
           "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/payload/Engine/artifacts/engine-0.2.3/g11/qualification-packages-4beb46f-final/public-packages.json",
+          "bytes": 169377,
+          "sha256": "bf706cb6e21bb047528cd85d31c2456aad3e836cac3fbba3be6b753509e94dff"
         }
       ],
       "conclusion": "All four release-mode deterministic packages and 51 installed consumers pass at the frozen clean revision. Four SHA-256 identities match GUI P2; animation-spec remains 0.2.2. No formal captures were reused.",
@@ -490,7 +504,7 @@
     {
       "id": "physical-entry-setup",
       "required": true,
-      "status": "passed-setup-only-307771a",
+      "status": "passed-final-apple-browser-setup-only",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
@@ -531,6 +545,16 @@
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
           "bytes": 4687,
           "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/payload/Engine/artifacts/engine-0.2.3/g11/final-apple-setup-smoke/result.json",
+          "bytes": 5173,
+          "sha256": "60f95e61293ab009898ae86bf33e217c3b9e167f40705171222b92ec77ee366d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/payload/Engine/artifacts/engine-0.2.3/g11/final-apple-setup-smoke-r2/result.json",
+          "bytes": 77364,
+          "sha256": "2a905ddf46a20da3749c4d6ccc84290bd3a88543ed16cfea04b0ac8123495950"
         }
       ],
       "conclusion": "The immutable current device payload opens and closes on Windows with 151 served files verified and zero GPU residue. Setup uses automated events and does not qualify physical input. All four devices are available; real workflows are pending.",
@@ -545,7 +569,7 @@
     {
       "id": "native-consumer-preparation",
       "required": true,
-      "status": "prepared-source-and-vendor-307771a",
+      "status": "verified-final-native-5bf22e6-windows-and-macos",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
@@ -576,9 +600,29 @@
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
           "bytes": 4687,
           "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/native-git-verification.json",
+          "bytes": 233,
+          "sha256": "f99b8527e2b797db59bc60a47264f886c618d9354e41c89c2b836e169b6d5e3d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/native-final-installed-bytes.json",
+          "bytes": 453,
+          "sha256": "9627d030c588b0413aa1b35377d87b9bc05b6ed0926f249e5e4367987314cd7a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/native-final-package-full-windows.log",
+          "bytes": 18897,
+          "sha256": "d5b0de8d146169bbf0d0dabf7dd77beb111ad102f7ea4f555e421cbdba0e51d6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T134622/native-macos-full-acceptance.json",
+          "bytes": 2618,
+          "sha256": "38b62159e1f24790ff723a76a0f9f91da73f05023781ff8d7c69b6e573511063"
         }
       ],
-      "conclusion": "Installed 7236b39 Native example from the unchanged locked dependency graph with refreshed Engine/extensions tarballs. Windows install and typecheck pass; all 885 package-owned files match the qualified three packages. Actual iOS build, physical flows and Web Audio capability are pending.",
+      "conclusion": "Final Native 5bf22e6 uses the Engine 4beb46f release tarballs. The full Native suite passed on Windows with five platform skips and on macOS with all 188 tests executed, including the Swift audio probes. The final iOS installation and physical checks are recorded in the Apple device requirement.",
       "priorEvidenceIndex": {
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
@@ -589,7 +633,7 @@
     {
       "id": "portable-device-handoff",
       "required": true,
-      "status": "passed-integrity-307771a",
+      "status": "verified-final-apple-retest-archive",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
@@ -630,6 +674,11 @@
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
           "bytes": 4687,
           "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/handoff.json",
+          "bytes": 1745,
+          "sha256": "01e7afcdf496a07f3a7f041ad3e11b6cb423d4abfaeb124d037af2e02c68013f"
         }
       ],
       "conclusion": "Fresh admitted runtime, deterministic packages, 1178 canonical source inputs and portable archive verified; automated smoke is not physical acceptance.",
@@ -1170,8 +1219,13 @@
     {
       "id": "mac-and-physical-iphone",
       "required": true,
-      "status": "partial-macos-and-iphone-gui-passed-iphone-audio-failed",
+      "status": "passed-final-apple-device-acceptance",
       "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261115T231035/mac-browser-hearing-final-acceptance.json",
+          "bytes": 3383,
+          "sha256": "dbdba332d4de914e29d48507431fb98b988d47010125bd0d5ee0144cbc6b78c2"
+        },
         {
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
           "bytes": 2817,
@@ -1236,9 +1290,19 @@
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/iphone-device-review.json",
           "bytes": 7971,
           "sha256": "a0d7d9a81992033b9bf05d3f318999263da5cb4e6182dec306267c76ac9a1969"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/handoff.json",
+          "bytes": 1745,
+          "sha256": "01e7afcdf496a07f3a7f041ad3e11b6cb423d4abfaeb124d037af2e02c68013f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T131720/apple-physical-acceptance.json",
+          "bytes": 6836,
+          "sha256": "61b9838dc3643a2a973dcace6f5fdf00ec884069327c1cd2755770e36037f960"
         }
       ],
-      "conclusion": "Mac IME and hearing passed on 5d8041d. The physical iPhone built and installed successfully and reproduced native preedit retention twice. Badge centering was reported visually. The Native host did not provide AudioContext, so actual hearing remains blocked. Native recognizer ownership and GPU cleanup measurements remain open.",
+      "conclusion": "The 4beb46f / 5bf22e6 Apple retest passed Mac browser GUI and real IME, physical iPhone GUI and IME, and the iPhone center sound and foreground recovery spot check. Tracked cleanup counters returned to zero. Earlier Mac browser hearing and full iPhone audio evidence retain their original candidate identities.",
       "stages": {
         "keyboardIme": {
           "status": "passed-physical-macos-ime",
@@ -1365,7 +1429,7 @@
               }
             },
             "audioFollowUp": {
-              "status": "remote-native-commit-verified-audio-retest-pending",
+              "status": "failed-native-pcm-install",
               "branch": "codex/g11-iphone-retest-023",
               "candidateId": "g11-023-iphone-retest-13f77a20f2966ae65e0f",
               "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
@@ -1374,7 +1438,174 @@
                 "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-recovery/native-git-verification.json",
                 "bytes": 233,
                 "sha256": "6352700bf83b17f5f548ce2ee12b15be098a9afc9a2c28efc9ceffccd6bf9edf"
+              },
+              "physicalRetest": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-recovery/returned-20261110T074507/physical-audio-retest-review.json",
+                "bytes": 1473,
+                "sha256": "9becb0b80203ff97e849ddf601fc64889f53c4810bf433101aa45da45f608d01"
               }
+            },
+            "pcmFollowUp": {
+              "status": "failed-macos-caf-preflight",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-07990ebaf139b212b1f4",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "2ef12c6a5a5eddb152606f78760eb956f955bba0",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-pcm-check/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "2af2cb4888c67eddc65d97412a3ffa90b12d509cf2fa0067dd8a302abf98884b"
+              },
+              "macOsPreflightFailure": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-direct-pcm/macos-caf-preflight-failure.json",
+                "bytes": 778,
+                "sha256": "95fcaa1356715dc5f9030fa3e5bf7982aa45693de60749e5c93946878e9b9b04"
+              }
+            },
+            "directPcmFollowUp": {
+              "status": "failed-physical-av-audio-engine-output",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-b7d9c40f328e553d6ea6",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "8e31441a3972682500a2be17b93b1060fbc98180",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-direct-pcm/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "51947dab6eea833b2427975e1142e5a12907492810c3bcbc912c14aa3781a173"
+              },
+              "physicalRetest": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-direct-pcm/returned-20261110T090022/physical-audio-retest-review.json",
+                "bytes": 2888,
+                "sha256": "a0f2a5b9da1cefbbb05dbd719f020cd14f948d0a3278ed2437114c57adc6805b"
+              }
+            },
+            "graphDiagnostic": {
+              "status": "failed-macos-disconnected-player-start",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-1d869efc009f35ad5f03",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "955f5912b305bff9f28fc2de11ee34a71338d4a7",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-diagnostic/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "a68e0867df56996170e3ef824b795ae4ee2caf60ab386aec1d8971af8d7d1843"
+              },
+              "windowsFocusedTests": {
+                "passed": 15,
+                "failed": 0,
+                "macOsOnlySkipped": 2,
+                "typecheck": "passed"
+              },
+              "macOsPreflightFailure": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-diagnostic/macos-disconnected-player/macos-graph-preflight-failure.json",
+                "bytes": 933,
+                "sha256": "e81602ccb47a8c297d82ef15f875acf8ba2bf873f82291518aafd1df7d06a9bb"
+              }
+            },
+            "pausedGraphCandidate": {
+              "status": "failed-macos-paused-graph-disconnected",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-4a3478009860cb28f2df",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "1b5841737ba668a09a9924eab3d9128d3a02b22d",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-paused/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "ca90adfaef5d3c3b59dfb3b368667e37b17211f44a3d0f185485347abab6d431"
+              },
+              "windowsFocusedTests": {
+                "passed": 16,
+                "failed": 0,
+                "macOsOnlySkipped": 2,
+                "typecheck": "passed"
+              },
+              "macOsPreflightFailure": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-paused/macos-graph-comparison.json",
+                "bytes": 2599,
+                "sha256": "7f3eb715078aee1d78540e1acaa9b0a187f64b1a09c2327ebc41c35ab5375ad6"
+              }
+            },
+            "graphTransitionProbe": {
+              "status": "legacy-graph-rerun-confirmed-missing-voice-bus-edge",
+              "branch": "codex/g11-iphone-retest-023",
+              "nativeRevision": "faafcc7d8f9de659d6b56c87c8a215a2964b57fb",
+              "candidateId": "g11-023-iphone-retest-4a3478009860cb28f2df",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-transition/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "76e34eaef4d8dfa82dbb69a432af841e1274be2180c26923cfb601eb76885ab9"
+              },
+              "candidateRuntimeChanged": false,
+              "releaseQualified": false,
+              "macOsLegacyRerun": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-transition/legacy-route-rerun.json",
+                "bytes": 3449,
+                "sha256": "986932a85445d1a84bdd4372791df68fda651fb87546fe89d17c690545d93102"
+              }
+            },
+            "graphTransitionNamedProbe": {
+              "status": "completed-macos-native-graph-transition-comparison",
+              "branch": "codex/g11-iphone-retest-023",
+              "nativeRevision": "dbff5464e0a1ab13a3aa3a1b561ee6648c557530",
+              "candidateId": "g11-023-iphone-retest-4a3478009860cb28f2df",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-transition-named/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "2c92a6a1cedd0c1a7f616e8f74fba9dfbb7f2f4820d487636506e865f7bdc44f"
+              },
+              "candidateRuntimeChanged": false,
+              "releaseQualified": false,
+              "macOsTransition": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-transition-named/macos-transition-comparison.json",
+                "bytes": 5032,
+                "sha256": "4621ecb24bb3976e7d166026d9a1e1f6abdd3ca02aa23e78740c7a06e42b02bb"
+              }
+            },
+            "busLastCandidate": {
+              "status": "passed-macos-native-reuse-and-focused-physical-iphone-audio",
+              "branch": "codex/g11-iphone-retest-023",
+              "nativeRevision": "0e9db72643c709e229550d9f9f9056d67f076c85",
+              "candidateId": "g11-023-iphone-retest-aa5959aa600a145ca2a4",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-bus-last/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "8d6008bcec076683d8b7a78f58bcbf33210ac5f87397f3f0c5518136059e1bd3"
+              },
+              "windowsFocusedTests": {
+                "passed": 16,
+                "failed": 0,
+                "macOsOnlySkipped": 3,
+                "typecheck": "passed"
+              },
+              "releaseQualified": false,
+              "physicalRetest": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-bus-last/returned-20261110T124527/physical-audio-acceptance.json",
+                "bytes": 9614,
+                "sha256": "69eacf68bf4881735a759fefc594cd991e694b2b763f06329f14fe8b3b7f7300"
+              },
+              "macFocusedAudio": {
+                "passed": 14,
+                "failed": 0,
+                "firstVoice": true,
+                "sameAndCrossBusReuse": true,
+                "stereoAndMute": true
+              },
+              "iPhoneFocusedAudio": {
+                "passed": true,
+                "liveClockSamples": 11,
+                "offlineStereoCases": 2,
+                "backgroundRecovery": true,
+                "cleanupPassed": true
+              },
+              "nativeFullTests": {
+                "passed": 183,
+                "failed": 4,
+                "failuresReproducedFromPriorReturn": true
+              },
+              "fullDeviceAcceptance": false
             }
           }
         }
@@ -1520,8 +1751,23 @@
     {
       "id": "g02-global-and-no-publication-rehearsal",
       "required": true,
-      "status": "passed-formal-7236b39",
+      "status": "passed-exact-engine-4beb46f",
       "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-windows-cleanup-result.json",
+          "bytes": 8422,
+          "sha256": "3168c22794435922a301be3c430fcef094355b76a4b0997694ddf8bb4c273294"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/passed-evidence/run.json",
+          "bytes": 7684,
+          "sha256": "e302939592caa39284892f47b8998efc90aac67034d95a26cb1d41a62d2ce5e6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/passed-evidence/rehearsal-report.json",
+          "bytes": 9328,
+          "sha256": "f803abc5495107b89b975563f62ff92caf4df9d86dd69e955a2b5fed2bc4d2dc"
+        },
         {
           "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/attempt-1-manifest.json",
           "bytes": 3183,
@@ -1563,7 +1809,7 @@
           "sha256": "936d8ae8228dc9e3f691bd65137999189a90bfb555808a35d52efdb78c290e4a"
         }
       ],
-      "conclusion": "The frozen 7236b39 passed the complete Windows global gate, official no-publication rehearsal and independent rehearsal audit. All four archived packages match the qualified package hashes. Global gate remained attempt 1; rehearsal attempt 2 retained the first npm TLS failure and its complete SHA-256 archive. This does not grant physical or Ubuntu qualification. No publication, tag, push or baseline promotion."
+      "conclusion": "The frozen 4beb46f passed the Windows global gate, the no-publication rehearsal and the independent audit. The four package SHA-256 values match the frozen packages. The first two global attempts preserve their npm JSON and Windows Rollup cleanup failures. The 7236b39 rehearsal and its npm TLS failure remain historical."
     },
     {
       "id": "gui-p0-invalidation",
@@ -2821,5 +3067,367 @@
       }
     },
     "releaseQualified": false
+  },
+  "finalAppleRetest": {
+    "status": "passed-final-physical-and-formal-qualification",
+    "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+    "nativeRevision": "5bf22e6f658230fefa00c8155ed14448eb3da644",
+    "nativeCandidateId": "g11-023-iphone-retest-218a8cb8eb824189bd48",
+    "browserCandidateSha256": "be5dde6a9e040c77964524466215e2a8721dcf91c499c06e32ff8170e4836695",
+    "nativeManifestSha256": "8838455610a40d19c9735fa0d070c640d29187b0858d5f5a614f2461203f4c33",
+    "sharedTarballs": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.3",
+        "sha256": "205be4307a2241a78937b2117468c7871dadc09f83861fcbf7b69c20d9d916d2"
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.3",
+        "sha256": "0ae1c524d5e40eaccc613fbf13547be626e4c0ed0a221321364939cc9b4add66"
+      }
+    ],
+    "archive": {
+      "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-0.2.3-g11-final-apple.tar.gz",
+      "bytes": 19405681,
+      "sha256": "38dd7fe8a2a93f0c55c000c5da1b2499a43e38bc4758926f929a528c5159795b"
+    },
+    "archiveFilesVerified": 5317,
+    "handoff": {
+      "path": "artifacts/engine-0.2.3/g11/final-apple-retest/handoff.json",
+      "bytes": 1745,
+      "sha256": "01e7afcdf496a07f3a7f041ad3e11b6cb423d4abfaeb124d037af2e02c68013f"
+    },
+    "nativeFullWindows": {
+      "tests": 188,
+      "passed": 183,
+      "failed": 0,
+      "platformSkipped": 5,
+      "log": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/native-final-package-full-windows.log",
+        "bytes": 18897,
+        "sha256": "d5b0de8d146169bbf0d0dabf7dd77beb111ad102f7ea4f555e421cbdba0e51d6"
+      }
+    },
+    "nativeFullMac": {
+      "status": "passed-macos-native-full-tests",
+      "testFiles": 30,
+      "tests": 188,
+      "passed": 188,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T134622/native-macos-full-acceptance.json",
+        "bytes": 2618,
+        "sha256": "38b62159e1f24790ff723a76a0f9f91da73f05023781ff8d7c69b6e573511063"
+      }
+    },
+    "nativeInstalledMembers": 834,
+    "browserSetup": "passed-automated-setup-only",
+    "macBrowserPhysical": "passed-real-gui-and-ime",
+    "macBrowserHearing": "passed-final-candidate",
+    "iphoneGuiImePhysical": "passed-physical-gui-and-ime",
+    "returnedDeviceReview": {
+      "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T131720/apple-physical-acceptance.json",
+      "bytes": 6836,
+      "sha256": "61b9838dc3643a2a973dcace6f5fdf00ec884069327c1cd2755770e36037f960"
+    },
+    "priorIphoneAudio": {
+      "status": "passed-for-0e9db72",
+      "finalCandidateSoundAndRecoveryConfirmation": "passed-operator-confirmed-spot-check",
+      "packageMembersChanged": 3
+    },
+    "packageGate": {
+      "status": "passed",
+      "consumerCount": 51,
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/payload/Engine/artifacts/engine-0.2.3/g11/qualification-packages-4beb46f-final/public-packages.json",
+        "bytes": 169377,
+        "sha256": "bf706cb6e21bb047528cd85d31c2456aad3e836cac3fbba3be6b753509e94dff"
+      }
+    },
+    "remainingFormal": {
+      "runtimeChangedSinceOldFormalCandidate": true,
+      "oldReportsRetained": true,
+      "finalWindowsAndUbuntuRequalification": "windows-formal-and-global-passed-ubuntu-passed",
+      "windows": {
+        "status": "passed-formal-captures-hya-and-global-gate",
+        "entry": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/windows-entry-ready.json",
+          "bytes": 786,
+          "sha256": "dac6da759a1dd2ed3aa456610159ef74c3f06ef9d9e85c5001a6fb7773f1fafb"
+        },
+        "originalResult": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/qualification-result.json",
+          "bytes": 105679,
+          "sha256": "73f94dbf4f59ae2b34707443f058b728d3aa8bcbe3e6fb96b76c291c5f752940"
+        },
+        "auditedCaptures": {
+          "legacy": 580,
+          "combined": 24
+        },
+        "hyaLayoutReview": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/windows-continuation/hya-layout-review.json",
+          "bytes": 3153,
+          "sha256": "2bcdbda6ac80137ea51a9f5a8792a8889bde9e85a3e37d53612d000c92af3756"
+        },
+        "continuationVerification": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/windows-continuation/verification.json",
+          "bytes": 4469,
+          "sha256": "a2bba78c7119a73c52f42c0575f8f9115ceb62bc89c5a694ed7a3d504fc555d7"
+        },
+        "continuationLauncher": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/windows-continuation/CONTINUE-WINDOWS-4beb46f.cmd",
+          "bytes": 1106,
+          "sha256": "7958f2fc5337ebc778c20fcf4c8e9486c4d37c4b8e82010ad701fb41a27d62db"
+        },
+        "continuationResult": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/windows-continuation/qualification-result.json",
+          "bytes": 12773,
+          "sha256": "75ce9a79bbfe4099ea9909538f5d174e753802dd99a8da133a92d7e49969f79c"
+        },
+        "globalGateContinuation": {
+          "status": "passed-third-attempt",
+          "auditedHyaProductionCaptures": 30,
+          "hyaProductionGpuChecksPassed": 4,
+          "candidatePacingChecksPassed": 12,
+          "priorPostCaptureFailure": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/hya-production-retry/qualification-result.json",
+            "bytes": 10973,
+            "sha256": "624bb9fe606b8f79f8a503b4608eb1aa5f96b3b4c0f953028a6e195350ed0cbb"
+          },
+          "verification": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/verification.json",
+            "bytes": 565,
+            "sha256": "4f479a5df742a97be07bd7e602caac60f5bc33406eea9a65f810c3fd2da36973"
+          },
+          "launcher": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/CONTINUE-GLOBAL-GATE-4beb46f.cmd",
+            "bytes": 2915,
+            "sha256": "ad8524cdabb234eafeb881cf817c773833a56c3903cdbe6ed1485c96f427acab"
+          },
+          "firstRunFailure": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/qualification-result.json",
+            "bytes": 12409,
+            "sha256": "a3a385a97052efa6285a31fcb2cf19712b3e41b83e0ffb343ae2a26de4eca871",
+            "stage": "global-gate",
+            "cause": "npm 12.2.2 returns a JSON object for npm pack; three private draw fixtures read an array. The fixture tarball SHA-256 is identical with npm 11.17.0."
+          },
+          "retryVerification": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-retry-verification.json",
+            "bytes": 2148,
+            "sha256": "8b4d025f9f155b30b99479cc3fa744de59db491eff4edba26b7f99acff0f4afb",
+            "focusedTestsPassed": 37,
+            "npmVersion": "11.17.0"
+          },
+          "retryLauncher": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/RETRY-GLOBAL-GATE-NPM11-4beb46f.cmd",
+            "bytes": 2084,
+            "sha256": "853698198739d3b70cedf601e7503f751c3e4fa168a41e97abc404e63cb83770"
+          },
+          "secondRunFailure": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-retry-result.json",
+            "bytes": 3959,
+            "sha256": "5e613fc3a63466b69046c493046e3707708a2e00b6ce7978a5aaf27423ae2b44",
+            "stage": "global-gate",
+            "cause": "Windows Rollup did not close within the post-termination cleanup window after producing the navigation example's Engine dependency. Fast, FrameGraph, and formal lighting gates passed before the slow gate stopped."
+          },
+          "windowsCleanupVerification": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-windows-cleanup-verification.json",
+            "bytes": 3137,
+            "sha256": "362ea5018310f6e6433ad4452f31a386ddd3d622fa488301449ae2b691097a5e",
+            "navmeshValidationErrors": 0,
+            "buildDeadlineMs": 120000,
+            "postOutputGraceMs": 1500,
+            "terminateGraceMs": 4000,
+            "killGraceMs": 8000
+          },
+          "windowsCleanupLauncher": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/RETRY-GLOBAL-GATE-WINDOWS-CLEANUP-4beb46f.cmd",
+            "bytes": 2168,
+            "sha256": "ce6209f6ba1880e62e61e2b3693a7e2f91b261f5012ef2380a8a640a7107ae6e"
+          },
+          "windowsCleanupResult": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-windows-cleanup-result.json",
+            "bytes": 8422,
+            "sha256": "3168c22794435922a301be3c430fcef094355b76a4b0997694ddf8bb4c273294"
+          }
+        },
+        "hyaProductionRetry": {
+          "originalFailedCapture": 7,
+          "originalResultsReturned": 29,
+          "layoutCohortsPassed": 27,
+          "corpusRoundsPassed": 3,
+          "corpusCasesPerRound": 23,
+          "productionCapturesToRepeat": 30,
+          "verification": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/hya-production-retry/verification.json",
+            "bytes": 5262,
+            "sha256": "1be34b0927c51fb2a5bf56ef3b5ead41e7baa65ed51be1e97c66a1ecc43f7f9f"
+          },
+          "browserReadinessSmoke": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/hya-production-retry/browser-readiness-smoke.json",
+            "bytes": 148,
+            "sha256": "f004837cbba2455ecf43e02a11840342eec6370e7af394e373f9803266296143"
+          },
+          "missingCaseDiagnostic": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/hya-production-retry/missing-case-diagnostic.json",
+            "bytes": 433250,
+            "sha256": "9cfcf28c5c22320b59762ea3aed8439575ca405a187a4c654dc703ff72b39f78"
+          },
+          "launcher": {
+            "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/hya-production-retry/CONTINUE-HYA-GPU-4beb46f.cmd",
+            "bytes": 2930,
+            "sha256": "aacc5f27bd4a068164380d61eb24fa286b6838c969dcf1b32ddbd3dcccde2151"
+          }
+        }
+      },
+      "ubuntu": {
+        "status": "passed-fast-and-full-swiftshader-with-existing-named-ao-investigation",
+        "revision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+        "ref": "codex/g11-iphone-retest-023",
+        "plan": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-plan.json",
+          "bytes": 1488,
+          "sha256": "692ca7c348ccf0433f49e5c42b77e307530915867115065e69353e80a6264af9"
+        },
+        "fastRunId": 42830158485,
+        "fastEvidence": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-fast-acceptance.json",
+          "bytes": 1807,
+          "sha256": "391bfd18fbcd330d1c0b89889521d000af397d0e8f05ff3c91bada679d2c7dfc"
+        },
+        "fullSwiftShaderRunId": 42830173495,
+        "fullSwiftShaderPassedAttempt": 2,
+        "fullSwiftShaderEvidence": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-slow-acceptance.json",
+          "bytes": 11119,
+          "sha256": "0e6e4b9c18f4753483c3d72be1263bee360688e09664586a5683f619e7e3239b"
+        },
+        "firstAttemptFailure": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-slow-attempt-1-job-129877834899-raw.log",
+          "bytes": 37701,
+          "sha256": "e98d7db3622ad4e5272455f24f94e9fb594d83b0f6ffab00021cbc551fe6b1f6"
+        },
+        "retry": {
+          "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-slow-rerun-receipt.json",
+          "bytes": 472,
+          "sha256": "ea33f7fb9a2232bde6cf85b13856c0f3ccb74fceed808572d31115a5a94c8172"
+        }
+      },
+      "noPublicationRehearsal": "passed-and-independently-audited",
+      "finalBrowserPhysical": {
+        "revision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+        "candidateSha256": "be5dde6a9e040c77964524466215e2a8721dcf91c499c06e32ff8170e4836695",
+        "windowsImeGamepadAndHearing": "passed-final-candidate",
+        "windowsIme": {
+          "status": "passed-physical-windows-ime",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-ime-4beb46f-final-acceptance.json",
+          "bytes": 1580,
+          "sha256": "6797464e4a84aebaa813ac01426daba7efd5222682f758c8fe2459587aa17950"
+        },
+        "windowsGamepadJumpDiagnosis": {
+          "status": "spawn-obstruction-reproduced-physical-clear-ground-retest-pending",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-gamepad-4beb46f-spawn-jump-diagnosis.json",
+          "bytes": 2658,
+          "sha256": "6a649e600ed367f329b875b8f1a4a1a38f46cfd1ef4f14f056232ca81545203a"
+        },
+        "windowsGamepadOriginal": {
+          "status": "passed-physical-gamepad-except-obstructed-jump",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-gamepad-4beb46f-original-sealed.json",
+          "bytes": 9142,
+          "sha256": "a45d7170f896bc74479c74bc8841b2e171b37541e713fdba656ce10baf14b054"
+        },
+        "windowsGamepad": {
+          "status": "passed-physical-windows-gamepad",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-gamepad-4beb46f-final-acceptance.json",
+          "bytes": 1766,
+          "sha256": "752fdc0085ec08d5c319427e8dcb08141fad733567fafa160333503b9f51f5fc"
+        },
+        "windowsHearing": {
+          "status": "passed-physical-windows-hearing",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-hearing-4beb46f-final-acceptance.json",
+          "bytes": 1733,
+          "sha256": "fbc3559979f479d64c4505ce7289a29dfa71b79478fe42a7bb122446430aa4bb"
+        },
+        "macBrowserHearing": "passed-final-candidate",
+        "macBrowserHearingFinal": {
+          "status": "passed-physical-mac-browser-hearing",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261115T231035/mac-browser-hearing-final-acceptance.json",
+          "bytes": 3383,
+          "sha256": "dbdba332d4de914e29d48507431fb98b988d47010125bd0d5ee0144cbc6b78c2"
+        },
+        "macBrowserHearingReview": {
+          "status": "passed-mac-physical-playback-profile-save-and-restore-pending",
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261115T154002/mac-browser-hearing-independent-review.json",
+          "bytes": 2828,
+          "sha256": "d8cd39d0add58d942ecca0545d65b0f7c876206bfe3c12c16c362c8b8cd7ad97"
+        },
+        "previousWindowsRevision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+        "previousMacHearingRevision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+        "windowsEntry": {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/START-WINDOWS-PHYSICAL-4beb46f.cmd",
+          "bytes": 730,
+          "sha256": "7017b4c770968bc9ed9a677676216ee5d364cd6b88ca10c05c54c3344048e266"
+        },
+        "windowsEntryPreflight": {
+          "path": "artifacts/engine-0.2.3/g11/final-apple-retest/windows-physical-4beb46f-preflight.json",
+          "bytes": 184,
+          "sha256": "1593554860df62f2c830c7adcd93675183c00f6109ad76458e90055f62dfba65"
+        },
+        "instructions": "artifacts/engine-0.2.3/g11/final-apple-retest/final-physical-followup.md"
+      },
+      "releaseSourceAlignment": {
+        "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/release-source-alignment-audit.json",
+        "bytes": 4500,
+        "sha256": "6d4140889d7a361c2891e773d1befa28094009de55b621aa27b653aa56564994",
+        "changedPaths": 57,
+        "changedRuntimeSourcePaths": 15
+      },
+      "plan": {
+        "path": "artifacts/engine-0.2.3/g11/final-qualification-4beb46f/g02-preflight-plan/run.json",
+        "bytes": 4030,
+        "sha256": "6fa2382b7bb8abf5abfdf2ce62309b786aaae80d9c470884218c2b42e01215f6"
+      }
+    },
+    "releaseQualified": true,
+    "engineLocal": {
+      "status": "passed-local-typecheck-full-tests-build-api",
+      "testsPassed": 2696,
+      "testsFailed": 0,
+      "exampleTargetsBuilt": 112,
+      "distFilesIdenticalToFrozenTarballs": 924,
+      "typecheck": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-typecheck.log",
+        "bytes": 3266,
+        "sha256": "3ec2f3775947f2a4b8d11a2e3d4be57f44864570767c58b28380e832699127cb"
+      },
+      "originalPermissionFailure": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-test.log",
+        "bytes": 15385,
+        "sha256": "a5b1582fb60942239feca899c9cce3e7ec72ca8264d4db728bbc89c5222db476"
+      },
+      "fullTest": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-test-elevated.log",
+        "bytes": 274035,
+        "sha256": "4d2a3dab6b505671735fbc38e79807fa10cf5ce59d70d89d4120fd7f1e6cf651"
+      },
+      "build": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-build.log",
+        "bytes": 19039,
+        "sha256": "f2ef3f89c04f98c25625573cc7558e336258e70ca059005e25b563c968e3bd6c"
+      },
+      "api": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-api-check.log",
+        "bytes": 163,
+        "sha256": "9c5938a528ad1bd143184f838b4da16a1608358cfd3bdc79905dabff16a977d4"
+      },
+      "dist": {
+        "path": "artifacts/engine-0.2.3/g11/final-apple-retest/engine-rebuild-dist-comparison.json",
+        "bytes": 303,
+        "sha256": "045b5856955d6d40c119cec310fffb200d621273024703d889ec75654db04a2e"
+      }
+    },
+    "browserSetupGpuResourcesAfter": 0
   }
 }

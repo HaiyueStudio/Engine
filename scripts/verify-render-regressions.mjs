@@ -19,11 +19,15 @@ const commands = [
     env: { EXAMPLE_SHELL_ONLY: '1' },
     timeout: exampleBuildTimeoutMs,
   },
-  ...renderTargets.map(entry => ({
+  ...(renderTargets.length > 0 ? [{
     cmd: 'npm run build -w ./examples',
-    env: { EXAMPLE_FILTER: entry.id, EXAMPLE_SKIP_SOURCE_VIEWER: '1' },
-    timeout: exampleBuildTimeoutMs,
-  })),
+    env: {
+      EXAMPLE_FILTER: renderTargets.map(entry => entry.id).join(','),
+      EXAMPLE_SKIP_SOURCE_VIEWER: '1',
+    },
+    // Keep the original aggregate build allowance. Rollup still enforces each target's timeout.
+    timeout: exampleBuildTimeoutMs * renderTargets.length,
+  }] : []),
 ];
 
 for (const { cmd, env = {}, timeout } of commands) {

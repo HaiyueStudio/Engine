@@ -22,6 +22,7 @@ import type { PlanarMirrorRenderer } from '../renderer/PlanarMirrorRenderer';
 import type { VolumeRenderer } from '../renderer/VolumeRenderer';
 import type { DefaultMaterialRendererOptions } from './Render3DContracts';
 import type { Render3DLiveCache } from './Render3DLiveCache';
+import { registerForwardOcclusionRenderer } from './Render3DForwardOcclusion';
 
 export interface DefaultRendererAccess {
   basic(): Mesh3DRenderer;
@@ -56,7 +57,7 @@ export function registerDefaultMaterialRenderers(
       ...(typeof options === 'object' ? options : {}),
     };
   if (enabled.basic) {
-      registry.register<BasicMaterial>({
+      registerForwardOcclusionRenderer<BasicMaterial>(registry, {
         materialType: BasicMaterial,
         shadowCullMode: material => material.cullMode,
         beginView: context => {
@@ -144,7 +145,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.blinnPhong) {
-      registry.register<BlinnPhongMaterial>({
+      registerForwardOcclusionRenderer<BlinnPhongMaterial>(registry, {
         materialType: BlinnPhongMaterial,
         isTransparent: material => material.blending !== 'none',
         transparentDepthSort: material => material.blending !== 'none',
@@ -190,7 +191,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.pbr) {
-      registry.register<PbrMaterial>({
+      registerForwardOcclusionRenderer<PbrMaterial>(registry, {
         materialType: PbrMaterial,
         receivesDirectionalShadow: true,
         shadowCullMode: material => material.doubleSided ? 'none' : null,
@@ -242,7 +243,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.depth) {
-      registry.register<DepthMaterial>({
+      registerForwardOcclusionRenderer<DepthMaterial>(registry, {
         materialType: DepthMaterial,
         beginView: context => {
           const renderer = access.depth();
@@ -284,7 +285,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.normal) {
-      registry.register<NormalMaterial>({
+      registerForwardOcclusionRenderer<NormalMaterial>(registry, {
         materialType: NormalMaterial,
         beginView: context => {
           const renderer = access.normal();
@@ -326,7 +327,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.volume) {
-      registry.register<VolumeMaterial>({
+      registerForwardOcclusionRenderer<VolumeMaterial>(registry, {
         materialType: VolumeMaterial,
         isTransparent: () => true,
         transparentOrder: () => 5,
@@ -360,7 +361,7 @@ export function registerDefaultMaterialRenderers(
       });
     }
     if (enabled.planarMirror) {
-      registry.register<PlanarMirrorMaterial>({
+      registerForwardOcclusionRenderer<PlanarMirrorMaterial>(registry, {
         materialType: PlanarMirrorMaterial,
         beginView: context => access.planarMirror().beginView(context),
         prepareObjects: (_context, items, first, count) => (

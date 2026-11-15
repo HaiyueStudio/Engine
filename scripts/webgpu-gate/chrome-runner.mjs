@@ -21,6 +21,13 @@ export function defaultWebGpuAngleBackend(platform = process.platform) {
   return 'vulkan';
 }
 
+/** Linux software canvas screenshots need Dawn and the compositor to share ANGLE's GL path. */
+export function chromeCanvasArguments(angleBackend, platform = process.platform) {
+  if (platform !== 'linux' || angleBackend !== 'swiftshader') return [];
+  return ['--enable-unsafe-swiftshader', '--use-gl=angle', '--ignore-gpu-blocklist',
+    '--use-webgpu-adapter=opengles', '--disable-skia-graphite'];
+}
+
 /** Automated graphs stay silent; real hearing/unlock requires a visible user-operated window. */
 export function chromeAudioArguments(mode = 'silent', presentation = null) {
   if (mode === 'silent') return ['--mute-audio', '--autoplay-policy=no-user-gesture-required'];
@@ -45,6 +52,7 @@ export async function runChromeWebGpuFixture({
   chunkedResult = false,
   presentation = null,
   audioMode = 'silent',
+  failureCaptureExpression = null,
 }) {
   const chrome = browserPath ?? process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
@@ -65,6 +73,7 @@ export async function runChromeWebGpuFixture({
       chunkedResult,
       presentation,
       audioMode,
+      failureCaptureExpression,
     );
     result.httpProvenance = fixtureServer.provenance();
     return result;
@@ -167,6 +176,7 @@ async function runChrome(
   chunkedResult,
   presentation,
   audioMode,
+  failureCaptureExpression,
 ) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   if (process.env.WEBGPU_REQUIRE_NATIVE === '1' && isSoftwareBackend(angleBackend)) {
@@ -184,6 +194,7 @@ async function runChrome(
     '--enable-unsafe-webgpu',
     ...(disableDx12InfoCollection ? ['--disable-gpu-process-for-dx12-info-collection'] : []),
     `--use-angle=${angleBackend}`,
+    ...(visualCapture ? chromeCanvasArguments(angleBackend) : []),
     '--remote-debugging-port=0',
     ...(visualCapture ? [
       `--window-size=${visualCapture.viewportWidth ?? 960},${visualCapture.viewportHeight ?? 540}`,
@@ -202,6 +213,8 @@ async function runChrome(
   let primaryError = null;
   let browserCdp = null;
   let fixtureContext = null;
+  let failureSnapshot;
+  let failureSnapshotError;
   child.stderr.setEncoding('utf8');
   child.stderr.on('data', chunk => { stderr += chunk; });
   try {
@@ -350,6 +363,15 @@ async function runChrome(
       }
       completedResult = result;
       return result;
+    } catch (error) {
+      if (failureCaptureExpression) {
+        try {
+          failureSnapshot = await captureChromeFailureSnapshot(cdp, failureCaptureExpression);
+        } catch (captureError) {
+          failureSnapshotError = String(captureError);
+        }
+      }
+      throw error;
     } finally {
       await cdp.call('Browser.close').catch(() => {});
       cdp.close();
@@ -359,6 +381,8 @@ async function runChrome(
       url, angleBackend, browserProduct, lastProgress, browserErrors, stderr,
       exitCode: child.exitCode, signalCode: child.signalCode,
       storageMode: 'isolated-memory-context', fixtureContext,
+      ...(failureSnapshot !== undefined ? { fixtureSnapshot: failureSnapshot } : {}),
+      ...(failureSnapshotError ? { fixtureSnapshotError: failureSnapshotError } : {}),
     });
     throw primaryError;
   } finally {
@@ -454,6 +478,16 @@ export function attachChromeFailureDiagnostics(error, diagnostics) {
   // Existing gates persist Error.stack; retain structured context there as well.
   failure.stack = `${failure.stack}\nChrome/WebGPU failure diagnostics: ${JSON.stringify(details)}`;
   return failure;
+}
+
+export async function captureChromeFailureSnapshot(cdp, expression) {
+  const response = await cdp.call('Runtime.evaluate', {
+    expression, returnByValue: true, awaitPromise: true,
+  });
+  if (response.result?.exceptionDetails) {
+    throw Error(response.result.exceptionDetails.exception?.description ?? response.result.exceptionDetails.text);
+  }
+  return response.result?.result?.value;
 }
 
 export async function removeChromeProfile(profile, {

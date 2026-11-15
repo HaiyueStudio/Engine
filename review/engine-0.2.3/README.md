@@ -1,6 +1,6 @@
 # Engine 0.2.3 验收入口
 
-G01–G10 已完成，G11 仍在集成／验收。开发候选的 Engine／extensions／shader-language 为 0.2.3，animation-spec 为 0.2.2。原 `7236b39` 的 Windows 正式性能、全局门禁与无发布演练，以及 `de464ec` 的 Ubuntu CI 已通过；方向焦点及示例行编辑回收问题已修复并通过本地检查；当前候选仍需受影响的设备、云端及正式资格。整版未完成验收，未发布或推广基线。唯一活动检查入口为 [G11 检查索引](g11-checks.json)。
+G11 已完成。冻结候选 `4beb46f` 已通过设备验收、Windows 正式性能与 HYA 检查、Ubuntu CI、全局门禁和无发布演练。四个重建 tarball 的 SHA-256 与已验收制品一致。正式发布仍待确定从冻结候选还是从合入后的主干发布。 [G11 检查索引](g11-checks.json) · [候选资格证明](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/g11-final-qualification.json)
 
 合同：[ADR 0139](../../docs/for-ai/adr/0139-engine-023-gameplay-contracts.md) · [行为](contract.md) · [目标声明](api-contract.d.ts) · [机器合同](../../config/gameplay-023-contract.json)。本页汇总结论和剩余责任，逐次尝试与本次整理前原文见[归档清单](../archive/engine-review-entry-history-20261102.json)。原 checks JSON、原始捕获、合同和源码身份保留。
 
@@ -32,19 +32,22 @@ G08–G10 的原生像素、独立消费者、包体、资源及整仓检查均�
 
 当前修复候选为 `307771a`。左／中／右试听改为等距及相同源音量，使用既有声像强度配置，保留距离衰减和远处静音。原浏览器左右总 RMS 为中心的 10%，iPhone 页面旧配置为 20%；新配置的原生离线 PCM 比值均为 1，声道隔离、循环源释放及远处静音通过。完整本地 Fast、四包／51 个消费者、128 次集合操作及 1,960 次导航通过，四个库包字节与 `1c84c10` 一致。[准备结果](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json)和[原听音失败](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json)保留。
 
-[当前设备包](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/engine-0.2.3-real-devices-307771a.tar.gz)约 18.5 MiB，5,322 个文件逐一回读校验。Windows 三个 current 入口及[Mac／iPhone 说明](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/README-current.md)已同步。Native 仅在已验证语料上应用具名试听配置与当前 vendor 包并重算来源；真实听音仍需设备记录。
+[上一轮 307771a 设备包](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/engine-0.2.3-real-devices-307771a.tar.gz)约 18.5 MiB，5,322 个文件逐一回读校验。Windows 三个 current 入口及[Mac／iPhone 说明](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/README-current.md)已同步。Native 仅在已验证语料上应用具名试听配置与当前 vendor 包并重算来源；真实听音仍需设备记录。
 
-当前 [Fast／跨平台无发布入口](https://github.com/HaiyueStudio/Engine/actions/runs/42457853186)和[完整 Ubuntu／SwiftShader CI](https://github.com/HaiyueStudio/Engine/actions/runs/42457859412)均通过。[当前 CI 复核](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json)按官方 SHA-256 核对附件并保留全部原报告；只沿用已批准的 AO 600 秒调查项，保留原失败、部分样本及 8 次预热／30 次采样，不授予软件环境原生性能资格。
+最终候选 `4beb46f` 的 Engine Fast、Windows／Ubuntu 无发布控制器和完整 Ubuntu／SwiftShader CI 均通过。完整 CI 首轮的 Chrome DevTools 引导超时已保留，第二轮原样复跑通过。平面反射 4 组场景和 4 项像素检查通过，运动模糊 5 组用例在原 35 秒时限内通过，PBR 六个 Linux 整页参考均精确匹配。AO 按已批准的 600 秒调查处理，保留 14 个完整用例和下一用例的 24 次样本。 [Fast 复核](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-fast-acceptance.json) [完整 CI 复核](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/ci-slow-acceptance.json)
 
 历史 `7236b39` 的 Windows 正式性能、资源／画质、全局门禁及无发布演练已通过，`de464ec` 的云端 CI 已通过。原平面反射、运动模糊、PBR、AO、MSAA、输入与灯光归档问题及解决证据在 [G11 索引](g11-checks.json)保留，各自结论仍绑定原候选。
 
-## 未完成的资格
+## 最终候选与发布来源
 
-- 当前候选的 Windows [真实 IME](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-ime.json)、[真实手柄](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-gamepad.json)和[实际听音](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-hearing.json)均通过。手柄覆盖导航、左右移动、B→X→恢复 B、起跳和长按只启动一次，退出后 GPU、关卡、世界和浏览器进程残留为 0。Mac 的中文提交、Esc 取消和 Chrome 进程退出已核对。操作者确认缩放后候选窗跟随光标，列表编辑回收后保留。修复候选 5d8041d 的真机折叠专项通过，收起后未选拼音已取消，重新展开保留原值。同一候选的正常选字和实际听音均已通过。物理 iPhone 已构建安装并回传，原候选复现了折叠残留拼音和 Badge 偏心，音频因原生宿主缺少 AudioContext 未能开始试听；旧记录保留原候选身份。
-- 当前 CI 已通过；受影响正式资格仍需严格核对输入和哈希，不能自动沿用历史候选。
-- 主工作区的 [29 项既存源码差异](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json)须在发布前统一；本轮十份 Engine 具名文件已一致，其他差异保留。
+- Windows 最终候选的真实 IME、手柄和听音均已通过。手柄覆盖关卡启动、角色移动、导航、配置恢复、B 键起跳和落地，起点碰撞体挡住起跳的记录保留。听音的 13 个检查点覆盖声道、距离静音、淡出、配置恢复和切回前台。 [Windows IME](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-ime-4beb46f-final-acceptance.json) · [Windows 手柄](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-gamepad-4beb46f-final-acceptance.json) · [Windows 听音](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-hearing-4beb46f-final-acceptance.json)
+- Mac 浏览器现场听音已通过。第一轮 12 个检查点覆盖声道、远处静音、淡出、音量重置、静音切换、暂停／恢复和切回前台后的播放。补测的三个关键检查点确认静音配置保存、取消静音、恢复静音均生效。新包 210 个清单文件逐项校验，原 204 个文件字节一致，音频、GPU 和测试进程残留为 0。 [Mac 最终听音复核](../../artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261115T231035/mac-browser-hearing-final-acceptance.json)
+- HYA 布局按原 27 组口径复测通过，HUD 10% 变更组三轮文本测量 P95 为 1.080、0.884、0.901 ms，均在 2 ms 上限内。23 项语料三轮通过。30 项 HYA 生产 GPU 捕获已独立复核，四组 GPU P95 均满足 5% 门槛，12 项候选生产帧节奏均通过。Windows 全局门禁第三轮通过，随后完成无发布演练及独立复核。前两轮的 npm 回执和 Rollup 退出失败保留。 [门禁及包哈希](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-windows-cleanup-result.json) · [演练报告](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/passed-evidence/rehearsal-report.json)
+- 当前主干 `a8b7ae6` 与冻结候选 `4beb46f` 分叉。重新比对发现 57 个交付树路径不同，其中 15 个为运行时源码。验收继续绑定冻结候选，正式发布需明确采用该源码或完成差异合入并复验受影响部分。 [当前差异](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/release-source-alignment-audit.json) · [历史差异](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json)
 
-iPhone 真机已通过折叠预编辑、正常选字、Badge 居中和退出清理。AVAudioEngine 报告双声道且登记了播放请求，实际试听仍无声，切回前台后也未恢复。下一轮保留原失败并复验音频。[iPhone 复验记录](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/returned-20261109T132012Z/physical-retest-review.json)
+iPhone 音频无声由运行时接线顺序导致，旧路径断在 voice-out → ui-in。Native `0e9db72` 先接好声音链，再接入总线，退役时断开总线并复用混音节点。该候选的 Mac 原生音频专项 14/14 通过。iPhone 真机通过左右／居中、距离静音、淡出、静音切换、音量及前后台恢复，退出后被追踪的音频与 GPU 资源归零。 [完整音频验收](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-bus-last/returned-20261110T124527/physical-audio-acceptance.json) [原断连证据](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-paused/macos-graph-comparison.json)
+
+Apple 最终补测绑定 Engine `4beb46f` 和 Native `5bf22e6`，两端使用同一对门禁 tarball。Mac 浏览器真实中文输入、缩放、折叠取消及列表回收通过。iPhone GUI／IME、旋转、键盘遮挡及后台返回通过，操作者确认居中有声及返回前台后恢复播放，日志记录音频恢复为运行状态。Native 全量在 macOS 上 188 通过、0 失败、0 跳过，在 Windows 上 183 通过、0 失败、5 项平台跳过。Engine 本机 2,696 项测试和 112 个示例构建通过。 [Apple 回传复核](../../artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T131720/apple-physical-acceptance.json) [Mac Native 全量复核](../../artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261110T134622/native-macos-full-acceptance.json)
 
 运行编号、逐文件哈希、候选输入、未完成设备及正式入口状态只在 [G11 检查索引](g11-checks.json)维护；本页不重复追加执行时间线。
 

@@ -13,6 +13,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
 import {
+  chromeCanvasArguments,
   defaultChromePath,
   defaultWebGpuAngleBackend,
   startHttpFixtureServer,
@@ -115,12 +116,14 @@ function sourceRecord(path) {
 
 async function captureVolume(binary, pageUrl) {
   const profile = mkdtempSync(resolve(tmpdir(), 'haiyue-volume-example-'));
+  const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   const child = spawn(binary, [
     '--headless=new',
     '--no-sandbox',
     '--disable-gpu-sandbox',
     '--enable-unsafe-webgpu',
-    `--use-angle=${process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend()}`,
+    `--use-angle=${angleBackend}`,
+    ...chromeCanvasArguments(angleBackend),
     '--window-size=960,640',
     '--force-device-scale-factor=1',
     '--remote-debugging-port=0',

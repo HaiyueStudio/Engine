@@ -8,7 +8,7 @@ import {type GuiModal} from './components/GuiModal';
 import type {GuiImageSource} from './components/GuiImage';
 import {GuiActivityState} from './GuiActivityState';
 import {GuiDirtyState} from './GuiDirtyState';
-import {GUI_TEXT_LAYOUT_POLICY,guiTextContentChange,guiTextNeedsCoordinates,rememberGuiInvalidation} from './GuiInvalidationState';
+import {GUI_LAYOUT_STYLE_MUTATION,GUI_TEXT_LAYOUT_POLICY,guiLayoutStyleChange,guiTextContentChange,guiTextNeedsCoordinates,rememberGuiInvalidation} from './GuiInvalidationState';
 
 const sourceIds = new WeakMap<object, number>();
 let sourceId = 0;
@@ -23,7 +23,11 @@ function sourceKey(source: GuiImageSource | undefined): unknown {
 }
 
 function styleKey(element: GuiElement): unknown {
-  const {icon, nineSlice, ...plain} = element.style;
+  const style = element.style;
+  if (Object.getPrototypeOf(style) === Object.prototype && !('icon' in style) && !('nineSlice' in style) && !('toJSON' in style)) {
+    return [style, null, null];
+  }
+  const {icon, nineSlice, ...plain} = style;
   // Borrowed handles are opaque. Inspect only identity and actual pixel inputs,
   // never caller metadata, DOM ownership graphs or GPU internals.
   return [plain, sourceKey(icon), nineSlice ? [sourceKey(nineSlice.source), nineSlice.sourceWidth,
@@ -31,6 +35,7 @@ function styleKey(element: GuiElement): unknown {
 }
 
 function validRect(rect: GuiRect): boolean {return [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) && rect.width >= 0 && rect.height >= 0;}
+function sameCoordinates(a: GuiRect, b: GuiRect): boolean {return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;}
 function snapshot(root: GuiElement): Map<GuiElement, GuiRect> {
   const result = new Map<GuiElement, GuiRect>();
   const pending = [{element: root, depth: 1}];
@@ -43,9 +48,36 @@ function snapshot(root: GuiElement): Map<GuiElement, GuiRect> {
   }
   return result;
 }
-function union(rects: readonly GuiRect[]): GuiRect {
-  const x = Math.min(...rects.map(r => r.x)), y = Math.min(...rects.map(r => r.y));
-  return {x, y, width: Math.max(...rects.map(r => r.x + r.width)) - x, height: Math.max(...rects.map(r => r.y + r.height)) - y};
+function standardRectKeys(rect: GuiRect): boolean {
+  const keys = Object.keys(rect);
+  return keys.length === 4 && keys[0] === 'x' && keys[1] === 'y' && keys[2] === 'width' && keys[3] === 'height' && !('toJSON' in rect);
+}
+function sameRect(a: GuiRect, b: GuiRect): boolean {
+  if (Number.isFinite(a.x) && Number.isFinite(a.y) && Number.isFinite(a.width) && Number.isFinite(a.height) &&
+      Number.isFinite(b.x) && Number.isFinite(b.y) && Number.isFinite(b.width) && Number.isFinite(b.height) &&
+      standardRectKeys(a) && standardRectKeys(b)) return sameCoordinates(a, b);
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+function sameChildren(element: GuiElement, expected: readonly GuiElement[]): boolean {
+  const children = element.children;
+  if (children.length !== expected.length) return false;
+  for (let i = 0; i < children.length; i++) if (children[i] !== expected[i]) return false;
+  return true;
+}
+class Bounds {
+  private empty = true;
+  private left = Infinity;
+  private top = Infinity;
+  private right = -Infinity;
+  private bottom = -Infinity;
+  add(rect: GuiRect): void {
+    this.empty = false;
+    this.left = Math.min(this.left, rect.x); this.top = Math.min(this.top, rect.y);
+    this.right = Math.max(this.right, rect.x + rect.width); this.bottom = Math.max(this.bottom, rect.y + rect.height);
+  }
+  rect(fallback: GuiRect): GuiRect {
+    return this.empty ? fallback : {x: this.left, y: this.top, width: this.right - this.left, height: this.bottom - this.top};
+  }
 }
 function inputKey(element: GuiElement): string {
   return JSON.stringify([element.getLayoutOptions(), styleKey(element), element.visible, element.disabled, element.hovered, element.pressed, element.focused,
@@ -81,7 +113,9 @@ export class GuiLayoutOwner {
       if (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Children)||textLayout) {this.needsLayout = true; reasons.push('layout');}
       if (flags & (GuiDirtyFlags.Visual | GuiDirtyFlags.Text)) reasons.push('paint');
       if (flags & GuiDirtyFlags.Input) reasons.push('input');
-      this.emit(reasons, element.rect,undefined,element,flags,kind,generation,structure);
+      const layoutStyle = flags === GuiDirtyFlags.Layout && !reason &&
+        (this.delegate as (GuiLayoutDelegate & {[GUI_LAYOUT_STYLE_MUTATION]?:(node:GuiElement)=>boolean})|null)?.[GUI_LAYOUT_STYLE_MUTATION]?.(element);
+      this.emit(reasons, element.rect,undefined,element,flags,layoutStyle ? guiLayoutStyleChange() : kind,generation,structure);
     }, () => {
       if (this.suspended) return;
       this.suspended = true; this.needsLayout = true;
@@ -132,7 +166,7 @@ export class GuiLayoutOwner {
     const children = new Map(order.map(element => [element, [...element.children]])), parents = new Map(order.map(element => [element, element.parent]));
     const motions = order.map(captureGuiLayoutMotion).filter((restore): restore is () => void => restore !== undefined);
     const dialogRects = order.filter((element): element is GuiModal => isGuiControl<GuiModal>(element, 'GuiModal')).map(element => ({target: element.dialogRect, rect: {...element.dialogRect}}));
-    const metadata = new Map<GuiElement, {readonly display?: 'none'; readonly contentHeight?: number}>(), oldManaged = new Map(this.managed);
+    const metadata = new Map<GuiElement, {readonly display?: 'none'; readonly contentHeight?: number}>(), oldManaged = this.managed;
     const calculatingDelegate = this.delegate;
     let applying = false;
     this.arranging = true;
@@ -146,22 +180,48 @@ export class GuiLayoutOwner {
         metadata.set(element, {...options});
       });
       if (generation !== this.generation || delegate !== this.delegate || this.destroyed || version !== this.inputVersion()) throw new Error('GUI tree changed during layout calculation.');
-      const current = snapshot(this.root);
-      if (current.size !== previous.size || [...current.keys()].some((element, index) => order[index] !== element || inputs.get(element) !== inputKey(element))) throw new Error('GUI tree changed during layout calculation.');
-      for (const [element, rect] of current) if (JSON.stringify(rect) !== JSON.stringify(previous.get(element))) throw new Error('GUI layout delegate mutated rectangles instead of committing.');
-      this.releaseManaged();
-      for (const [element, rect] of next) {const options = metadata.get(element)!; this.managed.set(element, {rect, options}); retainGuiLayout(element, rect, options);}
+      // The original preorder and copied edges already prove membership. Only
+      // revisit the full validator on failure, to preserve malformed-tree errors.
+      for (const element of order) {
+        const expected = children.get(element)!;
+        if (element.parent !== parents.get(element) || !sameChildren(element, expected)) {
+          snapshot(this.root);
+          throw new Error('GUI tree changed during layout calculation.');
+        }
+      }
+      if (order.some(element => inputs.get(element) !== inputKey(element))) throw new Error('GUI tree changed during layout calculation.');
+      for (const [element, rect] of previous) {
+        const current = element.rect;
+        if (!sameRect(rect, standardRectKeys(current) ? current : {...current})) throw new Error('GUI layout delegate mutated rectangles instead of committing.');
+      }
+      this.managed = new Map();
+      for (const element of oldManaged.keys()) if (!next.has(element)) releaseGuiLayout(element);
+      for (const [element, rect] of next) {
+        const options = metadata.get(element)!, old = oldManaged.get(element);
+        if (old && Object.is(old.rect.x, rect.x) && Object.is(old.rect.y, rect.y) &&
+            Object.is(old.rect.width, rect.width) && Object.is(old.rect.height, rect.height) &&
+            standardRectKeys(old.rect) && standardRectKeys(rect) &&
+            old.options.display === options.display && Object.is(old.options.contentHeight, options.contentHeight)) {
+          this.managed.set(element, old);
+        } else {
+          this.managed.set(element, {rect, options}); retainGuiLayout(element, rect, options);
+        }
+      }
+      this.activity.reset(); this.dirty.invalidate();
       applying = true; withGuiAssignments(next, () => this.root.layout(viewport));
       this.needsLayout = false;
-      const changed = [...previous].filter(([element, rect]) => JSON.stringify(rect) !== JSON.stringify(element.rect));
-      this.emit(['paint'], changed.length ? union(changed.map(([, rect]) => rect)) : previous.get(this.root)!, changed.length ? union(changed.map(([element]) => element.rect)) : this.root.rect);
+      const before = new Bounds(), after = new Bounds();
+      for (const [element, rect] of previous) if (!sameRect(rect, element.rect)) {before.add(rect); after.add(element.rect);}
+      this.emit(['paint'], before.rect(previous.get(this.root)!), after.rect(this.root.rect));
       return true;
     } catch (error) {
-      this.releaseManaged();
-      if (this.delegate === calculatingDelegate && !this.destroyed) {
-        this.managed = oldManaged;
-        for (const [element, value] of this.managed) retainGuiLayout(element, value.rect, value.options);
-      }
+      if (this.managed !== oldManaged || this.delegate !== calculatingDelegate || this.destroyed) {
+        this.releaseManaged();
+        if (this.delegate === calculatingDelegate && !this.destroyed) {
+          this.managed = oldManaged;
+          for (const [element, value] of this.managed) retainGuiLayout(element, value.rect, value.options);
+        }
+      } else {this.activity.reset(); this.dirty.invalidate();}
       if (applying) {
         for (const element of order) {
           for (const child of element.children) if (!previous.has(child) && child.parent === element) child.parent = null;

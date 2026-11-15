@@ -4,6 +4,8 @@ import {GuiNativeTextProjection} from './GuiNativeTextProjection';
 import {guiTextDifference} from './GuiGraphemes';
 import type {GuiRect} from '../GuiTypes';
 
+const pointerCompletionWindowMs=50;
+
 /** Browser-native editing/IME responder. The GPU GUI remains the visible control. */
 export class GuiBrowserTextInputHost implements GuiTextInputHost {
   private target:HTMLInputElement|HTMLTextAreaElement|null=null;
@@ -22,6 +24,8 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
     element.dataset.haiyueTextInput=String(request.generation);
     Object.assign(element.style,{position:'fixed',left:'0px',top:'0px',width:'1px',height:'18px',padding:'0',margin:'0',border:'0',opacity:'0.01',color:'transparent',caretColor:'transparent',background:'transparent',pointerEvents:'none',zIndex:'2147483647',resize:'none',overflow:'hidden',fontSize:'16px'});
     let closed=false,synchronizing=false,composing=false,committed=request.value,originStart=0,originEnd=0,eventId=0;
+    let markedInput:{text:string;deliveredAt:number}|null=null;
+    let pendingEnd:{text:string;timeStamp:number;timer:number}|null=null;
     let projection=new GuiNativeTextProjection(committed,request.multiline),requestedSelection:readonly [number,number]|null=null;
     element.value=projection.value;
     const storedSelection=():readonly [number,number]=>{
@@ -33,29 +37,46 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
       const a=projection.toStored(start),b=projection.toStored(end);return element.selectionDirection==='backward'?[b,a]:[a,b];
     };
     const removals:(()=>void)[]=[];
-    const listen=(target:EventTarget,name:string,handler:EventListener)=>{target.addEventListener(name,handler);removals.push(()=>target.removeEventListener(name,handler));};
+    const listen=(target:EventTarget,name:string,handler:EventListener,capture=false)=>{target.addEventListener(name,handler,capture);removals.push(()=>target.removeEventListener(name,handler,capture));};
     const emitComposition=(phase:'start'|'update'|'commit'|'cancel',text:string)=>{
       const start=Math.max(0,Math.min(text.length,(element.selectionStart??originStart)-originStart));
       const end=Math.max(start,Math.min(text.length,(element.selectionEnd??originStart)-originStart));
       request.onComposition({generation:request.generation,phase,text,selectionUtf16:[start,end],...(phase==='commit'?{eventId:++eventId}:{})});
     };
     const preview=()=>element.value.slice(originStart,Math.max(originStart,element.value.length-(projection.value.length-originEnd)));
+    const settleEnd=(commit:boolean)=>{
+      const end=pendingEnd;if(!end)return;
+      pendingEnd=null;view.clearTimeout(end.timer);
+      emitComposition(commit?'commit':'cancel',commit?end.text:'');
+    };
     const selection=()=>{
-      if(closed||synchronizing||composing||document.activeElement!==element||element.value!==projection.value)return;
+      if(closed||synchronizing||composing||pendingEnd||document.activeElement!==element||element.value!==projection.value)return;
       request.onSelection(...storedSelection(),request.generation);
     };
     const replace=(text:string)=>{const [a,b]=storedSelection();request.onEdit({startUtf16:Math.min(a,b),endUtf16:Math.max(a,b),text,generation:request.generation,eventId:++eventId});};
     listen(element,'compositionstart',()=>{
-      if(closed)return;selection();composing=true;originStart=element.selectionStart??0;originEnd=element.selectionEnd??originStart;emitComposition('start','');
+      settleEnd(true);
+      if(closed)return;selection();composing=true;markedInput=null;originStart=element.selectionStart??0;originEnd=element.selectionEnd??originStart;emitComposition('start','');
     });
     listen(element,'compositionupdate',event=>{if(!closed&&composing)emitComposition('update',(event as CompositionEvent).data??preview());});
     listen(element,'compositionend',event=>{
       if(closed||!composing)return;
       const text=(event as CompositionEvent).data??preview();composing=false;
-      emitComposition(text?'commit':'cancel',text);
+      const last=markedInput;markedInput=null;
+      // Chromium's candidate replacement queues input and compositionend together.
+      // A click may instead end the same marked text before the pointer reaches the DOM.
+      if(text&&last?.text===text&&event.timeStamp>last.deliveredAt){
+        pendingEnd={text,timeStamp:event.timeStamp,timer:view.setTimeout(()=>settleEnd(true),pointerCompletionWindowMs)};
+      }else emitComposition(text?'commit':'cancel',text);
     });
+    listen(document,'pointerdown',event=>{
+      // An already-started native click carries its earlier input timestamp.
+      // A later, separate click must preserve a completed candidate.
+      if(pendingEnd&&event.isTrusted)settleEnd(event.timeStamp>pendingEnd.timeStamp);
+    },true);
     listen(element,'beforeinput',event=>{
       const input=event as InputEvent;
+      if(!input.isComposing&&input.inputType!=='insertCompositionText')settleEnd(true);
       if(closed||composing||input.isComposing)return;
       if(input.inputType==='historyUndo'||input.inputType==='historyRedo'){
         input.preventDefault();consumeInputEvent(input);request.onCommand(input.inputType==='historyUndo'?'undo':'redo');
@@ -68,10 +89,12 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
       }
     });
     listen(element,'paste',event=>{
+      settleEnd(true);
       if(closed||composing)return;const clipboard=event as ClipboardEvent;
       if(!clipboard.clipboardData)return;clipboard.preventDefault();consumeInputEvent(clipboard);replace(clipboard.clipboardData.getData('text/plain'));
     });
     for(const name of ['copy','cut'])listen(element,name,event=>{
+      settleEnd(true);
       if(closed||composing)return;const clipboard=event as ClipboardEvent;
       if(!clipboard.clipboardData)return;
       clipboard.preventDefault();consumeInputEvent(clipboard);
@@ -82,18 +105,27 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
     listen(element,'input',event=>{
       if(closed||synchronizing)return;
       consumeInputEvent(event);
-      if(composing||(event as InputEvent).isComposing){if(composing)emitComposition('update',preview());return;}
-      const value=element.value;if(value===projection.value){selection();return;}
-      const a=element.selectionStart??value.length,b=element.selectionEnd??a;
+      const input=event as InputEvent;
+      if(composing){
+        const text=preview();markedInput={text,deliveredAt:view.performance.now()};
+        emitComposition('update',text);return;
+      }
+      if(input.isComposing||pendingEnd&&input.inputType==='insertCompositionText')return;
+      const value=element.value,a=element.selectionStart??value.length,b=element.selectionEnd??a,direction=element.selectionDirection;
+      settleEnd(true);
+      if(closed)return;
+      if(value===projection.value){selection();return;}
       const edit=guiTextDifference(projection.value,value),selected=requestedSelection;
       let start=projection.toStored(edit.startUtf16),end=projection.toStored(edit.endUtf16);
       if(selected&&projection.toNative(Math.min(...selected))===edit.startUtf16&&projection.toNative(Math.max(...selected))===edit.endUtf16){start=Math.min(...selected);end=Math.max(...selected);}
       committed=committed.slice(0,start)+edit.text+committed.slice(end);projection=new GuiNativeTextProjection(committed,request.multiline);requestedSelection=null;
-      const rawA=projection.toStored(a),rawB=projection.toStored(b),postSelection:readonly [number,number]=element.selectionDirection==='backward'?[rawB,rawA]:[rawA,rawB];
+      const rawA=projection.toStored(a),rawB=projection.toStored(b),postSelection:readonly [number,number]=direction==='backward'?[rawB,rawA]:[rawA,rawB];
       request.onValue(committed,postSelection,request.generation,++eventId);
     });
     listen(element,'keydown',event=>{
       const key=event as KeyboardEvent;consumeInputEvent(key);
+      if(!key.isComposing&&key.keyCode!==229)settleEnd(true);
+      if(closed)return;
       if(composing||key.isComposing||key.keyCode===229)return;
       try{if(request.onKeyboard?.(key)){key.preventDefault();return;}}catch(error){key.preventDefault();throw error;}
       if(!request.multiline&&!key.ctrlKey&&!key.metaKey&&!key.altKey&&(key.key==='Home'||key.key==='End')){
@@ -133,6 +165,7 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
       finish:()=>null,
       close:()=>{
         if(closed)return;const restore=document.activeElement===element&&document.hasFocus();closed=true;
+        if(pendingEnd){view.clearTimeout(pendingEnd.timer);pendingEnd=null;}
         for(const off of removals)off();element.remove();
         if(this.target===element){this.target=null;this.session=null;}
         if(restore)this.restoreFocus();

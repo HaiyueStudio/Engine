@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { inflateSync } from 'node:zlib';
-import { defaultChromePath, defaultWebGpuAngleBackend } from './webgpu-gate/chrome-runner.mjs';
+import { chromeCanvasArguments, defaultChromePath, defaultWebGpuAngleBackend } from './webgpu-gate/chrome-runner.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const chrome = process.env.CHROME_PATH ?? defaultChromePath();
@@ -123,6 +123,7 @@ async function captureCases(binary, cases) {
   const child = spawn(binary, [
     '--headless=new', '--no-sandbox', '--disable-gpu-sandbox', '--enable-unsafe-webgpu',
     `--use-angle=${angleBackend}`, '--window-size=960,640', '--force-device-scale-factor=1',
+    ...chromeCanvasArguments(angleBackend),
     '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank',
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.resume();

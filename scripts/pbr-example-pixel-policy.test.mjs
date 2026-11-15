@@ -11,9 +11,16 @@ const fixture = () => ({ schemaVersion: 3, fixture: 'haiyue-pbr-showcase-clearco
   modes: Object.fromEntries(PBR_PIXEL_MODES.map(mode => [mode, image])) });
 const baseline = () => ({ ...fixture(), referencePlatform: 'win32' });
 
-test('selects an explicit Windows reference and retains the old reference elsewhere', () => {
+test('selects explicit Windows and Linux references and retains the original Darwin reference', () => {
   assert.match(pbrPixelBaselinePath('win32'), /\.win32\.json$/);
-  for (const platform of ['darwin','linux']) assert.equal(pbrPixelBaselinePath(platform), 'review/baselines/render-pixels-stage9-pbr-example.json');
+  assert.equal(pbrPixelBaselinePath('darwin'), 'review/baselines/render-pixels-stage9-pbr-example.json');
+  assert.match(pbrPixelBaselinePath('linux'), /\.linux\.json$/);
+  const linuxReference = { ...fixture(), referencePlatform: 'linux' };
+  assert.equal(comparePbrPixelBaseline(fixture(), linuxReference, 'linux').status, 'passed');
+  assert.throws(() => comparePbrPixelBaseline(fixture(), fixture(), 'linux'), /reviewed Linux/);
+  assert.throws(() => comparePbrPixelBaseline(fixture(), baseline(), 'linux'), /reviewed Linux/);
+  assert.throws(() => comparePbrPixelBaseline(fixture(), linuxReference, 'win32'), /reviewed Windows/);
+  assert.throws(() => comparePbrPixelBaseline(fixture(), linuxReference, 'darwin'), /another platform/);
   assert.throws(() => pbrPixelBaselinePath('unknown'), /Unsupported/);
   assert.throws(() => comparePbrPixelBaseline(fixture(), fixture(), 'win32'), /reviewed Windows/);
   assert.throws(() => comparePbrPixelBaseline(fixture(), baseline(), 'darwin'), /another platform/);

@@ -2,11 +2,12 @@ import type {GuiElement} from './components/GuiElement';
 import type {GuiInvalidation} from './GuiLayoutTypes';
 import {GuiDirtyFlags} from './GuiTypes';
 
-const enum Change {Unknown=0,Paint=1,TextContent=2}
+const enum Change {Unknown=0,Paint=1,TextContent=2,LayoutStyle=3}
 const current=new WeakMap<GuiElement,Change>(),manualStable=new WeakSet<GuiElement>(),metricsDirty=new WeakSet<GuiElement>();
 const structureChanges=new WeakMap<GuiElement,number>();
 const notifications=new WeakMap<GuiInvalidation,Change>();
 export const GUI_TEXT_LAYOUT_POLICY=/* @__PURE__ */ Symbol.for('haiyue.gui.text-layout-policy.v1');
+export const GUI_LAYOUT_STYLE_MUTATION=/* @__PURE__ */ Symbol.for('haiyue.gui.layout-style-mutation.v1');
 export function consumeGuiChange(element:GuiElement):number {const kind=current.get(element)??Change.Unknown;current.delete(element);return kind;}
 export function consumeGuiStructureChange(element:GuiElement):number|undefined {const version=structureChanges.get(element);structureChanges.delete(element);return version;}
 export function markGuiStructureDirty(element:GuiElement,version:number):void {
@@ -18,6 +19,8 @@ export function guiLocalChange(kind:number):boolean {return kind===Change.Paint|
 export function rememberGuiInvalidation(change:GuiInvalidation,kind:number):void {notifications.set(change,kind);}
 export function guiPaintOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.Paint;}
 export function guiTextContentOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.TextContent;}
+export function guiLayoutStyleOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.LayoutStyle;}
+export function guiLayoutStyleChange():number {return Change.LayoutStyle;}
 export function noteGuiTextDirty(element:GuiElement,flags:GuiDirtyFlags,kind:number):void {
   if(flags&GuiDirtyFlags.Text&&kind!==Change.TextContent)metricsDirty.add(element);
 }

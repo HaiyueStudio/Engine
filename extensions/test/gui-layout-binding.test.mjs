@@ -74,6 +74,21 @@ test('static and paint changes solve nothing; fixed-size sibling islands isolate
  panels[0].children[0].setText('changed');root.layout(300,200);assert.equal(readGuiLayoutCounters(binding).solves,first.solves+1);
  binding.dispose();assert.equal(readGuiLayoutCounters(binding).sessions,0);
 });
+test('repeated fixed flow results reuse warm geometry and preserve synchronous layout notifications',()=>{
+ const root=new GuiRoot({width:120,height:100}),a=root.add(new GuiElement({width:59,height:20})),b=root.add(new GuiElement({width:59,height:20}));
+ const binding=attachGuiLayout(root);
+ try{
+  binding.setStyle(root.root,{width:120,height:100,wrap:'wrap',alignContent:'start'});
+  let notifications=0;root.onInvalidation(change=>{if(change.reasons.includes('layout'))notifications++;});
+  const frame=width=>{const before=notifications;binding.setStyle(a,{width});assert.equal(notifications,before+1);root.layout(120,100);root.clearDirty();assert.equal(a.rect.width,width);assert.equal(b.rect.y,width+59>120?20:0);};
+  for(const width of [60,62,60,62])frame(width);
+  const warm=readGuiLayoutCounters(binding).solves;
+  for(const width of [60,62,60,62])frame(width);
+  assert.equal(readGuiLayoutCounters(binding).solves,warm);
+  frame(63);assert.equal(readGuiLayoutCounters(binding).solves,warm+1);
+  binding.setStyle(a,{width:-1});assert.throws(()=>root.layout(120,100));assert.equal(a.rect.width,63);
+ }finally{binding.dispose();root.destroy();}
+});
 test('version invalidation remeasures constrained content and removed islands release their sessions',()=>{
  const root=new GuiRoot(),panel=root.add(createGuiContainer('column',{style:{width:100,height:100}})),text=panel.add(new GuiLabel({text:'a'}));let width=20;
  const binding=attachGuiLayout(root,{measure:()=>({width,height:10,minWidth:0,minHeight:0})});binding.setStyle(text,{width:'auto',height:'auto',alignSelf:'start'});

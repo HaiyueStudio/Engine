@@ -5,12 +5,15 @@ const progressNode = document.querySelector('#progress');
 const resultNode = document.querySelector('#result');
 const query = new URLSearchParams(location.search);
 let adapterInfo = {};
+// Borrow the sampler's arrays so failure capture adds no per-sample work.
+const failureState = { adapter: null, configuration: null, cases: [], currentCase: null, validationErrors: [], deviceLost: null };
 
 try {
   if (!navigator.gpu) throw new Error('navigator.gpu is unavailable');
   const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
   if (!adapter) throw new Error('No WebGPU adapter is available');
   adapterInfo = plainAdapterInfo(adapter.info ?? {});
+  failureState.adapter = adapterInfo;
   if (!adapter.features.has('timestamp-query')) {
     const error = new Error('The selected WebGPU adapter does not expose the optional timestamp-query feature.');
     error.code = 'timestamp-query-unavailable';
@@ -20,13 +23,22 @@ try {
     label: 'ambient-occlusion-gpu-cost',
     requiredFeatures: ['timestamp-query'],
   });
-  const validationErrors = [];
+  const validationErrors = failureState.validationErrors;
+  device.lost.then(info => { failureState.deviceLost = { reason: info.reason, message: info.message }; });
+  globalThis.__captureAoCostFailure = async () => {
+    const snapshot = JSON.parse(JSON.stringify(failureState));
+    const scopedError = await device.popErrorScope();
+    if (scopedError) snapshot.validationErrors.push(scopedError.message);
+    snapshot.deviceLost = failureState.deviceLost;
+    return snapshot;
+  };
   device.addEventListener('uncapturederror', event => validationErrors.push(event.error.message));
   device.pushErrorScope('validation');
   const warmupCount = positiveInteger(query.get('warmup'), 8);
   const sampleCount = positiveInteger(query.get('samples'), 30);
-  const cases = [];
+  const cases = failureState.cases;
   const matrix = createAoCostMatrix();
+  failureState.configuration = { warmupCount, sampleCount, caseCount: matrix.length, timestampQuery: true };
 
   for (let index = 0; index < matrix.length; index++) {
     const cost = matrix[index];
@@ -92,6 +104,9 @@ try {
 }
 
 async function measureCase(device, cost, warmupCount, sampleCount) {
+  const phaseSamples = { occlusion: [], denoise: [], upscale: [], total: [] };
+  const currentCase = { id: cost.id, stage: 'prepare', warmupCompleted: 0, rawSamples: phaseSamples };
+  failureState.currentCase = currentCase;
   const { width, height } = cost.resolution;
   const pass = new GtaoPass({
     quality: cost.quality.id,
@@ -106,15 +121,17 @@ async function measureCase(device, cost, warmupCount, sampleCount) {
     frame: createFrameContext(width, height),
   });
   initializeCaseTextures(device, resources, width, height);
+  currentCase.stage = 'warmup';
   for (let index = 0; index < warmupCount; index++) {
     const encoder = device.createCommandEncoder({ label: `AO warmup ${cost.id}.${index}` });
     pass.apply(encoder, resources.source, resources.destinationView, device);
     device.queue.submit([encoder.finish()]);
   }
   await device.queue.onSubmittedWorkDone();
+  currentCase.warmupCompleted = warmupCount;
 
   const probe = createTimestampProbe(device);
-  const phaseSamples = { occlusion: [], denoise: [], upscale: [], total: [] };
+  currentCase.stage = 'samples';
   try {
     for (let index = 0; index < sampleCount; index++) {
       const sample = await probe.measure(pass, resources, createFrameContext(width, height, index + warmupCount));

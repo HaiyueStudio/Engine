@@ -1,7 +1,9 @@
 import { BasicMaterial, CartesianTransform3D, DirectionalLight, Entity, EnvironmentLight, Geometry3D, HaiyueEngine, Mesh3D, OrbitControl, SphericalTransform3D, createBox3D, createPlane3D, createSphere3D } from '@haiyue/engine';
 import { createTorus3D } from '@haiyue/engine/geometry';
 import { MotionBlurPass, PostProcessRenderFeature } from '@haiyue/engine/postprocess';
+import { RttEngine } from '@haiyue/engine/rtt';
 import { applyGltfAnimationClip, disposeGltfModel, loadGltfModel, type LoadedGltfModel } from '@haiyue/extensions/gltf';
+import { readRegressionCrop, regressionCrop, regressionExtent } from './regression-capture';
 
 type Vec3 = [number, number, number];
 
@@ -16,18 +18,26 @@ async function main(): Promise<void> {
   const canvas = query<HTMLCanvasElement>('#canvas');
   const queryParams = new URLSearchParams(location.search);
   const regression = queryParams.get('regression') === '1';
+  const canvasParity = regression && queryParams.get('capture') === 'canvas';
   const requestedDisplayMode = parseDisplayMode(queryParams.get('mode'));
   const requestedReconstruction = queryParams.get('reconstruction') === 'centered' ? 'centered' : 'tile-neighbor-max';
   const initiallyEnabled = queryParams.get('blur') !== 'off';
   const engine = new HaiyueEngine({
     canvas,
     msaaSamples: 4,
+    recoverDeviceLost: !regression,
     clearColor: { r: 0.006, g: 0.01, b: 0.024, a: 1 },
   });
   await engine.init();
   const validationErrors: string[] = [];
   engine.device.addEventListener('uncapturederror', event => validationErrors.push(event.error.message));
   engine.device.pushErrorScope('validation');
+
+  const captureTarget = regression && !canvasParity
+    ? new RttEngine(engine, regressionExtent.width, regressionExtent.height, engine.clearColor, 'motion-blur.regression')
+    : null;
+  if (regression) engine.on('device-lost', ({ detail }) => reportFailure(new Error(`WebGPU device lost: ${detail.message}`)));
+  if (captureTarget) window.addEventListener('beforeunload', () => captureTarget.destroy(), { once: true });
 
   const scene = engine.createScene({
     name: 'Motion blur laboratory',
@@ -38,6 +48,7 @@ async function main(): Promise<void> {
     render3D: { renderProfile: 'gpu-driven' },
     render2D: false,
     gui: false,
+    ...(captureTarget ? { view: { target: captureTarget, sampleCount: 4 } } : {}),
     pipelineLabel: 'MotionBlur.render',
   });
   const cameraTransform = scene.cameraEntity.getComponent(SphericalTransform3D)!;
@@ -174,7 +185,7 @@ async function main(): Promise<void> {
     if (!validationFinished && ++frames >= (regression ? 24 : 14)) {
       validationFinished = true;
       if (regression) engine.stop();
-      void finishValidation();
+      void finishValidation().catch(reportFailure);
     }
   });
   engine.run();
@@ -184,6 +195,12 @@ async function main(): Promise<void> {
   }, { once: true });
 
   async function finishValidation(): Promise<void> {
+    let capture: { source: 'canvas' | 'offscreen'; rgbaBase64: string } | undefined;
+    if (regression) {
+      const texture = captureTarget?.colorTexture ?? engine.context?.getCurrentTexture();
+      if (!texture) throw new Error('Motion blur final color texture is unavailable.');
+      capture = { source: canvasParity ? 'canvas' : 'offscreen', rgbaBase64: await readRegressionCrop(engine.device, texture) };
+    }
     await engine.device.queue.onSubmittedWorkDone();
     const scopedError = await engine.device.popErrorScope();
     if (scopedError) validationErrors.push(scopedError.message);
@@ -197,9 +214,9 @@ async function main(): Promise<void> {
     document.body.dataset.motionBlurIntensity = String(motionBlur.intensity);
     document.body.dataset.motionBlurReconstruction = motionBlur.reconstruction;
     const result = query<HTMLElement>('#result');
-    result.dataset.status = validationErrors.length ? 'failed' : 'passed';
+    const status = validationErrors.length ? 'failed' : 'passed';
     result.textContent = JSON.stringify({
-      status: result.dataset.status,
+      status,
       errors: validationErrors,
       coverage,
       mode: params.enabled ? motionBlur.displayMode : 'raw',
@@ -208,7 +225,10 @@ async function main(): Promise<void> {
       characterJoints: 19,
       pipelineWarmupMs,
       stats: motionBlur.stats,
+      ...(capture ? { capture: { ...capture, crop: regressionCrop, frames: regressionFrame,
+        sampleCount: scene.renderView.sampleCount, adapter: engine.adapter?.info.architecture } } : {}),
     });
+    result.dataset.status = status;
   }
 }
 
@@ -373,11 +393,13 @@ function query<T extends Element>(selector: string): T {
   return element;
 }
 
-void main().catch(error => {
+function reportFailure(error: unknown): void {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
   document.body.dataset.renderStatus = 'failed';
   document.body.dataset.renderError = message;
   const result = document.querySelector<HTMLElement>('#result');
   if (result) { result.dataset.status = 'failed'; result.textContent = JSON.stringify({ status: 'failed', errors: [message] }); }
   console.error(error);
-});
+}
+
+void main().catch(reportFailure);

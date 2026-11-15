@@ -1,0 +1,17 @@
+{
+  "id": "m25-g11-linux-swiftshader-ao-cost-600s",
+  "status": "approved-investigation",
+  "version": "0.2.3",
+  "authority": "User explicitly approved this named software timeout investigation on 2026-11-07: 批准这项具名软件超时调查",
+  "problem": "Ubuntu SwiftShader reaches the 4K AO matrix and exceeds the original 600-second fixture deadline; the retained full attempt completed 14 cases plus 25 samples of case 15 without GPU/browser errors or device loss.",
+  "method": "Attempt all original 18 cases, 8 warmups and 30 samples under the original 600000 ms deadline. Preserve the original failed gate and completed/partial samples. Only the explicitly enrolled Linux SwiftShader CI timeout with unchanged inputs and clean GPU/browser diagnostics may continue subsequent checks.",
+  "conclusion": "This named timeout is an investigation with qualification false. It does not provide native GPU performance evidence. Independent complete CI must still finish after admission.",
+  "evidence": {
+    "failureRetentionRun": "https://github.com/HaiyueStudio/Engine/actions/runs/42346679841",
+    "originalSoftwareRuns": "https://github.com/HaiyueStudio/Engine/actions/runs/42343746757",
+    "nativeFullMatrix": "Same-version Windows native full matrix passed all 36 original P95 checks."
+  },
+  "unchangedHardGates": ["native GPU performance", "GPU 5% regression", "other performance budgets", "real frame pacing", "pixels and quality", "resources and lifecycle", "all other failures"],
+  "originalFailurePreserved": true,
+  "qualification": false
+}

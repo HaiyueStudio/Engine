@@ -8,6 +8,11 @@ import { inflateSync } from 'node:zlib';
 import { defaultChromePath, defaultWebGpuAngleBackend } from './webgpu-gate/chrome-runner.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const caseTimeoutMs = 35_000;
+const crop = { x: 440, y: 40, width: 500, height: 560 };
+const args = process.argv.slice(2);
+const verifyParity = args.length === 1 && args[0] === '--verify-readback-parity';
+if (args.length && !verifyParity) throw new Error('Usage: verify-motion-blur-example.mjs [--verify-readback-parity]');
 const chrome = process.env.CHROME_PATH ?? defaultChromePath();
 if (!existsSync(chrome)) throw new Error(`Motion blur pixel verification requires Chrome at ${chrome}.`);
 if (!existsSync(resolve(root, 'examples/motion-blur/bundle.js'))) {
@@ -59,6 +64,11 @@ try {
       p95Ms: percentile(pipelineWarmupSamplesMs, 0.95),
     },
     coverage: captures.reconstructed.result.coverage,
+    capture: Object.entries(captures).map(([name, { result, elapsedMs, parity }]) => ({
+      name, adapter: result.capture.adapter, frames: result.capture.frames,
+      sampleCount: result.capture.sampleCount, source: result.capture.source, elapsedMs,
+      ...(parity ? { parity } : {}),
+    })),
   }, null, 2));
 } finally {
   const closed = new Promise(accept => server.close(accept));
@@ -94,10 +104,22 @@ async function captureCases(binary, cases) {
         mobile: false,
       });
       const captures = {};
-      for (const [name, url] of Object.entries(cases)) captures[name] = await captureCase(cdp, url, name, stderr);
+      for (const [name, url] of Object.entries(cases)) {
+        const offscreen = await captureCase(cdp, url, name, 'offscreen', angleBackend, () => stderr);
+        if (verifyParity) {
+          const canvas = await captureCase(cdp, `${url}&capture=canvas`, name, 'canvas', angleBackend, () => stderr);
+          const canvasVsScreenshot = comparePixels(canvas.pixels, canvas.screenshot);
+          const offscreenVsCanvas = comparePixels(offscreen.pixels, canvas.pixels);
+          if (canvasVsScreenshot.meanAbsoluteDifference || offscreenVsCanvas.meanAbsoluteDifference) {
+            throw new Error(`Motion blur ${name} readback parity failed: ${JSON.stringify({ canvasVsScreenshot, offscreenVsCanvas })}`);
+          }
+          offscreen.parity = { canvasVsScreenshot, offscreenVsCanvas };
+        }
+        captures[name] = offscreen;
+      }
       return captures;
     } finally {
-      await cdp.call('Browser.close').catch(() => {});
+      await beforeTimeout(() => cdp.call('Browser.close'), 5_000, 'Chrome cleanup').catch(() => {});
       cdp.close();
     }
   } finally {
@@ -106,14 +128,15 @@ async function captureCases(binary, cases) {
   }
 }
 
-async function captureCase(cdp, url, name, stderr) {
-  await cdp.call('Page.navigate', { url });
+async function captureCase(cdp, url, name, source, angleBackend, readStderr) {
+  await beforeTimeout(() => cdp.call('Page.navigate', { url }), caseTimeoutMs, `motion blur ${name} navigation`);
+  const startedAt = performance.now();
   const fixture = await waitFor(async () => {
     try {
       const response = await cdp.call('Runtime.evaluate', {
         expression: `(() => {
           const result = document.querySelector('#result');
-          return location.href.includes('case=${name}') && result?.dataset.status
+          return location.href === ${JSON.stringify(url)} && result?.dataset.status
             ? { status: result.dataset.status, text: result.textContent, error: document.body.dataset.renderError }
             : null;
         })()`,
@@ -124,8 +147,8 @@ async function captureCase(cdp, url, name, stderr) {
       if (error instanceof Error && error.message.includes('execution context')) return null;
       throw error;
     }
-  }, 35_000, `motion blur ${name} result`);
-  if (fixture.status !== 'passed') throw new Error(`Motion blur ${name} failed: ${fixture.error || fixture.text}\n${stderr}`);
+  }, caseTimeoutMs, `motion blur ${name} result`);
+  if (fixture.status !== 'passed') throw new Error(`Motion blur ${name} failed: ${fixture.error || fixture.text}\n${readStderr()}`);
   const result = JSON.parse(fixture.text);
   const expectedMode = name === 'reconstructed' || name === 'centered' ? 'blur' : name;
   if (result.mode !== expectedMode) throw new Error(`Motion blur ${name} reported mode ${result.mode}, expected ${expectedMode}.`);
@@ -134,12 +157,39 @@ async function captureCase(cdp, url, name, stderr) {
     throw new Error(`Motion blur ${name} reported invalid pipelineWarmupMs ${result.pipelineWarmupMs}.`);
   }
   if (!String(result.coverage).includes('tile-neighbor-max')) throw new Error(`Motion blur ${name} coverage is incomplete.`);
-  const screenshot = await cdp.call('Page.captureScreenshot', {
-    format: 'png',
-    clip: { x: 440, y: 40, width: 500, height: 560, scale: 1 },
-    captureBeyondViewport: false,
-  });
-  return { result, pixels: decodePng(Buffer.from(screenshot.result.data, 'base64')) };
+  const capture = result.capture;
+  if (capture?.source !== source || capture.frames !== 24 || capture.sampleCount !== 4
+      || Object.entries(crop).some(([key, value]) => capture.crop?.[key] !== value)) {
+    throw new Error(`Motion blur ${name} did not produce the specified ${source} capture.`);
+  }
+  if (angleBackend === 'swiftshader' && capture.adapter !== 'swiftshader') {
+    throw new Error(`Motion blur ${name} used ${capture.adapter ?? 'an unknown adapter'} instead of SwiftShader.`);
+  }
+  const data = Buffer.from(capture.rgbaBase64, 'base64');
+  if (data.length !== crop.width * crop.height * 4) throw new Error(`Motion blur ${name} readback has the wrong byte count.`);
+  delete capture.rgbaBase64;
+  const pixels = { width: crop.width, height: crop.height, data };
+  let screenshot;
+  if (source === 'canvas') {
+    // The panel's CSS shadow reaches into the crop. Isolate the stopped canvas
+    // in the compositor so the screenshot and readback sample the same layer.
+    const hidden = await beforeTimeout(() => cdp.call('Runtime.evaluate', {
+      expression: `new Promise(resolve => {
+        const style = document.createElement('style');
+        style.textContent = 'body > :not(canvas) { visibility: hidden !important; }';
+        document.head.append(style);
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)));
+      })`, awaitPromise: true, returnByValue: true,
+    }), caseTimeoutMs - (performance.now() - startedAt), `motion blur ${name} parity composition`);
+    if (hidden.result?.result?.value !== true) throw new Error(`Motion blur ${name} could not isolate the canvas screenshot.`);
+    const response = await beforeTimeout(() => cdp.call('Page.captureScreenshot', {
+      format: 'png', clip: { ...crop, scale: 1 }, captureBeyondViewport: false,
+    }), caseTimeoutMs - (performance.now() - startedAt), `motion blur ${name} parity screenshot`);
+    screenshot = decodePng(Buffer.from(response.result.data, 'base64'));
+  }
+  const elapsedMs = performance.now() - startedAt;
+  if (elapsedMs > caseTimeoutMs) throw new Error(`Timed out waiting for motion blur ${name} capture.`);
+  return { result, pixels, screenshot, elapsedMs };
 }
 
 function comparePixels(left, right) {
@@ -274,13 +324,25 @@ function contentType(path) {
 }
 
 async function waitFor(read, timeout, label) {
-  const deadline = Date.now() + timeout;
-  while (Date.now() < deadline) {
-    const value = await read();
+  const deadline = performance.now() + timeout;
+  while (performance.now() < deadline) {
+    const value = await beforeTimeout(read, deadline - performance.now(), label);
     if (value) return value;
     await new Promise(accept => setTimeout(accept, 100));
   }
   throw new Error(`Timed out waiting for ${label}.`);
+}
+
+async function beforeTimeout(run, remainingMs, label) {
+  if (remainingMs <= 0) throw new Error(`Timed out waiting for ${label}.`);
+  let timer;
+  try {
+    return await Promise.race([run(), new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Timed out waiting for ${label}.`)), remainingMs);
+    })]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function connectCdp(url) {
