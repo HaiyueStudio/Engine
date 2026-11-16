@@ -45,3 +45,37 @@ test('G11 per-package plan and local preflight execute without a network or subm
     const noJournal=spawnSync(process.execPath,['scripts/publication.mjs','preflight','--plan',f.plan],{cwd:root,encoding:'utf8'});assert.equal(noJournal.status,0,noJournal.stderr);
   }finally{rmSync(f.directory,{recursive:true,force:true});}
 });
+
+test('G07 plans only the two new versions and rejects incomplete device qualification',()=>{
+  const f=fixture();
+  try{
+    for(const entry of f.source.packages)entry.version=entry.name==='@haiyue/animation-spec'?'0.2.2':
+      entry.name==='@haiyue/shader-language'?'0.2.3':'0.2.4';
+    f.save();
+    const q=JSON.parse(readFileSync(f.qualification));
+    const unchanged=f.source.packages.filter(entry=>entry.version!=='0.2.4');
+    Object.assign(q,{goal:'g07-integration-candidate',fullG07Complete:true,targetVersion:'0.2.4',
+      verification:{windowsDevice:'passed',macDevice:'pending',productionPerformance:'passed',globalGate:'passed',rehearsal:'passed'},
+      unchangedPackages:Object.fromEntries(unchanged.map(entry=>[entry.name,{
+        version:entry.version,sha256:entry.sha256,integrity:'sha512-'+createHash('sha512').update(readFileSync(entry.artifact)).digest('base64'),
+      }]))});
+    const save=()=>writeFileSync(f.qualification,JSON.stringify(q));
+    save();
+    assert.match(f.run().stderr,/macDevice/);
+    assert.equal(existsSync(f.plan),false);
+    q.verification.macDevice='passed';
+    const original=q.unchangedPackages['@haiyue/animation-spec'].sha256;
+    q.unchangedPackages['@haiyue/animation-spec'].sha256='f'.repeat(64);
+    save();
+    assert.match(f.run().stderr,/unchanged package/);
+    q.unchangedPackages['@haiyue/animation-spec'].sha256=original;
+    save();
+    const planned=f.run();assert.equal(planned.status,0,planned.stderr);
+    const plan=JSON.parse(readFileSync(f.plan));
+    assert.deepEqual(plan.packages.map(entry=>entry.name),['@haiyue/engine','@haiyue/extensions']);
+    const preflight=()=>spawnSync(process.execPath,['scripts/publication.mjs','preflight','--plan',f.plan],{cwd:root,encoding:'utf8'});
+    assert.equal(preflight().status,0);
+    plan.packages.reverse();writeFileSync(f.plan,JSON.stringify(plan));
+    assert.match(preflight().stderr,/publication set/);
+  }finally{rmSync(f.directory,{recursive:true,force:true});}
+});

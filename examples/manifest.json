@@ -2182,6 +2182,17 @@
       }
     },
     {
+      "id": "visual-novel",
+      "title": "雾港 · The Last Lantern",
+      "entry": "visual-novel/main.mjs",
+      "capabilities": ["narrative", "hya", "gui", "audio", "i18n", "save"],
+      "assets": ["visual-novel/project/assets"],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "full",
+      "catalog": { "group": "assets-ui", "order": 84 }
+    },
+    {
       "id": "narrative",
       "title": "Narrative · The Last Signal",
       "entry": "narrative/main.ts",

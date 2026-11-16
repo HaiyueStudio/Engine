@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { npmCommand, npmArgs } from '../../scripts/npm-process.mjs';
+import { npmCommand, npmArgs, parseNpmPackManifest } from '../../scripts/npm-process.mjs';
 import { fileURLToPath } from 'node:url';
 
 export const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -25,7 +25,8 @@ export function prepareSceneFlowCandidate(output, { packageReport } = {}) {
       if (sha(readFileSync(path)) !== packed.sha256) throw Error('Qualified public tarball changed: '+pkg.name);
       integrity = 'sha512-'+createHash('sha512').update(readFileSync(path)).digest('base64');
     } else {
-      const pack = JSON.parse(execFileSync(npmCommand(), npmArgs(['pack', './'+workspace, '--offline', '--ignore-scripts', '--json', '--pack-destination', out]), { cwd: root, encoding: 'utf8', windowsHide: true, maxBuffer: 4*1024*1024 }))[0];
+      const stdout = execFileSync(npmCommand(), npmArgs(['pack', './'+workspace, '--offline', '--ignore-scripts', '--json', '--pack-destination', out]), { cwd: root, encoding: 'utf8', windowsHide: true, maxBuffer: 4*1024*1024 });
+      const pack = parseNpmPackManifest(stdout, pkg.name);
       path = resolve(out, pack.filename); integrity = pack.integrity;
     }
     const bytes = readFileSync(path);

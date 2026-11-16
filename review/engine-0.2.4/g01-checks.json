@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "goal": "g01-contracts-baseline",
+  "status": "passed-g01",
+  "baselineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "scope": "Published tarball consumer, Windows-native WebGPU correctness, automated focus, silent Web Audio graph and characterization. Production/device qualification is assigned to G07.",
+  "contract": {
+    "path": "config/visual-novel-024-contract.json",
+    "bytes": 7660,
+    "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+  },
+  "adr": {
+    "path": "docs/for-ai/adr/0140-visual-novel-024.md",
+    "bytes": 2029,
+    "sha256": "8ed5d79ee84f3aac040eb77c5b3103df4f4103ff0b499bf50e300b7d9b5cefc1"
+  },
+  "consumer": [
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/package.json",
+      "bytes": 402,
+      "sha256": "ddc750bcd619dc09780eb031a6afe3b877ff1eb8609c356d246802554bb63111"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/package-lock.json",
+      "bytes": 13209,
+      "sha256": "89bb3f3fcf7f185b67199b0bfa34c7564f726d79939717742ba805014b3f5bc5"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/package-provenance.json",
+      "bytes": 2276,
+      "sha256": "e47bc4f49cfb9bd81374726a585bb5e41d62ce42b7a2d6e8c3c34b0afca8a320"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/index.html",
+      "bytes": 254,
+      "sha256": "06d56056c2e09edcdd5f316b146a9aeaddd507204749a21998d084d4d3daf2f4"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/run.mjs",
+      "bytes": 3943,
+      "sha256": "ae62c7b8ea5ae4439651679d3fd53d55ef43c89164c772207d5cd339197df2b8"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/probe.mjs",
+      "bytes": 24794,
+      "sha256": "c12341f30cfee567d159b23fc5a6f47a930360a271ab68f20c4344b372c00b5b"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/consumer/probe-image.png",
+      "bytes": 80,
+      "sha256": "7025454b19bbbaaed85927731b08046e8bdde6233aa440fc195860fa21a76eaf"
+    }
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+    "vendor": "nvidia",
+    "architecture": "pascal",
+    "device": "",
+    "description": "",
+    "fallback": false,
+    "dpr": 1,
+    "targetFormat": "bgra8unorm"
+  },
+  "checksPerRun": 11,
+  "observations": {
+    "rendering": "Two independent HYA instances position through region bounds and share one host step. Cached and full-raster readback are byte-identical.",
+    "ordering": "Late insertion of a replacement changes overlap. Preparing all candidate regions in authored order and switching visibility together preserves the intended topmost layer.",
+    "persistence": "A new runtime and save service restored the stable choice and RGBA image. Silent seek emitted no HYA event and PNG thumbnail decoded to the same pixels.",
+    "cancellation": "Missing and cancelled resources preserved committed pixels. Three sets of twelve replacements completed; all acquired leases were released, with zero tracked GPU resources after destroy.",
+    "audio": "Disposing the scene facade preserves an unrelated voice in the borrowed context. The legacy fade writes profile volume; temporary per-scene gain belongs to G04.",
+    "focus": "The existing GUI focus manager restored the original modal trigger when closed."
+  },
+  "measurements": {
+    "kind": "g01-small-fixture-characterization",
+    "runs": [
+      {
+        "path": "artifacts/engine-0.2.4/g01/attempt-07.json",
+        "bytes": 11788,
+        "sha256": "721de8a71354616cd2df056f549bbab0247887691517b987e8fac30a23ede53f",
+        "firstNativeFrame": 745.6899999380112,
+        "appToFirstGpuCommit": 548.5199999809265,
+        "verificationReadback": 5.764999985694885,
+        "switches": 12
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g01/attempt-08.json",
+        "bytes": 11782,
+        "sha256": "25be62108d9a7b792aec3e9a9da56a070ab026159391dab51afb89da0789fd83",
+        "firstNativeFrame": 854,
+        "appToFirstGpuCommit": 592.5749999284744,
+        "verificationReadback": 3.390000104904175,
+        "switches": 12
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g01/attempt-09.json",
+        "bytes": 11820,
+        "sha256": "32d4000110203ff7a5b087ba4e11a740f792c6334566ebc5029625808a61514c",
+        "firstNativeFrame": 707.9450000524521,
+        "appToFirstGpuCommit": 470.585000038147,
+        "verificationReadback": 13.764999985694885,
+        "switches": 12
+      }
+    ],
+    "switchCount": 36,
+    "switchMs": {
+      "min": 6.289999961853027,
+      "p50": 7.215000033378601,
+      "p95": 10.93999993801117,
+      "max": 11.105000019073486
+    }
+  },
+  "earlierAttempts": [
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-01.json",
+      "bytes": 4219,
+      "sha256": "9738102e78b50ea5528b98a6d45e9db9bb3713b6937de6f61a7951b6b9f356d2"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-02.json",
+      "bytes": 5670,
+      "sha256": "05ac727b6b8852a1650dfdda7b2cab4a55e6247708bb2cee62e2260a132d0042"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-03.json",
+      "bytes": 5925,
+      "sha256": "1293ebea4436b244865b50612ad5d657b7a3cb3e7158eeb9662247c053e86d1d"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-04.json",
+      "bytes": 7648,
+      "sha256": "0dd058d68d9f5f6beb012d457e0818f0eb069dba4f234350df8e6d0014d549dd"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-05.json",
+      "bytes": 10168,
+      "sha256": "86e2b4bbfafa5f25250e57437a6ac92f77db03dbfa2842db87a6bf377db70f63"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g01/attempt-06.json",
+      "bytes": 10424,
+      "sha256": "e57fc7c9c3eff336bb32156cfbb211bd027b1dcff3a5e0d2c25cbdf3b24ed6f9"
+    }
+  ],
+  "handoff": {
+    "ready": [
+      "g02-story-authoring",
+      "g03-hya-stage"
+    ],
+    "pendingDeviceAndReleaseQualification": "g07-integration-candidate"
+  }
+}

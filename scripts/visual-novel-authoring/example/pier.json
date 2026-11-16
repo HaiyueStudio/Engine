@@ -1,0 +1,18 @@
+{
+  "id": "pier",
+  "nodes": {
+    "restore-actor": {
+      "type": "stage",
+      "cues": [[{ "op": "show", "presetId": "evening", "slotId": "actor" }]],
+      "next": "shared"
+    },
+    "shared": { "type": "dialogue", "lineId": "shared-pier", "textKey": "pier.shared", "next": "journal" },
+    "journal": { "type": "action", "name": "journal.mark", "payload": { "checkpoint": "pier" }, "next": "branch" },
+    "branch": {
+      "type": "branch",
+      "condition": { "op": "gt", "variable": "trust", "value": 0 },
+      "then": "ending/lantern",
+      "otherwise": "ending/tide"
+    }
+  }
+}

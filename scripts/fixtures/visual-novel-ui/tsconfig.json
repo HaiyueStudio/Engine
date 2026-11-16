@@ -1,0 +1,11 @@
+{
+  "extends": "../../../extensions/tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "../../../extensions/src/visual-novel/ui/**/*.ts",
+    "../../../extensions/src/visual-novel/audio/**/*.ts"
+  ]
+}

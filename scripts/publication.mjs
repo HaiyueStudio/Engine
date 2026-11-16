@@ -13,18 +13,54 @@ if(args.length||!['plan','preflight','status','unlock-stale','verify','publish']
 const read=p=>JSON.parse(readFileSync(resolve(root,p),'utf8'));
 const sha=(b,a='sha256')=>createHash(a).update(b).digest(a==='sha512'?'base64':'hex');
 
-if(mode==='plan'){
-  if(!reportPath||!planPath||!qualificationPath||journalPath||retryAuth||confirmPlanId)throw Error('Plan requires a package report, completed G13/G11 candidate qualification and new plan destination.');
-  const report=read(reportPath);
+function packageIdentities(report) {
+  return report.packages.map(entry => {
+    const file = resolve(root, entry.artifact);
+    const bytes = readFileSync(file);
+    if (sha(bytes) !== entry.sha256) throw Error('Package report bytes changed: ' + entry.name);
+    return { name:entry.name, version:entry.version, file, sha256:entry.sha256, integrity:'sha512-'+sha(bytes,'sha512') };
+  });
+}
+
+function qualifiedPackages(report, qualification, reportHash) {
   if(report.gate?.status!=='passed'||report.sourceState?.workingTreeDirty!==false)throw Error('Plan requires passing packages from a clean candidate.');
+  const g07 = qualification.goal === 'g07-integration-candidate';
+  const completed = g07 ? qualification.fullG07Complete === true
+    : qualification.goal === 'g13-integration-release' && qualification.fullG13Complete === true
+      || qualification.goal === 'g11-integration-candidate' && qualification.fullG11Complete === true;
+  if (!completed || qualification.releaseQualified !== true || qualification.revision !== report.sourceState.revision ||
+      qualification.packageReport?.sha256 !== reportHash) throw Error('Candidate qualification does not match these clean candidate packages.');
+  const packages = packageIdentities(report);
+  if (!g07) return packages;
+
+  const { versions } = read('config/visual-novel-024-contract.json');
+  const expected = { ...versions.publish, ...versions.unchanged };
+  if (qualification.targetVersion !== '0.2.4' || packages.length !== Object.keys(expected).length ||
+      new Set(packages.map(entry => entry.name)).size !== packages.length ||
+      packages.some(entry => expected[entry.name] !== entry.version)) throw Error('G07 package versions differ from the frozen 0.2.4 contract.');
+  for (const name of ['windowsDevice', 'macDevice', 'productionPerformance', 'globalGate', 'rehearsal']) {
+    if (qualification.verification?.[name] !== 'passed') throw Error('G07 qualification is missing a passing ' + name + ' result.');
+  }
+  for (const entry of packages.filter(entry => Object.hasOwn(versions.unchanged, entry.name))) {
+    const unchanged = qualification.unchangedPackages?.[entry.name];
+    if (unchanged?.version !== entry.version || unchanged.sha256 !== entry.sha256 || unchanged.integrity !== entry.integrity) {
+      throw Error('G07 unchanged package does not match the qualified registry bytes: ' + entry.name);
+    }
+  }
+  return Object.keys(versions.publish).map(name => packages.find(entry => entry.name === name));
+}
+
+if(mode==='plan'){
+  if(!reportPath||!planPath||!qualificationPath||journalPath||retryAuth||confirmPlanId)throw Error('Plan requires a package report, completed candidate qualification and new plan destination.');
+  const report=read(reportPath);
   const qualification=read(qualificationPath);
-  if(!((qualification.goal==='g13-integration-release'&&qualification.fullG13Complete===true)||(qualification.goal==='g11-integration-candidate'&&qualification.fullG11Complete===true))||qualification.releaseQualified!==true
-    ||qualification.revision!==report.sourceState.revision||qualification.packageReport?.sha256!==sha(readFileSync(resolve(root,reportPath))))
-    throw Error('Candidate qualification does not match these clean candidate packages.');
-  const plan={schemaVersion:qualification.goal==='g11-integration-candidate'?2:1,version:qualification.targetVersion??report.packages?.[0]?.version,revision:report.sourceState.revision,dirty:false,
+  const reportHash=sha(readFileSync(resolve(root,reportPath)));
+  const packages=qualifiedPackages(report,qualification,reportHash);
+  const version=qualification.targetVersion??report.packages?.[0]?.version;
+  if (version==='0.2.4'&&qualification.goal!=='g07-integration-candidate')throw Error('0.2.4 publication requires G07 qualification.');
+  const plan={schemaVersion:qualification.goal==='g13-integration-release'?1:2,version,revision:report.sourceState.revision,dirty:false,
     qualification:{path:qualificationPath,sha256:sha(readFileSync(resolve(root,qualificationPath)))},
-    packageReport:{path:reportPath,sha256:sha(readFileSync(resolve(root,reportPath)))},
-    packages:report.packages.map(p=>{const file=resolve(root,p.artifact),bytes=readFileSync(file);if(sha(bytes)!==p.sha256)throw Error('Package report bytes changed');return{name:p.name,version:p.version,file,sha256:sha(bytes),integrity:'sha512-'+sha(bytes,'sha512')};})};
+    packageReport:{path:reportPath,sha256:reportHash},packages};
   validatePublicationPlan(plan);mkdirSync(dirname(resolve(root,planPath)),{recursive:true});writeFileSync(resolve(root,planPath),JSON.stringify(plan,null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify({status:'planned-not-published',planId:publicationPlanId(plan),plan:planPath}));
 }else{
@@ -33,6 +69,13 @@ if(mode==='plan'){
   const plan=read(planPath);validatePublicationPlan(plan);
   if(sha(readFileSync(resolve(root,plan.packageReport.path)))!==plan.packageReport.sha256)throw Error('Frozen package report changed.');
   if(sha(readFileSync(resolve(root,plan.qualification.path)))!==plan.qualification.sha256)throw Error('Frozen candidate qualification changed.');
+  if (plan.version === '0.2.4' || plan.packages.some(entry => entry.version === '0.2.4')) {
+    const qualification = read(plan.qualification.path);
+    if (qualification.goal !== 'g07-integration-candidate' || plan.version !== qualification.targetVersion || plan.revision !== qualification.revision ||
+        JSON.stringify(plan.packages) !== JSON.stringify(qualifiedPackages(read(plan.packageReport.path), qualification, plan.packageReport.sha256))) {
+      throw Error('Frozen plan does not match the G07 publication set.');
+    }
+  }
   for(const p of plan.packages)verifyPublicationBytes(p,readFileSync(p.file));
   if(mode==='preflight'){console.log(JSON.stringify({status:'local-preflight-passed',planId:publicationPlanId(plan),packages:plan.packages.map(p=>({name:p.name,version:p.version})),networkUsed:false,submitted:false}));process.exit(0);}
   const journalFile=resolve(root,journalPath);

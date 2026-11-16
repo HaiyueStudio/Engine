@@ -171,3 +171,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0138：GUI 独立 pass 包体准入；固定七报告哈希复核并完整重跑门禁](0138-selective-gui-bundle-admission.md)
 
 - [0139：0.2.3 游戏流程与 GUI 组件合同](0139-engine-023-gameplay-contracts.md)
+- [0140：0.2.4 视觉小说与 HYA 舞台合同](0140-visual-novel-024.md)

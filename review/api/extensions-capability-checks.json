@@ -1292,5 +1292,30 @@
       "path": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
       "sha256": "b3cb934a7af91ce4243486d3c8d4b42419bcad16518d85811047bb4e0961ab87"
     }
-  ]
+  ],
+  "visualNovel024": {
+    "disposition": "prequalified-working-tree",
+    "entrypoint": "./visual-novel",
+    "source": "extensions/src/visual-novel.ts",
+    "decision": "docs/for-ai/adr/0140-visual-novel-024.md",
+    "runtimeExports": [
+      "createVisualNovel",
+      "validateVisualNovelDefinition"
+    ],
+    "typeExports": [
+      "VisualNovelDefinition",
+      "VisualNovelOptions",
+      "VisualNovelSession",
+      "VisualNovelSnapshot",
+      "VisualNovelView"
+    ],
+    "reviewedSymbols": 7,
+    "publishedRootGrowth": 0,
+    "evidence": "review/engine-0.2.4/g07-checks.json",
+    "loading": {
+      "initialGzipBytes": 71092,
+      "totalGzipBytes": 488795,
+      "deferredHyaAndOpenType": true
+    }
+  }
 }

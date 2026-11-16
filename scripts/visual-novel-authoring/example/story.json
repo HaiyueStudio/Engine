@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "harbor",
+  "version": "1",
+  "start": "arrival/set-stage",
+  "variables": { "trust": 0, "knowsHarbor": false, "openedJournal": false },
+  "chapters": ["arrival.json", "pier.json", "ending.json"],
+  "defaultLocale": "zh-Hans",
+  "locales": { "zh-Hans": "zh-Hans.json", "en": "en.json" },
+  "assets": {
+    "harbor": { "kind": "hya", "path": "harbor.hya.json" },
+    "keeper": { "kind": "hya", "path": "keeper.hya.json" }
+  },
+  "presets": {
+    "evening": [
+      { "id": "background", "assetId": "harbor", "bounds": [0, 0, 1280, 720], "order": 0, "fit": "cover" },
+      { "id": "actor", "assetId": "keeper", "bounds": [820, 120, 380, 600], "order": 10 }
+    ]
+  },
+  "actions": ["journal.mark"],
+  "routes": {
+    "stay": {
+      "locale": "zh-Hans",
+      "initial": { "knowsHarbor": true },
+      "steps": [
+        { "nodeId": "arrival/set-stage", "stage": true },
+        { "nodeId": "arrival/offer", "choiceId": "stay" },
+        { "nodeId": "pier/restore-actor", "stage": true },
+        { "nodeId": "pier/journal", "result": { "openedJournal": true } }
+      ]
+    },
+    "leave": {
+      "locale": "en",
+      "steps": [
+        { "nodeId": "arrival/set-stage", "stage": true },
+        { "nodeId": "arrival/offer", "choiceId": "leave" },
+        { "nodeId": "pier/restore-actor", "stage": true },
+        { "nodeId": "pier/journal", "result": { "openedJournal": true } }
+      ]
+    },
+    "inspect-options": { "steps": [{ "nodeId": "arrival/set-stage", "stage": true }] },
+    "inspect-stage": { "steps": [] }
+  },
+  "replays": { "pier-memory": { "startLineId": "first-view", "endLineId": "shared-pier" } }
+}

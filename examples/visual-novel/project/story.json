@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "last-lantern",
+  "version": "1",
+  "start": "arrival/open-stage",
+  "variables": { "trust": 0 },
+  "chapters": ["arrival.json", "pier.json", "ending.json"],
+  "defaultLocale": "zh-Hans",
+  "locales": { "zh-Hans": "zh-Hans.json", "en": "en.json" },
+  "assets": {
+    "harbor": { "kind": "hya", "path": "assets/harbor.hya.json" },
+    "keeper": { "kind": "hya", "path": "assets/keeper.hya.json" },
+    "traveler": { "kind": "hya", "path": "assets/traveler.hya.json" },
+    "rain": { "kind": "hya", "path": "assets/rain.hya.json" },
+    "signal": { "kind": "hya", "path": "assets/signal.hya.json" },
+    "music": { "kind": "audio", "path": "assets/harbor-loop.wav" },
+    "arrival-zh": { "kind": "audio", "path": "assets/arrival-zh.wav" },
+    "arrival-en": { "kind": "audio", "path": "assets/arrival-en.wav" },
+    "pier-zh": { "kind": "audio", "path": "assets/pier-zh.wav" },
+    "pier-en": { "kind": "audio", "path": "assets/pier-en.wav" },
+    "lantern-zh": { "kind": "audio", "path": "assets/lantern-zh.wav" },
+    "lantern-en": { "kind": "audio", "path": "assets/lantern-en.wav" },
+    "tide-zh": { "kind": "audio", "path": "assets/tide-zh.wav" },
+    "tide-en": { "kind": "audio", "path": "assets/tide-en.wav" }
+  },
+  "presets": {
+    "rain-night": [
+      { "id": "background", "assetId": "harbor", "bounds": [0, 0, 1280, 720], "order": 0 },
+      { "id": "keeper", "assetId": "keeper", "bounds": [155, 235, 300, 340], "order": 10 },
+      { "id": "traveler", "assetId": "traveler", "bounds": [850, 210, 320, 363], "order": 20 },
+      { "id": "weather", "assetId": "rain", "bounds": [0, 0, 1280, 720], "order": 30 }
+    ],
+    "beacon": [
+      { "id": "weather", "assetId": "signal", "bounds": [0, 0, 1280, 720], "order": 30 }
+    ]
+  },
+  "actions": [],
+  "routes": {
+    "lantern": {
+      "locale": "zh-Hans",
+      "steps": [
+        { "nodeId": "arrival/open-stage", "stage": true },
+        { "nodeId": "arrival/fork", "choiceId": "stay" },
+        { "nodeId": "pier/approach", "stage": true },
+        { "nodeId": "pier/flash", "stage": true }
+      ]
+    },
+    "tide": {
+      "locale": "en",
+      "steps": [
+        { "nodeId": "arrival/open-stage", "stage": true },
+        { "nodeId": "arrival/fork", "choiceId": "leave" },
+        { "nodeId": "pier/approach", "stage": true },
+        { "nodeId": "pier/flash", "stage": true }
+      ]
+    }
+  },
+  "replays": {
+    "lantern-cg": { "startLineId": "pier-story", "endLineId": "lantern-end" },
+    "tide-cg": { "startLineId": "pier-story", "endLineId": "tide-end" }
+  }
+}

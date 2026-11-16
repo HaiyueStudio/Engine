@@ -3,7 +3,7 @@ import {resolve,relative,isAbsolute} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {npmCommand,npmArgs,tarCommand} from '../../../scripts/npm-process.mjs';
+import {npmCommand,npmArgs,parseNpmPackManifest,tarCommand} from '../../../scripts/npm-process.mjs';
 export const root=fileURLToPath(new URL('../../../',import.meta.url));
 export const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 
@@ -20,7 +20,10 @@ export function preparePublicFeatureCandidate({output,application,types,smoke,re
  for(const workspace of ['engine','extensions','animation-spec']){
   const pkg=JSON.parse(readFileSync(resolve(root,workspace,'package.json')));let file,integrity;
   if(qualified){const p=qualified.packages.find(p=>p.name===pkg.name);if(!p||p.version!==pkg.version||p.sha256!==p.deterministicRepackSha256)throw Error('Invalid deterministic package: '+pkg.name);file=resolve(root,p.artifact);if(sha(readFileSync(file))!==p.sha256)throw Error('Qualified bytes changed.');}
-  else{const p=JSON.parse(execFileSync(npmCommand(),npmArgs(['pack','./'+workspace,'--offline','--ignore-scripts','--json','--pack-destination',out]),{cwd:root,encoding:'utf8',windowsHide:true,maxBuffer:4*1024*1024}))[0];file=resolve(out,p.filename);integrity=p.integrity;}
+  else{
+   const stdout=execFileSync(npmCommand(),npmArgs(['pack','./'+workspace,'--offline','--ignore-scripts','--json','--pack-destination',out]),{cwd:root,encoding:'utf8',windowsHide:true,maxBuffer:4*1024*1024});
+   const packed=parseNpmPackManifest(stdout,pkg.name);file=resolve(out,packed.filename);integrity=packed.integrity;
+  }
   const bytes=readFileSync(file);packages.push({workspace,name:pkg.name,version:pkg.version,file,sha256:sha(bytes),integrity:integrity??'sha512-'+createHash('sha512').update(bytes).digest('base64'),bytes:bytes.length});
  }
  const dependencies=Object.fromEntries(packages.map(p=>[p.name,'file:'+p.file.replaceAll('\\','/')])),overrides={};

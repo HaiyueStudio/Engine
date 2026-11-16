@@ -10,7 +10,7 @@ import {
 const examplesDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const root = resolve(examplesDir, '..');
 const INPUT_EXTENSIONS = new Set([
-  '.css', '.html', '.js', '.json', '.mjs', '.ts', '.tsx', '.wgsl',
+  '.css', '.html', '.js', '.json', '.mjs', '.ts', '.tsx', '.wav', '.wgsl',
 ]);
 const IGNORED_DIRECTORIES = new Set([
   '.cache', '.git', 'artifacts', 'dist', 'dist-test', 'node_modules',
@@ -22,11 +22,13 @@ const IGNORED_OUTPUTS = new Set([
   resolve(examplesDir, SHARED_ENGINE_OUTPUT),
   resolve(examplesDir, `${SHARED_ENGINE_OUTPUT}.map`),
   resolve(examplesDir, 'page-turn-book/pdf.worker.min.mjs'),
+  resolve(examplesDir, 'visual-novel/project/compiled.json'),
 ]);
 const SOURCE_ROOTS = [
   resolve(root, 'engine/src'),
   resolve(root, 'animation-spec/src'),
   resolve(root, 'extensions/src'),
+  resolve(root, 'scripts/visual-novel-authoring'),
   examplesDir,
 ];
 const CONFIG_FILES = [

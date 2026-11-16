@@ -1,0 +1,24 @@
+{
+  "id": "pier",
+  "nodes": {
+    "approach": {
+      "type": "stage", "cues": [[{ "op": "show", "presetId": "rain-night", "slotId": "keeper" }]],
+      "next": "story"
+    },
+    "story": {
+      "type": "dialogue", "lineId": "pier-story", "textKey": "pier.story", "speakerKey": "traveler",
+      "voices": { "zh-Hans": "pier-zh", "en": "pier-en" }, "next": "flash"
+    },
+    "flash": {
+      "type": "stage",
+      "cues": [
+        [{ "op": "show", "presetId": "beacon" }, { "op": "wait", "kind": "event", "slotId": "weather", "event": "beacon-finished" }]
+      ],
+      "next": "verdict"
+    },
+    "verdict": {
+      "type": "branch", "condition": { "op": "gt", "variable": "trust", "value": 0 },
+      "then": "ending/lantern", "otherwise": "ending/tide"
+    }
+  }
+}

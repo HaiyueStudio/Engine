@@ -1,0 +1,434 @@
+{
+  "schemaVersion": 1,
+  "goal": "g04-playback-ui",
+  "status": "passed-g04",
+  "source": {
+    "revision": "a8b7ae6ae44e441340200266a4082637b5ca4e37",
+    "workingTreeImplementation": true,
+    "node": "v24.19.0"
+  },
+  "publishedBaseline": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "contract": {
+    "path": "config/visual-novel-024-contract.json",
+    "bytes": 7660,
+    "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+  },
+  "relatedEvidence": [
+    {
+      "path": "review/engine-0.2.4/g01-checks.json",
+      "bytes": 5971,
+      "sha256": "402265fb3c12a296008d63bd27e26a07a7859b7b4ab489394136864f2e36e46c"
+    },
+    {
+      "path": "review/engine-0.2.4/g02-checks.json",
+      "bytes": 8784,
+      "sha256": "0929311fb0e144ba23835e09660168e0acdd0edb54b77fe30b33dd77c0c7b8d4"
+    },
+    {
+      "path": "review/engine-0.2.4/g03-checks.json",
+      "bytes": 11590,
+      "sha256": "9056f1399f546e609ece7c492ab05138c7caf1f44646ba9b51f30c4af6373dc9"
+    }
+  ],
+  "implementation": [
+    "Reveal Unicode graphemes against the fully shaped layout, using the existing GUI root, focus domain, and actions. Support wrapping, live locale changes, themes, safe areas, and reading preferences.",
+    "Confirm reveals then advances. Automatic waits for text, a minimum reading time and current voice. Skip advances only already-read dialogue; mode changes at unread lines, choices and mandatory stage or wait actions.",
+    "Keep a bounded history ring and reuse the existing virtual list. Replay the selected voice for the current locale without advancing the story.",
+    "Use the original mixer with separately owned voice leases and transient gain on the scene music voice. Use current track, bus and voice values throughout and release pending loads on cancellation."
+  ],
+  "native": {
+    "runner": "Chrome/157.0.8103.52",
+    "adapter": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "vendor": "nvidia",
+      "architecture": "pascal",
+      "fallback": false
+    },
+    "input": "Automated keyboard and pointer events through the existing GUI domain.",
+    "audio": "Muted native Web Audio graph; compare scheduled gain with live AudioParam values after the audio clock advances.",
+    "checks": [
+      "native-glyphs-fixed-line-raster-and-held-confirm",
+      "native-pointer-modal-consumption-and-keyboard-focus-return",
+      "native-narrow-large-text-safe-area-and-locale-focus",
+      "native-choice-and-required-stage-boundary",
+      "native-virtual-history-window",
+      "native-web-audio-scene-only-duck-and-restore",
+      "native-audio-owner-cleanup"
+    ],
+    "history": {
+      "id": "native-virtual-history-window",
+      "seeded": 12001,
+      "retained": 10000,
+      "tail": {
+        "logicalItems": 10000,
+        "first": 9994,
+        "last": 10000,
+        "rowInstances": 6,
+        "boundRows": 6
+      },
+      "head": {
+        "logicalItems": 10000,
+        "first": 0,
+        "last": 6,
+        "rowInstances": 6,
+        "boundRows": 6
+      },
+      "openMs": 18.644999980926514,
+      "restyled": 6
+    },
+    "browserErrors": 0,
+    "gpuErrors": 0,
+    "ownedBrowserProcessesRemaining": 0,
+    "deviceQualification": "G07 physical input, listening and integrated device qualification.",
+    "report": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/result.json",
+      "bytes": 6715,
+      "sha256": "edda29c28646057c4ef4220f93ae2d50b946a81930d70061d4a3525ebc716aec"
+    },
+    "repeat": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-a/result.json",
+      "bytes": 6714,
+      "sha256": "8733ffbfb7a5daabb4064aa83a590305df1af71da5f03673a57dae1d9d8f8dd3"
+    },
+    "bundle": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/fixture.js",
+      "bytes": 3050359,
+      "sha256": "fee5fd01ecff860489308a5b48ea02f6ac05d3fb6c2f4f1a5826d2e854f942b9"
+    },
+    "html": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/index.html",
+      "bytes": 185,
+      "sha256": "0d4983c1ffc42043f86e8d2557bd7d38f8c56d128b535ab718d2b2405a4b55c3"
+    },
+    "images": [
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/dialogue-complete.png",
+        "bytes": 27399,
+        "sha256": "51d76a12e1d6e2b13b740d1053676f8538389ffaa7a92ef53511e3183f7b137b"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/narrow-choice.png",
+        "bytes": 28722,
+        "sha256": "66c0927175f12e8e567c775032775e2ff59fa1d88830f2acfd601213ba52cbbf"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-audio-native-b/virtual-history.png",
+        "bytes": 29456,
+        "sha256": "0c3b62a9af7f649b44e2d40912e3f16cc19d5c7a44d435f7984669210bbc0e3d"
+      }
+    ]
+  },
+  "resolvedFindings": [
+    {
+      "problem": "An unattached measurement label lacked the original GUI font context.",
+      "fix": "Attach the hidden label to the same GuiRoot.",
+      "evidence": {
+        "path": "artifacts/engine-0.2.4/g04/native-01/result.json",
+        "bytes": 4156,
+        "sha256": "e80970d628c0f430319f2d33a8d8943c84eb03eb2f56fe50deb3bd9877e125bb"
+      }
+    },
+    {
+      "problem": "A muted browser reported running before its audio clock advanced.",
+      "fix": "Warm the native graph and require clock progression before gain checks.",
+      "evidence": {
+        "path": "artifacts/engine-0.2.4/g04/native-04/result.json",
+        "bytes": 5589,
+        "sha256": "6007a01fdfb07eebdd9d48d716681abb96417eb7885bd1bab477a63183d40781"
+      }
+    },
+    {
+      "problem": "The nested pack fixtures indexed the npm 12 JSON object as an array.",
+      "fix": "Normalize both npm pack formats and verify one expected manifest before reading the tarball.",
+      "evidence": {
+        "path": "artifacts/engine-0.2.4/g04/root-npm-test.log",
+        "bytes": 274367,
+        "sha256": "dbd5eb694542d6dc85f1f62133e573eecf17c4462b5644cb8f8f7d1653190180"
+      }
+    },
+    {
+      "problem": "The G04 playback support exceeded the original focused audio gzip budgets.",
+      "fix": "Use one gain application path for direct, spatial and transient levels. Keep reader lease coordination inside visual-novel audio.",
+      "evidence": {
+        "path": "artifacts/engine-0.2.4/g04/npm12-public-packages/public-packages.json",
+        "bytes": 169486,
+        "sha256": "8becedd5f77172009e74c6bfe3f88f41673156719be21c2e874f5eeccc2f1562"
+      }
+    }
+  ],
+  "checks": {
+    "focused": {
+      "total": 34,
+      "passed": 34,
+      "failed": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.4/g04/audio-budget-focused-retest.log",
+        "bytes": 3751,
+        "sha256": "6f523f4b14e8d121685714438e68525ba0276d30fcf426310255ddf70635272c"
+      }
+    },
+    "workspaces": {
+      "shader-language": {
+        "total": 138,
+        "passed": 138,
+        "failed": 0,
+        "log": {
+          "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+          "bytes": 276438,
+          "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+        }
+      },
+      "engine": {
+        "total": 1409,
+        "passed": 1409,
+        "failed": 0,
+        "log": {
+          "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+          "bytes": 276438,
+          "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+        }
+      },
+      "animation-spec": {
+        "total": 127,
+        "passed": 127,
+        "failed": 0,
+        "log": {
+          "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+          "bytes": 276438,
+          "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+        }
+      },
+      "extensions": {
+        "total": 1037,
+        "passed": 1037,
+        "failed": 0,
+        "log": {
+          "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+          "bytes": 276438,
+          "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+        }
+      },
+      "example-audio": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "log": {
+          "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+          "bytes": 276438,
+          "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+        }
+      }
+    },
+    "catalog": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+        "bytes": 276438,
+        "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+      }
+    },
+    "rootTest": {
+      "status": "passed",
+      "perSuite": {
+        "shader-language": 138,
+        "engine": 1409,
+        "animation-spec": 127,
+        "extensions": 1037,
+        "examples-catalog": 7,
+        "example-audio": 1
+      },
+      "total": 2719,
+      "log": {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-test.log",
+        "bytes": 276438,
+        "sha256": "44f12566f087e90ef432bc2f6cc7edd36c3326aa94a4af97dbfd28ec1ddfe51f"
+      }
+    },
+    "typecheck": "passed",
+    "build": "passed",
+    "boundary": "passed",
+    "api": "unchanged",
+    "logs": [
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-typecheck.log",
+        "bytes": 3436,
+        "sha256": "d6146f66bd62a6eb61b7f8467797c8b1fee20cba6857fc1623cff0f69671506c"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-build.log",
+        "bytes": 19170,
+        "sha256": "103dfb3165bd7bc7d5cfe916c4ec9389d8168c4fa492a49098d4715ecfd07c27"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-check-boundaries.log",
+        "bytes": 1150,
+        "sha256": "b04993722d9de89b44db84ae0b15f5c70b89d8f739d6076aed0d33571a51591c"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g04/npm12-final-api-check.log",
+        "bytes": 185,
+        "sha256": "acc73bebddd7a1137977a77019dcef37d3997d82b4af469100798a39188d4aca"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "path": "engine/src/audio/OwnerSafeAudioMixer.ts",
+      "bytes": 22852,
+      "sha256": "19457f28f6320e4166a39648a73e0b48a018e8a37889be96ddb60fc585937aeb"
+    },
+    {
+      "path": "extensions/src/audio/GameAudio.ts",
+      "bytes": 10760,
+      "sha256": "0e054c2600c8584a4dde5bc49627679cd3e3a529c633469cfe35c9d4b5815c10"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/GuiReading.ts",
+      "bytes": 26209,
+      "sha256": "3676ae3d2c8c14474f3186982f33efb91e4591726b9a8d029d7f358a7fd79d9c"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/ReadingPlayback.ts",
+      "bytes": 14103,
+      "sha256": "5f6feca39d58c760f75df9faca5c9c76c68f2ef68c7f816c48f28e7ce33de92b"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/reading-text.ts",
+      "bytes": 1517,
+      "sha256": "00428ccfb3a5a743991f0fe23488c03879a571dc87d646fb546dfb9fe62bb272"
+    },
+    {
+      "path": "extensions/src/visual-novel/audio/ReadingAudio.ts",
+      "bytes": 8070,
+      "sha256": "5a5b6d36b26755c5df3dca54a3aa427b42e64da8578b315f0ad3bccba54bb6a1"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-ui/README.md",
+      "bytes": 2008,
+      "sha256": "702859b64a65faafdc80985b686fe020f3c966c0fdf154cb6089b9d700299d18"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-ui/compile.mjs",
+      "bytes": 940,
+      "sha256": "4c215efd9dd32d69e2b8e9378f79c1cbaf42f40c91fa988659d3d72f00925b66"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-ui/fixture.mjs",
+      "bytes": 18993,
+      "sha256": "4a23b24918777e361f8cbedd2887c064b512d22589046fba395dc3700c63b31c"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-ui/run.mjs",
+      "bytes": 3426,
+      "sha256": "745d86cdda4defcd9e5f2e1ad6bd3a59728d58f4624ab81e744cb23da3f674c6"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-ui/tsconfig.json",
+      "bytes": 262,
+      "sha256": "d02d7d39a0f4e4267f38b7d138b180377287bea2d4eb0bf1ae94a3189b96e3b8"
+    },
+    {
+      "path": "engine/dist/audio.js",
+      "bytes": 22162,
+      "sha256": "2064cacf11dfd221a41faac11c938c84c8b1b5179f03f1da741b670c754c7f56"
+    },
+    {
+      "path": "engine/dist/gui.js",
+      "bytes": 9805,
+      "sha256": "eb90c2e660b08328e3e752f2b53a25de8f5f44cf249ca5cd9cb9f0c3d01879dd"
+    },
+    {
+      "path": "engine/test/owner-safe-audio-upgrade.test.mjs",
+      "bytes": 9736,
+      "sha256": "30f40bc9e2b41bd870399b6f3b2c8ae84b552a6567cda9e8c1ea14cdc8687dce"
+    },
+    {
+      "path": "extensions/test/visual-novel-ui.test.mjs",
+      "bytes": 10350,
+      "sha256": "a07ad44f9a5aa4754b641f32694c5a45c2d834a898c93be467e9a253582e661f"
+    },
+    {
+      "path": "extensions/test/visual-novel-audio.test.mjs",
+      "bytes": 6968,
+      "sha256": "0de438c4b7fb4aff1f1b368725d27147ad415443a152c7d9149764b49d86a2ce"
+    }
+  ],
+  "followUp": {
+    "previousReceipt": {
+      "path": "artifacts/engine-0.2.4/g04/g04-checks-before-npm12-fix.json",
+      "bytes": 13212,
+      "sha256": "9ee44b37232d646545fcea25e137ba4e8ea2636729cf98d3eb092a3c80c4fedd"
+    },
+    "reproduciblePackFormats": {
+      "path": "artifacts/engine-0.2.4/g04/npm11-npm12-pack-both.log",
+      "bytes": 223,
+      "sha256": "f93e85cfac2c987837c8cc60808f32cf781b942cd20761ecd26e717b497bf7f7"
+    },
+    "packParserTests": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-focused-fix.log",
+      "bytes": 5847,
+      "sha256": "628486df61a14416186dc4a7534adaaddb806b9f780fe000aff5e8416e716500"
+    },
+    "packageGate": {
+      "path": "artifacts/engine-0.2.4/g04/npm12-package-final/public-packages.json",
+      "bytes": 169319,
+      "sha256": "21f8ea940a32db31cf2b9c3af08ce1711ea94deef78c95210a014ef2bba802c8"
+    },
+    "audioBudgets": [
+      {
+        "id": "audio-mixer-only",
+        "gzipBytes": 7252,
+        "maxGzipBytes": 7300
+      },
+      {
+        "id": "audio-core",
+        "gzipBytes": 7252,
+        "maxGzipBytes": 7300
+      },
+      {
+        "id": "extensions-audio",
+        "gzipBytes": 9432,
+        "maxGzipBytes": 9600
+      }
+    ],
+    "inputs": [
+      {
+        "path": "scripts/npm-process.mjs",
+        "bytes": 2197,
+        "sha256": "d7c331da6dcff7d3838c58dd53246f328f2d31d17d670f676214a559ddfdab8b"
+      },
+      {
+        "path": "scripts/publication-process.test.mjs",
+        "bytes": 7975,
+        "sha256": "25d693002594fcfdfb17864242124083a415868bc035e230837d997a4bb2770f"
+      },
+      {
+        "path": "scripts/verify-engine-package.mjs",
+        "bytes": 32445,
+        "sha256": "76bf55d79a7d4ceeacdb52a8ff04d215838bf68b3ff295648a56046529e62b8c"
+      },
+      {
+        "path": "extensions/test/layout-production-draw-fixture.mjs",
+        "bytes": 4632,
+        "sha256": "7d116244a8c96bdeea836c3d349b3cd0cd23a57f804db3b5944edf735125d423"
+      },
+      {
+        "path": "extensions/test/animation-mask-browser-gate.mjs",
+        "bytes": 4948,
+        "sha256": "9051623bc4d80e66228e4cf7919698a56c34f51c9ea8fcc4065be99898970bae"
+      },
+      {
+        "path": "extensions/test/scene-flow-candidate.mjs",
+        "bytes": 7504,
+        "sha256": "ed283157fddb8886c5cf7c0a94dc42876e0c0a85243eafb4d245e0954b3b2996"
+      },
+      {
+        "path": "extensions/test/helpers/public-feature-candidate.mjs",
+        "bytes": 7310,
+        "sha256": "a0d04d963e2abafcb6710e7cf94719b2a4ae2824543a178e8a6fa89fb784c96d"
+      }
+    ]
+  }
+}

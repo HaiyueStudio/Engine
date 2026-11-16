@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haiyue-visual-novel-024/1",
+  "status": "frozen",
+  "qualificationScope": "G01 published-package feasibility and implementation contract",
+  "baseline": {
+    "version": "0.2.3",
+    "tag": "v0.2.3",
+    "revision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+    "checks": "review/engine-0.2.4/g01-checks.json"
+  },
+  "versions": {
+    "publish": {
+      "@haiyue/engine": "0.2.4",
+      "@haiyue/extensions": "0.2.4"
+    },
+    "unchanged": {
+      "@haiyue/animation-spec": "0.2.2",
+      "@haiyue/shader-language": "0.2.3"
+    },
+    "rootExportsAdded": [],
+    "newThirdPartyDependencies": []
+  },
+  "publicSurface": {
+    "entry": "@haiyue/extensions/visual-novel",
+    "owner": "G07",
+    "functions": [
+      "createVisualNovel",
+      "validateVisualNovelDefinition"
+    ],
+    "types": [
+      "VisualNovelDefinition",
+      "VisualNovelOptions",
+      "VisualNovelSession",
+      "VisualNovelSnapshot",
+      "VisualNovelView"
+    ],
+    "session": {
+      "properties": [
+        "view"
+      ],
+      "operations": [
+        "start",
+        "advance",
+        "choose",
+        "setPreferences",
+        "replayVoice",
+        "save",
+        "load",
+        "continueLatest",
+        "listReplays",
+        "startReplay",
+        "endReplay",
+        "subscribe",
+        "dispose"
+      ]
+    },
+    "compatibility": "Additive focused entry. Existing narrative, HYA, GUI, audio and save exports retain their identities."
+  },
+  "packagePolicy": {
+    "admission": "G07 measures the focused entry and shared transitive chunks from release tarballs, and checks lazy HYA, font and voice loading.",
+    "dependencies": "Use only installed public Haiyue packages. Keep authoring and developer preview outside the player entry.",
+    "existingBudgets": "Existing root/package, GPU, image and resource gates continue to apply."
+  },
+  "authoring": {
+    "owner": "G02",
+    "schemaVersion": 1,
+    "requiredFields": [
+      "schemaVersion",
+      "narrative",
+      "assets",
+      "presets",
+      "cues"
+    ],
+    "optionalFields": [
+      "replays"
+    ],
+    "stableIds": [
+      "chapter",
+      "node",
+      "line",
+      "choice",
+      "asset",
+      "preset",
+      "slot",
+      "replay"
+    ],
+    "cueOperations": [
+      "show",
+      "hide",
+      "state",
+      "transition",
+      "wait"
+    ],
+    "waitKinds": [
+      "duration",
+      "event"
+    ],
+    "output": "One authoring format compiles to NarrativeDefinition and resolved stage cues. Stable preview IDs, source-locatable validation and isolated preview state."
+  },
+  "stage": {
+    "owner": "G03",
+    "ownership": [
+      "one original HYA Player per slot",
+      "regions owned by the stage",
+      "one frame source for all live slots"
+    ],
+    "slotState": [
+      "id",
+      "assetId",
+      "variantId",
+      "bounds",
+      "order",
+      "time",
+      "data"
+    ],
+    "handoff": "Prepare the ordered candidate shot with hidden regions. Register producers in clear/background/actor/effect/GUI order. Reveal the ready candidate and hide the prior generation within one presentation boundary. Retire the previous players before releasing their region handles.",
+    "ordering": "G01 demonstrates that inserting a late replacement can change occlusion. Changing the visible producer order requires an ordered staged presentation. An optimized same-slot replacement must demonstrate pixel equivalence.",
+    "events": "Consume published frame events through one route. Accept the current session, slot generation, action request and named event once. Leave required waits intact when simplifying decoration.",
+    "cancellation": "A failed or superseded candidate releases what it owns and leaves the committed shot active. Preparation retries retain request identity.",
+    "resourceLimits": {
+      "inheritedRegionCount": 8,
+      "inheritedRegionCacheBytes": 67108864,
+      "productionLayers": [
+        "background",
+        "left-actor",
+        "right-actor",
+        "effect",
+        "dialogue-overlay"
+      ]
+    },
+    "observation": "Native WebGPU pixel readback is normalized to RGBA. Retained cache, whole-frame working set and pending retirement remain separate measurements."
+  },
+  "presentation": {
+    "owner": "G04",
+    "preferences": [
+      "textSpeed",
+      "fontScale",
+      "highContrast",
+      "reducedMotion",
+      "voiceVolume"
+    ],
+    "input": "Existing GUI focus and input actions. Confirm reveals the current line before advancing. Modals consume input, restore their opener or the next eligible control and use available host insets.",
+    "audio": "Reuse the owner-safe mixer and explicit HYA audio host. History playback uses a separate lease. Scene BGM ducking uses transient gain on the owned scene track; it composes with the current persistent setting. The legacy fade changes configuration and is unsuitable for this isolation."
+  },
+  "persistence": {
+    "owner": "G05",
+    "schemaVersion": 1,
+    "requiredSnapshotFields": [
+      "schemaVersion",
+      "narrative",
+      "slots"
+    ],
+    "optionalSnapshotFields": [
+      "history"
+    ],
+    "allowedBoundaries": [
+      "dialogue",
+      "choice"
+    ],
+    "states": "Restore a compatible snapshot into a prepared stage and seek silently. The snapshot carries real actor time and resolved asset/variant values. Validate immutable IDs before swapping. Current chapter history belongs to the slot; preferences, read markers and unlocks belong to the profile.",
+    "replay": "Use an isolated session with explicit start and end, read-only progress and a controlled action port. Returning from replay preserves the original save and effect results.",
+    "thumbnails": "Capture a committed frame only when requested. Supported browser path is RGBA readback, 2D canvas encoding and existing GameSaveService thumbnail storage. Capture failure leaves text metadata and the save available."
+  },
+  "deviceScope": {
+    "requiredForG07": [
+      "physical Windows WebGPU Chrome keyboard/mouse and listening",
+      "physical macOS WebGPU Chrome reading, choice, save/load and listening"
+    ],
+    "inherited": "Global release qualification retains config/release-matrix.json without changes.",
+    "extended": [
+      "physical touch or gamepad where the product enables it",
+      "Native iPhone HYA embedded audio only with separate HyaAudioHost evidence"
+    ],
+    "g01": "Windows Chrome native WebGPU and automated focus/muted Web Audio graph. G07 binds real device evidence."
+  },
+  "measurement": {
+    "g01Probe": {
+      "width": 320,
+      "height": 200,
+      "dpr": 1,
+      "msaa": 1,
+      "consecutiveSwitches": 12,
+      "coldProcesses": 3
+    },
+    "g07Production": {
+      "logicalWidth": 1280,
+      "logicalHeight": 720,
+      "coldProcesses": 3,
+      "scenarios": [
+        "static-dialogue",
+        "continuous-background",
+        "two-actors-and-effect",
+        "prepared-shot-switch",
+        "repeated-resume"
+      ]
+    },
+    "cold": "New browser process and profile with uncached fixture assets. Record navigation and module start to first submitted GPU work completion separately; pixel-readback verification has its own channel.",
+    "steady": "Use the same device, browser and exact input content. Record frame intervals, CPU, measurable GPU, resource peak and retirement separately. Use existing hard gates and comparable cohorts. G01 probe timings are characterization."
+  },
+  "errors": {
+    "input": "E_GAMEPLAY_INVALID_INPUT",
+    "cancelled": "E_SCENE_FLOW_ABORTED",
+    "superseded": "E_SCENE_FLOW_SUPERSEDED",
+    "persistence": "Preserve original GameSaveError."
+  }
+}

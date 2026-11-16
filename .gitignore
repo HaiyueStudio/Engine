@@ -15,3 +15,4 @@ examples/page-turn-book/pdf.worker.min.mjs
 artifacts/
 animation-spec/corpus/.cache/
 .DS_Store
+/examples/visual-novel/project/compiled.json

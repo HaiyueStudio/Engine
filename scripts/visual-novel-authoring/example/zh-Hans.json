@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "messages": {
+    "keeper": "守灯人",
+    "arrival.view": "港口的灯还亮着。",
+    "arrival.offer": "你要登上最后一班船吗？",
+    "choice.stay": "留下守灯",
+    "choice.leave": "登船离开",
+    "pier.shared": "木栈桥在脚下轻响。",
+    "ending.lantern": "你为港口点亮了下一盏灯。",
+    "ending.tide": "落潮时，你登上了船。"
+  }
+}

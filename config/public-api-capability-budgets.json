@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "ADR 0140 admits the seven frozen symbols of extensions ./visual-novel, with zero symbol reserve and no root export changes.",
     "ADR 0139 / G01 admits exactly GuiIconPosition on Engine ./gui, GuiTabHeaderOptions on existing ./gui-layout and 12 ./gui-controls symbols for G10. Original GuiContent, GUI identity, layout, theme, modal/input and resource owners are reused. Root symbols, old reserves and all performance/resource budgets remain unchanged.",
     "ADR 0139 / G01 admits exactly 2 Tilemap atlas/transform types for G08 (8→10), preserving existing reserves. Same original component/system identities; existing production palette/textured 2D programs and frame/tracker owners are reused. No other symbols or performance/resource budget change.",
     "ADR 0139 / G01 admits exactly 9 focused gui-collections symbols for G07; only the numeric window is shared with HYA, original GUI/input owners remain. No root, performance or resource budget growth.",
@@ -422,6 +423,17 @@
           },
           "entrypoints": {
             "./gui-controls": 12
+          }
+        },
+        {
+          "id": "visual-novel",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./visual-novel": 7
           }
         }
       ]

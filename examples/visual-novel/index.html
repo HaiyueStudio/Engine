@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-Hans">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雾港 · The Last Lantern</title>
+<link rel="stylesheet" href="./style.css">
+<main>
+  <header>
+    <div><p class="subheading">THE LAST LANTERN</p><h1>雾港</h1></div>
+    <div class="actions"><button id="new">新故事</button><button id="continue">继续游戏</button>
+      <label><span class="sr">语言 / Language</span><select id="language"><option value="zh-Hans">简体中文</option><option value="en">English</option></select></label></div>
+  </header>
+  <div class="play">
+    <section class="stage" aria-label="故事舞台">
+      <canvas id="canvas" width="1280" height="720" tabindex="0" aria-label="视觉小说对白与舞台"></canvas>
+      <div id="splash"><div class="lighthouse" aria-hidden="true"></div><h2 id="splash-title">末班渡船即将驶离</h2><p id="splash-copy">在雾散前，决定把最后一盏灯留给谁。</p></div>
+    </section>
+    <aside aria-label="旅程">
+      <div class="current"><span id="chapter-label">当前章节</span><strong id="chapter">启程</strong></div>
+      <p id="line" aria-live="polite"></p>
+      <div id="choices"></div>
+      <button id="advance" class="primary" disabled>继续</button>
+      <hr>
+      <div class="controls">
+        <label for="slot" id="slot-label">存档位置</label><select id="slot"><option value="slot-1">1</option><option value="slot-2">2</option></select>
+        <button id="save">保存</button><button id="load">读取</button>
+        <label for="history" id="history-label">对白历史</label><select id="history"></select>
+        <button id="voice">重听配音</button>
+      </div>
+      <hr>
+      <label for="replays" id="replays-label">结局回看</label>
+      <div class="controls replay"><select id="replays"></select><button id="replay">回看</button><button id="return" hidden>返回故事</button></div>
+      <details>
+        <summary id="settings-label">阅读设置</summary>
+        <label><input id="immediate" type="checkbox"><span id="immediate-label">即时显示</span></label>
+        <label><input id="contrast" type="checkbox"><span id="contrast-label">高对比度</span></label>
+        <label><span id="size-label">字号</span><input id="size" type="range" min=".75" max="2" value="1" step=".25"></label>
+      </details>
+      <p id="notice" role="status">正在准备舞台…</p>
+    </aside>
+  </div>
+</main>
+<script src="../shared/engine.js"></script>
+<script src="./bundle.js"></script>
+</html>

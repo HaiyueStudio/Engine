@@ -69,8 +69,23 @@ const exampleBundles = demos.map(entry => ({
     ...haiyuePlugins({ ...checkedTypeScript(), declaration: false, localPackages: entry.id === 'gui-runtime' ? {'@haiyue/extensions/gui-layout': fileURLToPath(new URL('../extensions/src/gui-layout.ts', import.meta.url))} : {} }),
     exampleBuildMetadata(entry.id),
     pdfWorkerAsset(entry.id),
+    visualNovelProject(entry.id),
   ],
 }));
+
+function visualNovelProject(entryId) {
+  return {
+    name: 'visual-novel-project',
+    async generateBundle() {
+      if (entryId !== 'visual-novel') return;
+      const { loadProject } = await import('../scripts/visual-novel-authoring/project.mjs');
+      const { story, diagnostics, files } = await loadProject(fileURLToPath(new URL('./visual-novel/project/story.json', import.meta.url)));
+      if (!story || diagnostics.length) this.error(JSON.stringify(diagnostics));
+      for (const path of files) this.addWatchFile(path);
+      this.emitFile({ type: 'asset', fileName: 'project/compiled.json', source: JSON.stringify(story, null, 2) + '\n' });
+    },
+  };
+}
 
 function pdfWorkerAsset(entryId) {
   return {

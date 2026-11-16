@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "goal": "g03-hya-stage",
+  "status": "passed-g03",
+  "source": {
+    "revision": "a8b7ae6ae44e441340200266a4082637b5ca4e37",
+    "workingTreeImplementation": true,
+    "node": "v24.19.0"
+  },
+  "publishedBaseline": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "scope": "Internal stage implementation, published-foundation native visual comparison, scene lifecycle and same-host characterization. Public entry and production release gates remain G07.",
+  "contract": {
+    "path": "config/visual-novel-024-contract.json",
+    "bytes": 7660,
+    "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+  },
+  "relatedEvidence": [
+    {
+      "path": "review/engine-0.2.4/g01-checks.json",
+      "bytes": 5971,
+      "sha256": "402265fb3c12a296008d63bd27e26a07a7859b7b4ab489394136864f2e36e46c"
+    },
+    {
+      "path": "review/engine-0.2.4/g02-checks.json",
+      "bytes": 8784,
+      "sha256": "0929311fb0e144ba23835e09660168e0acdd0edb54b77fe30b33dd77c0c7b8d4"
+    }
+  ],
+  "implementation": [
+    "Use existing Scene frames and HYA Player per slot. Preserve the unchanged painter prefix and prepare the ordered suffix hidden before commit.",
+    "Resolve named preset groups, stage states and original HYA transport ranges. Track requests, slot generations and named events at committed frame boundaries.",
+    "Keep still producers in demand mode, reuse AssetManager leases, and bound speculative acquisition by concurrency and retained source bytes.",
+    "Prepare snapshots by silent seek. Keep the visible shot on resource rejection or supersession and dispose stage owners on Scene Flow exit."
+  ],
+  "native": {
+    "nativeChecks": 36,
+    "comparedPixelsPerFullImage": 921600,
+    "maxPixelDifference": 0,
+    "restores": 36,
+    "stageFrameIntervalP95RangeMs": [
+      16.695000000000164,
+      16.824999999999818
+    ],
+    "retainedColorPeakBytes": 24716736,
+    "workingColorPeakBytes": 7372800,
+    "workingRetiringColorPeakBytes": 0,
+    "depthPeakBytes": 16044768,
+    "gpuTimestamp": "unavailable on the tested adapter/browser path; queue wait is separately observed",
+    "maxCachedRegions": 6,
+    "adapter": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "vendor": "nvidia",
+      "device": "",
+      "architecture": "pascal",
+      "description": "",
+      "fallback": false,
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "msaa": 1,
+      "timestamp": false
+    },
+    "casesPerRound": [
+      "four-slot-native-first-frame-and-gui-overlay",
+      "async-first-pose-and-supersession",
+      "failed-resource-keeps-committed-shot",
+      "actual-hya-event-isolated-by-slot-and-action",
+      "normal-and-reduced-transition-pixel-parity",
+      "named-state-applies-native-hya-data",
+      "contain-cover-stretch-and-native-resize",
+      "twelve-silent-restores-with-resource-accounting",
+      "full-image-parity-with-manual-hya-reference",
+      "same-host-matched-frame-cohorts",
+      "scene-flow-retirement",
+      "scene-exit-releases-assets-and-gpu-owners"
+    ],
+    "branchAudioDeviceQualification": "G07"
+  },
+  "pixelEdgeFinding": {
+    "original": "Fractional slot boundaries disagreed between native retained and direct rasterization along the same edge (1870 pixels, maximum channel delta 255).",
+    "method": "Snap fitted bounds to the actual device-pixel edges before creating or resizing stage slots.",
+    "result": "All final full-frame comparisons had maximum channel delta 0 with the original <=2 threshold."
+  },
+  "checks": {
+    "focusedStageTests": 10,
+    "suitePassed": {
+      "shader-language": {
+        "total": 138,
+        "passed": 138,
+        "failed": 0
+      },
+      "engine": {
+        "total": 1408,
+        "passed": 1408,
+        "failed": 0
+      },
+      "animation-spec": {
+        "total": 127,
+        "passed": 127,
+        "failed": 0
+      },
+      "extensions": {
+        "total": 1024,
+        "passed": 1024,
+        "failed": 0
+      },
+      "example-audio": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0
+      }
+    },
+    "catalog": "passed",
+    "api": "passed",
+    "boundary": "passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "npmWrappers": {
+      "extensionInitial": "Three existing fixtures received an empty nested npm pack result under the workspace npm entry. Direct execution of the complete workspace passed.",
+      "rootInitial": "An existing Shader Language fixture could not create a file symlink in the sandbox. Exact fixture and full workspace passed under regular Windows process permissions."
+    }
+  },
+  "inputs": [
+    {
+      "path": "extensions/src/visual-novel/stage/VisualNovelStage.ts",
+      "bytes": 27469,
+      "sha256": "9bcf5c8fb8354b932a5ab95504cc5094082d1b60be687081ffb70617cbbf992f"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/hya-stage.ts",
+      "bytes": 11400,
+      "sha256": "099b350a4a602611ce5b7be0d38495a492c9f1f553087f73542391131d432220"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/narrative-stage.ts",
+      "bytes": 959,
+      "sha256": "743726417056817e9fb9b86782cbb44c3525d380d15a1dad527eb9174480f9c6"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/resources.ts",
+      "bytes": 1347,
+      "sha256": "1340352f634ce5a2cc5cf6eac454d25a7413c8d24ac22807c783658a987c0392"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/types.ts",
+      "bytes": 2970,
+      "sha256": "adbf87d66d2fb97a9a0a1a2183fc37e30efa75ce1c0d8a91becd2bc76fb20dae"
+    },
+    {
+      "path": "extensions/test/visual-novel-stage.test.mjs",
+      "bytes": 14075,
+      "sha256": "e77696245976f62bead8e5e5e6dab5b3409e08ccde8425382e7630d926d1f869"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/README.md",
+      "bytes": 2259,
+      "sha256": "7d6efc2e71bf0a8a0daad7411bdf673064e801936fa22b91b1aaf4f631714e2a"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/assets.mjs",
+      "bytes": 5828,
+      "sha256": "59369c7e8c658ec8eec8482a5bdad5faddf453e8506f77aee70449063fdc79fc"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/fixture.mjs",
+      "bytes": 26366,
+      "sha256": "723ec3db65c341873baa9cfd299e8c50c1db4d68893a46218ec5aa8f48be6ae4"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/run.mjs",
+      "bytes": 5597,
+      "sha256": "36660a9e1fc970c09ea6f25e8d51c82801d40fffd16a1849d4cbdcf1eb9bce72"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/source-loader.mjs",
+      "bytes": 1282,
+      "sha256": "d446e3778fbb1a6b1fca1d6b0717ea16b6c894b298ee98c383c66066ce992832"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.4/g03/native-acceptance-summary.json",
+      "bytes": 13700,
+      "sha256": "147ccc1315bebc1b4c1ae63a817cae82cae77384599221a19e87e07c78ccdb47"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/round-1.json",
+      "bytes": 113178,
+      "sha256": "40bcd6c76e21933026f00e67e9be324b377323e7f1f713b3868dda97da834f34"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/round-2.json",
+      "bytes": 113261,
+      "sha256": "7f6faf8b5b99f4385eb8217e7af4b2f2fbf90b7b6222e26d4aa587491335f751"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/round-3.json",
+      "bytes": 113272,
+      "sha256": "85d928a1bde28dfb1b1043d5a90003b75158bd1c87eda8333098129d11af32a2"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/fixture.js",
+      "bytes": 4005720,
+      "sha256": "f13d482b18b7864aab1693a8a93f2129a62d3bf88c8fc02bd6927a091b0876ae"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/image.json",
+      "bytes": 178,
+      "sha256": "74a4b1c091749668077ed0e4509728cc9c783703cc065933a2be1dae564e89c2"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/final-native-720p/image.png",
+      "bytes": 80,
+      "sha256": "7025454b19bbbaaed85927731b08046e8bdde6233aa440fc195860fa21a76eaf"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/validation-exit.txt",
+      "bytes": 159,
+      "sha256": "339ab769712056e65d0f60751431cd9d37c7faf0a25f9a274f818635d3f183d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/direct-workspaces-exit.txt",
+      "bytes": 75,
+      "sha256": "b8eb9234ca54c26d8a997d6a2174bf87469c377c19747f83eab8c7d3e25565aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/extensions-typecheck.log",
+      "bytes": 477,
+      "sha256": "f5ce40147bc7e33536fab1157c115d35f6b5f912e1c06b033e8587369bdd90a3"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/extensions-test.log",
+      "bytes": 107233,
+      "sha256": "52f562da55f249a2a9eb1b9c5a1ea453030dd68953b074b066c5ff786c764198"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/extensions-direct-retest.log",
+      "bytes": 106578,
+      "sha256": "4082b9568e83795dde8b66263d0e13f125d57ef9540fd7c67d19b66c16a56ac6"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/engine-typecheck.log",
+      "bytes": 3436,
+      "sha256": "8bdf81c7f4465776a9f92b2af03a114c306085f51e1a88508a7c4fb436d20f67"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/engine-test.log",
+      "bytes": 15288,
+      "sha256": "ab7434f1df9ac459f5d51bb813a14c3948660704cbaf0fed7951b6dad699d89b"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/engine-build.log",
+      "bytes": 19177,
+      "sha256": "b9162fd2aef0aa400592916b28f7f00c51af4f81f4104d7eeb80643022cceaf0"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/workspace-boundaries.log",
+      "bytes": 1150,
+      "sha256": "b04993722d9de89b44db84ae0b15f5c70b89d8f739d6076aed0d33571a51591c"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/api-check.log",
+      "bytes": 185,
+      "sha256": "acc73bebddd7a1137977a77019dcef37d3997d82b4af469100798a39188d4aca"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/shader-symlink-recheck.log",
+      "bytes": 226,
+      "sha256": "da1d3bf48cfdb8ce9c34ef311c9e0e2401fbeb0820415a809cc4f4b9982d220a"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/shader-language-direct.log",
+      "bytes": 13404,
+      "sha256": "37417dce6f3de6c553c7ede439611fcbdaf12255f401927905ab106251102392"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/engine-direct.log",
+      "bytes": 136439,
+      "sha256": "8c061b09b450c659c6e3809b0625e92e3e198add24f2f2186a9ac9733808ff2c"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/animation-spec-direct.log",
+      "bytes": 12914,
+      "sha256": "5bf526531448c59365de25df64efc6dd8c3c974ce3b528ac381914e9bf422518"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/example-tests.log",
+      "bytes": 1099,
+      "sha256": "835fb8fb9647cf5471c2589b620bdff7a656c3f560a4871dc86d44f4a4ba4624"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/native-720p-01/round-1.json",
+      "bytes": 9196,
+      "sha256": "f07b95011b54dd34e399fef011ea362a9de3bab2c06f36cb3403bf0fee3104a8"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/native-720p-01/round-2.json",
+      "bytes": 9196,
+      "sha256": "9122f014ac4193579222f994ae8d687f580aab9fed96dc4828b2e7e506f1082d"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/native-720p-01/round-3.json",
+      "bytes": 9197,
+      "sha256": "6306e60c19e0bcfee735295ad2dc03c3dbe58ff9ee906c9acc6e9c57d70616d5"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g03/edge-720p/round-1.json",
+      "bytes": 9614,
+      "sha256": "b5264a07b849150e6ba8aea599b60b369b4796cc60da8c2aed4bf413f4db0504"
+    }
+  ]
+}

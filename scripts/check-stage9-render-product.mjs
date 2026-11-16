@@ -145,7 +145,7 @@ function validateManifest(kind) {
     }
   }
   const discovered = discoverMainTargets(kind);
-  for (const id of discovered) if (!ids.has(id)) violations.push(`${kind}/${id}/main.ts is not in manifest`);
+  for (const [id, source] of discovered) if (!ids.has(id)) violations.push(`${kind}/${id}/${source} is not in manifest`);
   for (const id of ids) if (!discovered.has(id)) violations.push(`${kind} manifest target has no directory entry: ${id}`);
   if (kind === 'examples') validateExampleCatalog(manifest);
   return manifest;
@@ -187,10 +187,12 @@ function validateExampleCatalog(manifest) {
 }
 
 function discoverMainTargets(kind) {
-  const result = new Set();
+  const result = new Map();
   const directory = resolveLogicalPath(kind);
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory() && existsSync(resolve(directory, entry.name, 'main.ts'))) result.add(entry.name);
+    if (!entry.isDirectory()) continue;
+    const source = ['main.ts', 'main.mjs'].find(name => existsSync(resolve(directory, entry.name, name)));
+    if (source) result.set(entry.name, source);
   }
   return result;
 }

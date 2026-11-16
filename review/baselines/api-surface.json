@@ -12297,6 +12297,39 @@
               "kind": "type"
             }
           ]
+        },
+        "./visual-novel": {
+          "source": "extensions/src/visual-novel.ts",
+          "exports": [
+            {
+              "name": "createVisualNovel",
+              "kind": "value"
+            },
+            {
+              "name": "validateVisualNovelDefinition",
+              "kind": "value"
+            },
+            {
+              "name": "VisualNovelDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "VisualNovelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "VisualNovelSession",
+              "kind": "type"
+            },
+            {
+              "name": "VisualNovelSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "VisualNovelView",
+              "kind": "type"
+            }
+          ]
         }
       }
     }

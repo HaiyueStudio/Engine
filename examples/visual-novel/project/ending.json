@@ -1,0 +1,15 @@
+{
+  "id": "ending",
+  "nodes": {
+    "lantern": {
+      "type": "dialogue", "lineId": "lantern-last-light", "textKey": "ending.lanternLine", "speakerKey": "keeper",
+      "voices": { "zh-Hans": "lantern-zh", "en": "lantern-en" }, "next": "lantern-end"
+    },
+    "lantern-end": { "type": "end", "ending": "lantern", "lineId": "lantern-end", "textKey": "ending.lantern" },
+    "tide": {
+      "type": "dialogue", "lineId": "tide-last-look", "textKey": "ending.tideLine", "speakerKey": "traveler",
+      "voices": { "zh-Hans": "tide-zh", "en": "tide-en" }, "next": "tide-end"
+    },
+    "tide-end": { "type": "end", "ending": "tide", "lineId": "tide-end", "textKey": "ending.tide" }
+  }
+}

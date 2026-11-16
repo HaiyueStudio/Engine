@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "goal": "g07-integration-candidate",
+  "status": "prequalification",
+  "targetVersion": "0.2.4",
+  "fullG07Complete": false,
+  "releaseQualified": false,
+  "previousGoals": [
+    {
+      "path": "review/engine-0.2.4/g01-checks.json",
+      "sha256": "402265fb3c12a296008d63bd27e26a07a7859b7b4ab489394136864f2e36e46c"
+    },
+    {
+      "path": "review/engine-0.2.4/g02-checks.json",
+      "sha256": "0929311fb0e144ba23835e09660168e0acdd0edb54b77fe30b33dd77c0c7b8d4"
+    },
+    {
+      "path": "review/engine-0.2.4/g03-checks.json",
+      "sha256": "9056f1399f546e609ece7c492ab05138c7caf1f44646ba9b51f30c4af6373dc9"
+    },
+    {
+      "path": "review/engine-0.2.4/g04-checks.json",
+      "sha256": "86fd0ae84b7b5fa13096fbceb90815fa1ee7737444fa7dbf19997f8c55d894bf"
+    },
+    {
+      "path": "review/engine-0.2.4/g05-checks.json",
+      "sha256": "6dedba296f32b4d81415ea6a2fa6ec7d65b2bc91d1679faad63279ed7cf88b48"
+    },
+    {
+      "path": "review/engine-0.2.4/g06-checks.json",
+      "sha256": "af96be423283c75dae889e5d0ecc0a23c49a8cb62184c02f6e5df80088eb0fee"
+    }
+  ],
+  "packageReport": {
+    "path": "artifacts/engine-0.2.4/g07/working-draft-pack/public-packages.json",
+    "sha256": "76576b5e0209f8a04d6f182b77a232e2fa9312c4a983d5bcdf2207af1509d148",
+    "phase": "working-tree",
+    "source": {
+      "revision": "a8b7ae6ae44e441340200266a4082637b5ca4e37",
+      "workingTreeDirty": true
+    }
+  },
+  "unchangedPackages": {
+    "@haiyue/animation-spec": {
+      "version": "0.2.2",
+      "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+      "integrity": "sha512-hYUAlmKtfGd+GaO9d5qBa0ykU7AR1sR3+pyzyUqnPzTVOUtdlS+Zph2yIPRNcnj33LIdShdVY5NN1lDeydIsLA=="
+    },
+    "@haiyue/shader-language": {
+      "version": "0.2.3",
+      "sha256": "f6d6c43653c9c2f94eb93848a729fff63ae64f70d027d9d5a4698d78266f9463",
+      "integrity": "sha512-4DysyHPd+HPUPNiU1XI6yFyQSviIHO08fnzqhLnOS/kF5lac0TuKdRrpN1/sX7gFu5QPcxXsoqXaU3Mncm+fvA=="
+    }
+  },
+  "publicEntry": {
+    "entry": "@haiyue/extensions/visual-novel",
+    "owner": "G07",
+    "functions": [
+      "createVisualNovel",
+      "validateVisualNovelDefinition"
+    ],
+    "types": [
+      "VisualNovelDefinition",
+      "VisualNovelOptions",
+      "VisualNovelSession",
+      "VisualNovelSnapshot",
+      "VisualNovelView"
+    ],
+    "session": {
+      "properties": [
+        "view"
+      ],
+      "operations": [
+        "start",
+        "advance",
+        "choose",
+        "setPreferences",
+        "replayVoice",
+        "save",
+        "load",
+        "continueLatest",
+        "listReplays",
+        "startReplay",
+        "endReplay",
+        "subscribe",
+        "dispose"
+      ]
+    },
+    "compatibility": "Additive focused entry. Existing narrative, HYA, GUI, audio and save exports retain their identities."
+  },
+  "draftPackage": [
+    {
+      "name": "@haiyue/engine",
+      "version": "0.2.4",
+      "sha256": "c5ec896c941653770fea71aeac161d8856ca364777f5713f9b95ec05730e7110",
+      "packedBytes": 2042447,
+      "unpackedBytes": 8512102
+    },
+    {
+      "name": "@haiyue/animation-spec",
+      "version": "0.2.2",
+      "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+      "packedBytes": 170719,
+      "unpackedBytes": 666297
+    },
+    {
+      "name": "@haiyue/extensions",
+      "version": "0.2.4",
+      "sha256": "8a3213cd73a6f154749191ffe668be6f61149a28b2fc1acb502b6e5161f5f931",
+      "packedBytes": 596785,
+      "unpackedBytes": 2283063
+    },
+    {
+      "name": "@haiyue/shader-language",
+      "version": "0.2.3",
+      "sha256": "f6d6c43653c9c2f94eb93848a729fff63ae64f70d027d9d5a4698d78266f9463",
+      "packedBytes": 148545,
+      "unpackedBytes": 720460
+    }
+  ],
+  "capacity": {
+    "oldLimitBytes": 570000,
+    "approvedLimitBytes": 600000,
+    "originalObservedBytes": 596633,
+    "originalFailure": {
+      "path": "artifacts/engine-0.2.4/g07/first-candidate/public-packages.json",
+      "sha256": "c57ac0f647e805c85f5d51148366653798ba10d9613309e5678123898c35802f"
+    },
+    "overlappingBuildFailure": {
+      "path": "artifacts/engine-0.2.4/g07/approved-draft-pack/public-packages.json",
+      "sha256": "39406f895d9bab4a33b233f0a77a5ab4bfeb367b6386df4593bc560258807a55"
+    },
+    "observedBytes": 596785,
+    "initialGzipBytes": 71092,
+    "deferredGzipBytes": 417703,
+    "totalGzipBytes": 488795
+  },
+  "draftConsumers": {
+    "gameplay": {
+      "path": "artifacts/engine-0.2.4/g07/working-draft-app/consumer-native.json",
+      "sha256": "dfc7652860d938fcc521c174c0da55d6ba5f1554d48292263750ce10a32e334a"
+    },
+    "editedRoute": {
+      "path": "artifacts/engine-0.2.4/g07/author-qualification/edited-native.json",
+      "sha256": "88171363598be3c087071806b5b396c23eb56547c48f1f426d78bdd49e1a2cea"
+    },
+    "performanceDiagnostic": {
+      "path": "artifacts/engine-0.2.4/g07/working-draft-app/device-kit/performance/diagnostic-VT5cai/result.json",
+      "sha256": "a1d8071f5a0c5757e8dc902fb1d71257575e06987de244339ff4f998b3df9acd"
+    },
+    "performanceScenarios": [
+      "static-dialogue",
+      "continuous-background",
+      "two-actors-and-effect",
+      "prepared-shot-switch",
+      "repeated-resume"
+    ],
+    "offlineRehearsalPlan": {
+      "path": "artifacts/engine-0.2.4/g07/rehearsal-plan.json",
+      "sha256": "49da547523fecc66f9b349efe1d81ede58cc65c31120a010da2cbf31ea766ff4"
+    },
+    "catalog": {
+      "path": "artifacts/engine-0.2.4/g07/catalog-native.json",
+      "sha256": "64232f03ed843c96bff53b3ada8bcc7bdfb5c1be57cc2a9c1d99e707795509c2"
+    }
+  },
+  "draftEngineFast": {
+    "status": "passed-across-original-run-and-corrected-suffix",
+    "tests": 2724,
+    "originalWithCatalogCheckFailure": {
+      "path": "artifacts/engine-0.2.4/g07/working-draft-fast.log",
+      "sha256": "8ed448de79da6688ee040e75a46c8065f128acce3f38861d967ba0b06593910c"
+    },
+    "correctedSuffix": [
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-check-engine-contracts.log",
+        "sha256": "13ff3c768892d7d3157f315d77435c48a76b9553a4da924faeff35c0b77943e3"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-performance-budget-test.log",
+        "sha256": "67f251fb3b1cadeb3aedec812f0407d1939f8aeb17dc89ac6f7951700b063345"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-architecture-check.log",
+        "sha256": "f6ec07101b9efcbea3ab25aa4282c6b71dde8433ec4b978623374831d4914d15"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-renderer-prepare-check.log",
+        "sha256": "43bfb252495dcb27ffc002bb50efa7ad84c76e16a4375aa8340ff128e5e51f04"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-capability-admission-check.log",
+        "sha256": "562f35f82eef9922daf329a6c54d56d41c6ede0c676a585f81bc4ad97356a28e"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-docs-check.log",
+        "sha256": "187361e405276817da824dcc2f78cd67a676e5a88a9f2f367144ec9fdd876f70"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-api-check.log",
+        "sha256": "d96d489ea3728657484a463e53efc8868d8cb6c85663393bd1159c61b1082a67"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-release-scope-check.log",
+        "sha256": "332737c5f8e1c232234f022eb5382e7751a78af73f9f322294caad5f1b5aea61"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-shader-language-check.log",
+        "sha256": "5342f2ca49dec1770716b35857434f94c8d47dc663c3aa24708db9ef494fcd72"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g07/draft-release-policy-test.log",
+        "sha256": "643b47a360b5ec5cb3fad7e85eaec443f28fd8bcea7f9899a4bddb25935cabb7"
+      }
+    ]
+  },
+  "verification": {
+    "windowsDevice": "pending",
+    "macDevice": "pending",
+    "productionPerformance": "pending",
+    "globalGate": "pending",
+    "rehearsal": "pending"
+  },
+  "pending": [
+    "clean candidate authorization and freeze",
+    "bind final Windows and macOS device evidence",
+    "three production cold processes per scenario",
+    "complete global gate and no-publication rehearsal"
+  ]
+}

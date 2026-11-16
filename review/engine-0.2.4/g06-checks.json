@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 1,
+  "goalId": "g06-production-slice",
+  "status": "passed",
+  "publishedBaseline": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "inputs": [
+    {
+      "goal": "g01-contracts-baseline",
+      "path": "review/engine-0.2.4/g01-checks.json",
+      "bytes": 5971,
+      "sha256": "402265fb3c12a296008d63bd27e26a07a7859b7b4ab489394136864f2e36e46c"
+    },
+    {
+      "goal": "g02-story-authoring",
+      "path": "review/engine-0.2.4/g02-checks.json",
+      "bytes": 8784,
+      "sha256": "0929311fb0e144ba23835e09660168e0acdd0edb54b77fe30b33dd77c0c7b8d4"
+    },
+    {
+      "goal": "g03-hya-stage",
+      "path": "review/engine-0.2.4/g03-checks.json",
+      "bytes": 11590,
+      "sha256": "9056f1399f546e609ece7c492ab05138c7caf1f44646ba9b51f30c4af6373dc9"
+    },
+    {
+      "goal": "g04-playback-ui",
+      "path": "review/engine-0.2.4/g04-checks.json",
+      "bytes": 15423,
+      "sha256": "86fd0ae84b7b5fa13096fbceb90815fa1ee7737444fa7dbf19997f8c55d894bf"
+    },
+    {
+      "goal": "g05-save-resume",
+      "path": "review/engine-0.2.4/g05-checks.json",
+      "bytes": 13489,
+      "sha256": "6dedba296f32b4d81415ea6a2fa6ec7d65b2bc91d1679faad63279ed7cf88b48"
+    }
+  ],
+  "template": {
+    "path": "artifacts/engine-0.2.4/g06/qualification-final/last-lantern-kit.tar.gz",
+    "bytes": 4387242,
+    "sha256": "6215e216b2f21203ccb1719b80a8aeea1e54fa4f1fe0845bb7b3f6c9f8cf08f1",
+    "packageMode": "local-preintegration-tarballs",
+    "installBuild": [
+      "empty-directory extraction",
+      "npm ci",
+      "npm run build"
+    ],
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.4-g06.0",
+        "filename": "haiyue-engine-0.2.4-g06.0.tgz",
+        "sha256": "a7636e5d9a7fc5383d80a3c4de7c27defd9659f2782f8ac0eda949401db7f6ce",
+        "baseSha256": "71fcb41289dccfe1f19039f8f61afd42140f3cb4656df48769315ee12226c6d7",
+        "verifiedFiles": 551
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.4-g06.0",
+        "filename": "haiyue-extensions-0.2.4-g06.0.tgz",
+        "sha256": "d851bf9b9f2233fd4a6324e87f1e7d3ee56ecedc163382d843eed7a93469c30b",
+        "baseSha256": "e3790e8c631db792f173e1f3e2d50456e6dfcdde2f3176f888868a72791df2ec",
+        "verifiedFiles": 285
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "filename": "haiyue-animation-spec-0.2.2.tgz",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "verifiedFiles": 51
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.3",
+        "filename": "haiyue-shader-language-0.2.3.tgz",
+        "sha256": "f6d6c43653c9c2f94eb93848a729fff63ae64f70d027d9d5a4698d78266f9463",
+        "verifiedFiles": 76
+      }
+    ],
+    "verifiedInstalledFilesPerCopy": 963,
+    "lockSha256": "b4efbf2d81157d5dce36ac500710827e14e82161e58d976c01669acdea78977e",
+    "identicalBundleSha256": "af85831abb22d8bf529d936c735b734376e7495af1f15bcf20eb9f098b5d902d",
+    "installEvidence": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/independent-installs.json",
+      "bytes": 5063,
+      "sha256": "f28b6fd57b4a9e5aa8a7709664591c7d39ad2d831462b65e554cc784f1395dbd"
+    },
+    "servedEntry": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/template-server.log",
+      "bytes": 161,
+      "sha256": "ba88748a036f1c7863275f01dfd3bd9046f8f80944d3cfd16e96476aa74fd851"
+    }
+  },
+  "production": {
+    "title": "雾港 / The Last Lantern",
+    "chapters": [
+      "arrival.json",
+      "pier.json",
+      "ending.json"
+    ],
+    "locales": [
+      "zh-Hans",
+      "en"
+    ],
+    "baseEndings": [
+      "结局 · 守灯",
+      "Ending · The Tide"
+    ],
+    "namedEvent": "beacon-finished",
+    "layers": [
+      {
+        "id": "background",
+        "assetId": "harbor"
+      },
+      {
+        "id": "keeper",
+        "assetId": "keeper"
+      },
+      {
+        "id": "traveler",
+        "assetId": "traveler"
+      },
+      {
+        "id": "weather",
+        "assetId": "rain"
+      }
+    ],
+    "voice": "eight synthetic zh-Hans/en WAVs and an original looping BGM",
+    "voiceGainSequence": [
+      1,
+      1,
+      0,
+      0.20879999999999999,
+      0.58
+    ],
+    "continueAfterPageRestartAt": "arrival/fork",
+    "replays": [
+      "lantern-cg",
+      "tide-cg"
+    ],
+    "replayExitRestoredAt": "arrival/fork",
+    "storagePreservedDuringReplay": true,
+    "browser": {
+      "product": "Chrome/157.0.8103.52",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:53918/proof.html?edited=false",
+      "angleBackend": "d3d11",
+      "nativeBackend": true,
+      "presentationMode": "headless",
+      "audioMode": "silent",
+      "storageMode": "isolated-memory-context"
+    },
+    "gpu": {
+      "architecture": "pascal",
+      "vendor": "nvidia",
+      "device": ""
+    },
+    "nativeEvidence": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/blank-native.json",
+      "bytes": 25700,
+      "sha256": "90494623c3fbe9be8012eeb3aa095ceec2f84a9bcec6a9d63ea4e2374c713e19"
+    },
+    "screenshot": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/blank-screenshot.png",
+      "bytes": 151692,
+      "sha256": "1e35aa6ac4e1d1ac063f7133a0aaf60644b1f73e45fe73a603384bfb14a09408"
+    }
+  },
+  "authoring": {
+    "changedKeeperX": [
+      155,
+      255
+    ],
+    "reusedPreset": "rain-night",
+    "addedHya": "gold-signal",
+    "condition": "trust > 1",
+    "newEnding": "结局 · 双灯引航",
+    "previews": [
+      {
+        "path": "artifacts/engine-0.2.4/g06/qualification-final/lantern-author-preview.json",
+        "bytes": 1721,
+        "sha256": "c1e220f3ee6398e2c9176141cee59f49285f62ba54a5e68a6972b657ed9c74a5"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g06/qualification-final/tide-author-preview.json",
+        "bytes": 1695,
+        "sha256": "29b5dfd4fffec9a01429ec0a7aac71275259121853ade4bfcfbae69682d74176"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g06/qualification-final/relight-author-preview.json",
+        "bytes": 1698,
+        "sha256": "bed54f9f7bc80313068d6d060df6c649f060835ae5f8c7ed0df5247b1b575d79"
+      }
+    ],
+    "nativeEvidence": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/edited-native.json",
+      "bytes": 24652,
+      "sha256": "936ddbb436a7c5fbdd89be941101d41ea5ea56a57e4a843d368094907fcb8aaf"
+    },
+    "screenshot": {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/edited-screenshot.png",
+      "bytes": 134491,
+      "sha256": "f6f45bbf89b80ac1b9cbc0a7bfed11596c476a832c8ffaac6b268f06d66deeef"
+    },
+    "guide": {
+      "path": "docs/engine-guide/visual-novel.md",
+      "bytes": 2244,
+      "sha256": "bdd44aa9cbc8b2cfa58f4fdf31c3a3675540f9e94dae6cccf5bc76c4c893a305"
+    },
+    "license": {
+      "path": "examples/visual-novel/project/LICENSE-ASSETS.md",
+      "bytes": 620,
+      "sha256": "abaf9da2d3db1f893040af67ec52d01355ff3369c6fb4f5469cf25dfe83024a9"
+    }
+  },
+  "repositoryChecks": {
+    "typecheck": {
+      "path": "artifacts/engine-0.2.4/g06/root-typecheck.log",
+      "bytes": 3438,
+      "sha256": "c4ef10b8bf65f81ca91cef4cec9c65c9ec50972ecf444daed9e04f6e2f788ebc"
+    },
+    "test": {
+      "path": "artifacts/engine-0.2.4/g06/root-test.log",
+      "bytes": 277207,
+      "sha256": "1401712a6caa06f212fd38449ecb0e6234efbaa044f0d0c684bcfea698be332d",
+      "tests": 2724,
+      "failures": 0
+    },
+    "build": {
+      "path": "artifacts/engine-0.2.4/g06/root-build.log",
+      "bytes": 19162,
+      "sha256": "2011f73da988c274a04d755914495c1b483e06e7e3c140ec91f6cb149b739546"
+    },
+    "docs": {
+      "path": "artifacts/engine-0.2.4/g06/docs-check.log",
+      "bytes": 3500,
+      "sha256": "349734e1d8369bb9d287090e2c4ad3f06b7fe9bfec171c92a3a17e60abb891d3",
+      "tests": 32
+    }
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.4/g06/qualification-03/blank-native-failure-1794836218370.txt",
+      "bytes": 1176,
+      "sha256": "1e309b053a102d32d2b34c54f3bb6072c3c38ecbfda6408508e0c8819de78370"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g06/qualification-03/blank-native-failure-1794836315582.txt",
+      "bytes": 1461,
+      "sha256": "f7909f17a413061f17f6ae578f369d3303aae20913015e369392fd56e5d472bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g06/qualification-final/edited-native-failure-1794837081103.txt",
+      "bytes": 2373,
+      "sha256": "6cb51f328a281719711d4e90d7c057aa55f94cffbee9aacdf7d8c3024c363bb4"
+    }
+  ],
+  "checkedSource": [
+    {
+      "path": "examples/visual-novel/index.html",
+      "bytes": 2549,
+      "sha256": "9cc28b3740bf9c6fe96b1991dbeeea76668c400ed77a8cfd72fa78d647b204ab"
+    },
+    {
+      "path": "examples/visual-novel/main.mjs",
+      "bytes": 8198,
+      "sha256": "fd54762c8c5e8f5ce466642d54786838563f2260d9b52e9bb1983d65efb33a11"
+    },
+    {
+      "path": "examples/visual-novel/project/LICENSE-ASSETS.md",
+      "bytes": 620,
+      "sha256": "abaf9da2d3db1f893040af67ec52d01355ff3369c6fb4f5469cf25dfe83024a9"
+    },
+    {
+      "path": "examples/visual-novel/project/arrival.json",
+      "bytes": 702,
+      "sha256": "c7aae99f2353ca0dc1df43818b149986862a4fdeb8f9596165bbdd588627737d"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/arrival-en.wav",
+      "bytes": 166458,
+      "sha256": "f2df9cb90dd420d8cdac6bc88a33dc328195807de36c9cf1ca68f59bd3b2fd50"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/arrival-zh.wav",
+      "bytes": 195326,
+      "sha256": "0f314e6031f5e1b334b213f7b261bebc192ff43706ba6a0b66a01efd4f1c5bf0"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/harbor-loop.wav",
+      "bytes": 352844,
+      "sha256": "ba8a0775a31ff38523ded49540d47aeb767509eb5e304d8af59bad273b40b89f"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/harbor.hya.json",
+      "bytes": 8319,
+      "sha256": "b91b35548403726db1a4e67bc8614f1836e5eb5ac646eba7480eef584d67a341"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/keeper.hya.json",
+      "bytes": 3818,
+      "sha256": "c8868f446b17d5635d4217c1e17a0dc75026dd47ed9b9e7ade5eb2790dcd26c6"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/lantern-en.wav",
+      "bytes": 144158,
+      "sha256": "f31d3c0cac290aa2fb6582eb7baadf26e1ad74c06908e987f620dcf1c705b5cb"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/lantern-zh.wav",
+      "bytes": 192090,
+      "sha256": "c09c011dcfbc136e46b53dfe9333979ecb39201fb4d7ccdaed88dca961f40f63"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/pier-en.wav",
+      "bytes": 155912,
+      "sha256": "ff8a40f319123d729c78a8317a17fe54079863b4c37926887fa9ce6076a6a535"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/pier-zh.wav",
+      "bytes": 219586,
+      "sha256": "7d6f2489791ab6cb8c67288df758db3415db4bb93aae75e53579b1e14ae9d8f6"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/rain.hya.json",
+      "bytes": 26491,
+      "sha256": "93379249e978ef2d023b4cf33593d7fdf561287b42c3aa8b9b952e8376d51baf"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/signal.hya.json",
+      "bytes": 3563,
+      "sha256": "4a5fa3dc993c7015ca95aa3eb9ee107784b7d5ff1f3a07cb8ed71d1170e99efb"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/tide-en.wav",
+      "bytes": 189968,
+      "sha256": "19f401e790df79a51e9b301d914f3bbd39537fbca83f94681de538f486fedf77"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/tide-zh.wav",
+      "bytes": 240892,
+      "sha256": "e25fcbb2b600efaf8a3bed742810777163f965fc731118da6b66a7e389467b49"
+    },
+    {
+      "path": "examples/visual-novel/project/assets/traveler.hya.json",
+      "bytes": 3160,
+      "sha256": "9446a864ca3c82fbdf5ab45cdbf663cd4d227c609813278dd51a03708db9ab02"
+    },
+    {
+      "path": "examples/visual-novel/project/en.json",
+      "bytes": 763,
+      "sha256": "367a2a774abd72a84e086c4ded142bb46087bf96d447994036b2cb4a8d3ac46f"
+    },
+    {
+      "path": "examples/visual-novel/project/ending.json",
+      "bytes": 687,
+      "sha256": "56645291976937dabfcc39cea1db1b9ff45fbbcdce46c32f8b13d63d2ac674e9"
+    },
+    {
+      "path": "examples/visual-novel/project/pier.json",
+      "bytes": 776,
+      "sha256": "b54a4a6b89d8159b0e3c6a1c043c74579f9bed16a98d405c0ffc75f7101e06d8"
+    },
+    {
+      "path": "examples/visual-novel/project/story.json",
+      "bytes": 2573,
+      "sha256": "32bc21b0972e891158205eb1e80e380f5d1d0487e0172b4f62c441ebbabbb4b1"
+    },
+    {
+      "path": "examples/visual-novel/project/zh-Hans.json",
+      "bytes": 725,
+      "sha256": "e28bf37e36e7053c3dc7ede450821babba5d07a42c6d671f6c3c4a42a227370b"
+    },
+    {
+      "path": "examples/visual-novel/style.css",
+      "bytes": 2828,
+      "sha256": "cc088fb923f691732381fc1511d838e8ca18f97f924aff2bd6a1ffbf1e1c295e"
+    },
+    {
+      "path": "examples/visual-novel/tools/author-exercise.mjs",
+      "bytes": 2464,
+      "sha256": "a1e3054afc7cea38e4d739d2edb2543237a58dd45ca45b713db11ee1b0bc673a"
+    },
+    {
+      "path": "examples/visual-novel/tools/build.mjs",
+      "bytes": 1251,
+      "sha256": "679cf3acbbcf970566942a80c71921f94fb3c4f1c82c3b2c7de3cf8196c267fc"
+    },
+    {
+      "path": "examples/visual-novel/tools/candidate-api.d.ts",
+      "bytes": 3831,
+      "sha256": "26588f587995f84ea6d184751e22cab081042371d2af33a6497fa7d1da3f294d"
+    },
+    {
+      "path": "examples/visual-novel/tools/candidate-entry.mjs",
+      "bytes": 8765,
+      "sha256": "8767073977c1c4f8412093c04563c15ec24f773e24aa3a394ca242ea247bc835"
+    },
+    {
+      "path": "examples/visual-novel/tools/create-art.mjs",
+      "bytes": 6949,
+      "sha256": "363eb07e7d7b213f85b97e7fa9aa0f6ade591d9b1f562c98706c4caaa10f517d"
+    },
+    {
+      "path": "examples/visual-novel/tools/create-audio.mjs",
+      "bytes": 1777,
+      "sha256": "946fd88f348a91ab72c9361a02ce15dc8c22ff2ddf3027cb29b75818b19d2fa0"
+    },
+    {
+      "path": "examples/visual-novel/tools/native-flow.mjs",
+      "bytes": 7764,
+      "sha256": "e173114d9d29bcd44687bed6a5ff300e90aa18d64cde4f2c9c5a63a424b15b5b"
+    },
+    {
+      "path": "examples/visual-novel/tools/prepare-kit.mjs",
+      "bytes": 7417,
+      "sha256": "c859594a123bcc2fd02b855c9010854b84b086df0aaccb655df1f109277aebcf"
+    },
+    {
+      "path": "examples/visual-novel/tools/serve.mjs",
+      "bytes": 1420,
+      "sha256": "c9d7410147035333a6c1140b18c03215bede203be6c467667654ad1974bc34c4"
+    },
+    {
+      "path": "examples/visual-novel/tools/tsconfig.json",
+      "bytes": 529,
+      "sha256": "570b36b310f8a59bcd8b313d1ddcc1921612bea7166eb3b4725513d49efb0e5f"
+    },
+    {
+      "path": "examples/visual-novel/tools/verify-kit.mjs",
+      "bytes": 5284,
+      "sha256": "f4be2096d62de2493cc6e19af098cdd9775474ed68080745684538fbce9aa92c"
+    },
+    {
+      "path": "examples/visual-novel/tools/verify-native.mjs",
+      "bytes": 1875,
+      "sha256": "d4ccab31fc8eaf2d9227f29317de80fbfbd2a6e8f621bd869b1379c61cd0dff1"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-visual-novel.mjs",
+      "bytes": 100,
+      "sha256": "f56f80014e4380a4155af4cabb4963c9162d8fc5b77d48213e003262931c33af"
+    }
+  ],
+  "pendingG07": [
+    "canonical entry and release build",
+    "physical audio/input and performance",
+    "release candidate and no-publication rehearsal"
+  ]
+}

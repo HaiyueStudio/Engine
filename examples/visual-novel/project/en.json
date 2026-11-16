@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "messages": {
+    "keeper": "Lightkeeper",
+    "traveler": "Traveler",
+    "arrival.watch": "The tide is rising. One lantern still waits for those coming home.",
+    "arrival.fork": "The ferry is about to leave. Who should the light guide?",
+    "choice.stay": "Stay and light the pier",
+    "choice.leave": "Take the lantern on the last ferry",
+    "pier.story": "That light brought me across the water. Let it shine once more.",
+    "ending.lanternLine": "You stayed. Tonight, those returning have a light to follow.",
+    "ending.lantern": "Ending · The Watch",
+    "ending.tideLine": "As the ferry leaves, your lantern shines from its stern toward the empty harbor.",
+    "ending.tide": "Ending · The Tide"
+  }
+}

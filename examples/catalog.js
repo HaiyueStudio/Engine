@@ -67,7 +67,7 @@ export function createExampleCatalogReport(manifest) {
       !entry?.id
       || typeof entry.title !== 'string'
       || !entry.title.trim()
-      || !isLocalTypeScriptEntry(entry.entry, entry.id)
+      || !isLocalEntry(entry.entry, entry.id)
     ) {
       const id = entry?.id ?? '<missing>';
       skipEntry(entry, 'invalid-entry', `Skipped example "${id}": invalid title, id, or local TypeScript entry.`);
@@ -142,7 +142,7 @@ function encodePath(path) {
   return path.split('/').map(segment => encodeURIComponent(segment)).join('/');
 }
 
-function isLocalTypeScriptEntry(path, id) {
-  if (typeof path !== 'string' || !path.endsWith('.ts') || !path.startsWith(`${id}/`)) return false;
+function isLocalEntry(path, id) {
+  if (typeof path !== 'string' || !/\.(?:ts|mjs)$/u.test(path) || !path.startsWith(`${id}/`)) return false;
   return path.split('/').every(segment => segment && segment !== '.' && segment !== '..');
 }

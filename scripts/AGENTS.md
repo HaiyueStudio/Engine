@@ -6,6 +6,7 @@
 - A gate validates an existing contract; do not weaken thresholds, remove cases, skip unsupported failures, or change metric populations merely to restore green.
 - Policy/config parsing and artifact validation belong in importable side-effect-free modules with `node:test` coverage. CLI wrappers orchestrate and report.
 - Reuse `build-rollup-once.mjs`, shared Chrome/server helpers, shared GPU audit device, and existing validators instead of adding one-off process/build/mock implementations.
+- For new local Windows unattended test launchers, request elevation through Windows UAC if the runner requires administrator privileges. From the independent test terminal, use `windows-unattended-chatgpt.ps1` to request a normal shutdown and stop remaining client processes and verified desktop helpers in the current session. Reopen ChatGPT after the test process returns. Keep the test exit code and evidence path. Verification-only runs leave the client alone.
 
 ## Evidence and browser rules
 
