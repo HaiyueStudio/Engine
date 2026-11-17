@@ -15,7 +15,7 @@ import { ENGINE_021_EVIDENCE_KINDS, validateEngine021EvidenceBindings, validateE
 
 import {G13_STAGE9_REUSE} from './g13-stage9-reuse-policy.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
-if (args.length > 1 || args.length === 1 && !args[0].startsWith('--manifest=')) throw Error('Use --manifest=<artifacts/.../qualification.json>, or the default artifacts/engine-0.2.1/qualification.json');
+if (args.length > 1 || args.length === 1 && !args[0].startsWith('--manifest=')) throw Error('Use --manifest=<artifacts/.../qualification.json>, or the default for the current package version');
 const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const inside = (directory, path) => { const local = relative(directory, path); if (!local || local === '..' || local.startsWith('../') || local.startsWith('..\\') || isAbsolute(local)) throw Error('Evidence path escapes its directory'); return path; };
 async function reader(directory) {
@@ -23,10 +23,10 @@ async function reader(directory) {
   return async name => readFile(inside(base, await realpath(inside(base, resolve(base, name)))));
 }
 const readArtifacts = await reader(resolve(root, 'artifacts'));
-const manifestPath = args[0]?.slice(11) ?? 'artifacts/engine-0.2.1/qualification.json';
+const targetVersion=JSON.parse(await readFile(resolve(root,'package.json'))).version;
+const manifestPath = args[0]?.slice(11) ?? 'artifacts/engine-' + targetVersion + '/qualification.json';
 const manifestBytes = await readArtifacts(relative(resolve(root, 'artifacts'), resolve(root, manifestPath)));
 const manifest = JSON.parse(manifestBytes);
-const targetVersion=JSON.parse(await readFile(resolve(root,'package.json'))).version;
 validateEvidenceTargetVersion(manifest,targetVersion);
 const reports = {}, readers = {};
 for (const kind of ENGINE_021_EVIDENCE_KINDS) {
@@ -103,11 +103,12 @@ validateEngine021CompiledEvidence(reports, builds);
 if (git(['rev-parse', 'HEAD']) !== current.revision || git(['status', '--porcelain'])) throw Error('Candidate changed during evidence audit');
 const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs', 'scripts/g13-stage9-reuse-policy.mjs'];
 if(targetVersion==='0.2.3')policyFiles.push('config/gameplay-023-contract.json','docs/for-ai/adr/0139-engine-023-gameplay-contracts.md');
+if(targetVersion==='0.2.4')policyFiles.push('config/visual-novel-024-contract.json','docs/for-ai/adr/0140-visual-novel-024.md');
 const stage9Reuse=targetVersion==='0.2.2'&&Object.values(current.reuseChanges).some(paths=>paths.some(p=>Object.hasOwn(G13_STAGE9_REUSE.files,p)));
 
 const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence-v2', targetVersion, assessedAt: new Date().toISOString(),
   acceptanceRevision: current.revision, dirty: false, manifest: manifestPath, manifestSha256: sha256(manifestBytes),
-  policy: { adr: ['0126', '0127', ...(stage9Reuse?['0138']:[]), ...(['0.2.2','0.2.3'].includes(targetVersion) && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(targetVersion==='0.2.3'?['0139']:[]), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  policy: { adr: ['0126', '0127', ...(stage9Reuse?['0138']:[]), ...(['0.2.2','0.2.3','0.2.4'].includes(targetVersion) && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(targetVersion==='0.2.3'?['0139']:[]), ...(targetVersion==='0.2.4'?['0140']:[]), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
   ...(manifest.reuseDecision ? { reuseDecision: manifest.reuseDecision, readbackFixFiles: current.readbackFixFiles, ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? { pbrFixFiles: current.pbrFixFiles } : {}), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? { downloadFixFiles: current.downloadFixFiles } : {}) } : {}),
   bindings: Object.fromEntries(ENGINE_021_EVIDENCE_KINDS.map(kind => [kind, { ...manifest.reports[kind],
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,

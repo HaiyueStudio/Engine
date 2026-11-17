@@ -193,6 +193,7 @@ export function validateEngine021EvidenceBindings(manifest, reports, current) {
     paths.add(binding.file);
     check(binding.captureRevision === report?.revision && report.dirty === false &&
       (report.status === 'passed' || g05Kinds.includes(kind) && report.status === 'failed'), `${kind}: not a complete clean capture`);
+    if (current.targetVersion === '0.2.4') check(report.revision === current.revision, kind + ': 0.2.4 requires fresh candidate evidence');
     validateEngine021RevisionReuse(report.revision, current, kind, binding, manifest.reuseDecision);
     check(Number.isFinite(Date.parse(report.generatedAt)) && Number.isFinite(Date.parse(report.finishedAt)) &&
       Date.parse(report.finishedAt) >= Date.parse(report.generatedAt), `${kind}: missing capture completion`);
@@ -235,7 +236,7 @@ export const ENGINE_022_SPARSE256_CPU_DECISION = 'ADR0137-g05-moving-sparse256-c
 
 function isMovingSparse256CpuCheck(kind, c, targetVersion) {
   const job = c.job;
-  return ['0.2.2', '0.2.3'].includes(targetVersion) && kind === 'rooms' && c.metric === 'cpuP95Ms' && c.limit === 4
+  return ['0.2.2', '0.2.3', '0.2.4'].includes(targetVersion) && kind === 'rooms' && c.metric === 'cpuP95Ms' && c.limit === 4
     && job?.suite === 'rooms' && job.caseId === 'sparse-256' && job.moving === true && job.algorithm === 'tiled'
     && ['chrome-windows', 'edge-windows'].includes(job.browserId) && job.preference === 'high-performance'
     && job.full === true && job.idleMs === 0 && job.cohort === 0;
@@ -243,7 +244,7 @@ function isMovingSparse256CpuCheck(kind, c, targetVersion) {
 
 /** Consume only a complete independent raw audit; original measurement status remains unchanged. */
 export function assessEngine021G05Audit(kind, audit, targetVersion = '0.2.1') {
-  check(['0.2.1', '0.2.2', '0.2.3'].includes(targetVersion), 'Unknown G05 acceptance target version');
+  check(['0.2.1', '0.2.2', '0.2.3', '0.2.4'].includes(targetVersion), 'Unknown G05 acceptance target version');
   const shape = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
   check(shape && ['passed', 'failed'].includes(audit?.status) && audit.cleanCandidate === true && audit.captures === shape[0] &&
     audit.checks?.length === shape[1] && audit.stability?.length === shape[2] && audit.memory?.length === shape[3],
@@ -267,7 +268,7 @@ export function assessEngine021G05Audit(kind, audit, targetVersion = '0.2.1') {
   }
   if (kind === 'forward') check(audit.checks.filter(c => c.metric === 'cpuP95Ratio').length === 4 &&
     audit.checks.filter(c => c.metric === 'gpuP95Ratio').length === 4, 'forward: incomplete CPU/GPU coverage');
-  if (['0.2.2', '0.2.3'].includes(targetVersion) && kind === 'rooms') check(roomCpuBrowsers.size === 2,
+  if (['0.2.2', '0.2.3', '0.2.4'].includes(targetVersion) && kind === 'rooms') check(roomCpuBrowsers.size === 2,
     'rooms: complete dynamic sparse-256 CPU browser coverage required');
   for (const m of audit.memory) check(m.status === 'passed' && m.checks?.length > 0 && m.checks.every(c =>
     c.passed === true && Number.isFinite(c.observed) && c.observed >= 0 && Number.isFinite(c.limit) && c.limit > 0 && c.observed <= c.limit),
@@ -281,9 +282,9 @@ export function assessEngine021G05Audit(kind, audit, targetVersion = '0.2.1') {
   return { status: 'passed', originalStatus: audit.status, performanceChecks: audit.checks.length,
     hardPerformanceChecks: kind === 'forward' ? 4 : audit.checks.length - roomCpuBrowsers.size,
     stabilityChecks: audit.stability.length, warnings, cpuRegressionInvestigations, cpuAbsoluteInvestigations,
-    ...(['0.2.2', '0.2.3'].includes(targetVersion) && kind === 'rooms' ? { acceptanceDecision: ENGINE_022_SPARSE256_CPU_DECISION } : {}),
+    ...(['0.2.2', '0.2.3', '0.2.4'].includes(targetVersion) && kind === 'rooms' ? { acceptanceDecision: ENGINE_022_SPARSE256_CPU_DECISION } : {}),
     scope: 'ADR 0126/0127 prerequisite only. Cohort variation and Forward CPU 5% excess are investigated. '
-      + (['0.2.2', '0.2.3'].includes(targetVersion) ? 'ADR 0137 additionally investigates only Windows moving tiled sparse-256 CPU 4 ms; 0.2.3 inherits this exact scope under ADR 0139. ' : '')
+      + (['0.2.2', '0.2.3', '0.2.4'].includes(targetVersion) ? 'ADR 0137 additionally investigates only Windows moving tiled sparse-256 CPU 4 ms; Later admitted target versions keep this exact scope. ' : '')
       + 'GPU 5%, other budgets, complete production, resources, correctness and release evidence remain required.' };
 }
 

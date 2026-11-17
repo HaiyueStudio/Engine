@@ -175,6 +175,12 @@
     "g01": "Windows Chrome native WebGPU and automated focus/muted Web Audio graph. G07 binds real device evidence."
   },
   "measurement": {
+    "inheritedRendererAudit": {
+      "contract": "engine-021-evidence-v2",
+      "samples": 580,
+      "requireFreshCandidateCaptures": true,
+      "investigation": "ADR0137-g05-moving-sparse256-cpu-investigation"
+    },
     "g01Probe": {
       "width": 320,
       "height": 200,

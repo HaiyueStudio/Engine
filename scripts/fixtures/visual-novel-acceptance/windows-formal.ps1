@@ -26,6 +26,10 @@ try {
     & node scripts/verify-visual-novel-acceptance.mjs performance --artifact $deviceKit
     $code = $LASTEXITCODE
     if ($code -eq 0) {
+        & node scripts/fixtures/visual-novel-acceptance/legacy-render-evidence.mjs --run
+        $code = $LASTEXITCODE
+    }
+    if ($code -eq 0) {
         & node scripts/release-workflow.mjs run --run $runFile --no-publish
         $code = $LASTEXITCODE
     }
