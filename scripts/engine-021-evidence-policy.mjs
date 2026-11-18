@@ -176,6 +176,215 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
     'Evidence reuse requires new sampling after another non-acceptance change');
 }
 
+/** One user-approved documentation repair. Original 0.2.4 populations remain immutable. */
+export const ENGINE_024_CHANGELOG_REUSE = Object.freeze({
+  "decision": "g07-024-changelog-heading-20261119",
+  "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a",
+  "changelogLfSha256": "40cfa59fbadd0c9b4e8ef290e9b3d6d4e5ccc7d9723c234e37e947e5992af768",
+  "allowedChanges": [
+    "CHANGELOG.md",
+    "scripts/check-engine-021-evidence.mjs",
+    "scripts/engine-021-evidence-policy.mjs",
+    "scripts/engine-021-evidence-policy.test.mjs"
+  ],
+  "reports": {
+    "resources": {
+      "file": "artifacts/engine-0.2.1/g09/study-resources-2026-11-18T14-21-13.374Z/report.json",
+      "sha256": "eecf351a92b56d1181de056431012c1338c8a03a0cbd3e5bd9f260a450e6b2e6",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "rooms": {
+      "file": "artifacts/engine-0.2.1/g05/continuous-rooms-2026-11-18T14-42-27.840Z/report.json",
+      "sha256": "0f3f66013523eac9295f8b6fab525d43eb0843beaa0087c17fc3b5f17ba41481",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "instances": {
+      "file": "artifacts/engine-0.2.1/g05/continuous-instances-2026-11-18T15-30-27.063Z/report.json",
+      "sha256": "8dfd1450a9a58bdee5b71a56cd750e4ad24f2793ce79ab19a2824a73d9495446",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "forward": {
+      "file": "artifacts/engine-0.2.1/g05/continuous-forward-2026-11-18T15-45-45.512Z/report.json",
+      "sha256": "4ef6c742e7eda0b2f44effabf0fabdcac2de4ba34bec86e189f78dae784c2abe",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "production": {
+      "file": "artifacts/engine-0.2.1/g09/production-local-2026-11-18T15-49-00.685Z/report.json",
+      "sha256": "fea3b985457822a7ee5f577b2c4c3f463e6d2272413ba5674aa32190cc9c1c70",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "ablation": {
+      "file": "artifacts/engine-0.2.1/g09/study-ablation-2026-11-18T16-15-39.524Z/report.json",
+      "sha256": "1d97e1ef4263869ee86c8438ee524c0f79bab0b8604a1a44937328be8c578d84",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    },
+    "correctness": {
+      "file": "artifacts/engine-0.2.1/g09/acceptance-full-2026-11-18T16-27-58.685Z/report.json",
+      "sha256": "3ec2ead262b3342a71b14ef9a92e424d206eb0cf0b67035466b5100b91d721e1",
+      "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a"
+    }
+  },
+  "production": {
+    "file": "artifacts/engine-0.2.4/g07/qualification-f204b9b/device-kit/performance/formal-IvNSxx/result.json",
+    "sha256": "8f4fb821ab0670c48ecad9c3ef23d965616ccc05581f34b7e4cd5f513e56fb20",
+    "rows": [
+      {
+        "id": "static-dialogue",
+        "processIndex": 1,
+        "path": "static-dialogue-1.json",
+        "sha256": "392cce1cb51f60929bff0ab7777223d4265f30999fee31486d8ffddbc8f32b6c"
+      },
+      {
+        "id": "static-dialogue",
+        "processIndex": 2,
+        "path": "static-dialogue-2.json",
+        "sha256": "108c5d71674b486533ce25515d9d2caf7d901a06f06f69640e58f3e97289b263"
+      },
+      {
+        "id": "static-dialogue",
+        "processIndex": 3,
+        "path": "static-dialogue-3.json",
+        "sha256": "c411c4abfd72b80fef2e7e8c7e7a3e7c508ed8196015e6aef0d6904cfeffef33"
+      },
+      {
+        "id": "continuous-background",
+        "processIndex": 1,
+        "path": "continuous-background-1.json",
+        "sha256": "ba459a5657b3dc0b7684594b77810d9d0dce97ac523ec71dbf47c342b4cb5249"
+      },
+      {
+        "id": "continuous-background",
+        "processIndex": 2,
+        "path": "continuous-background-2.json",
+        "sha256": "7f561aebbf2af12d57ad1a906ce76ee27d45481d58421b35df734f3524ca2a17"
+      },
+      {
+        "id": "continuous-background",
+        "processIndex": 3,
+        "path": "continuous-background-3.json",
+        "sha256": "82e994176a54803a148eb930bcfab5c1f4885e1ff7429a5f939a61ebc6cee40b"
+      },
+      {
+        "id": "two-actors-and-effect",
+        "processIndex": 1,
+        "path": "two-actors-and-effect-1.json",
+        "sha256": "e9344f3ea1f85d462e4624cd7b0bc0a73861eca642666861cb4d51688e4d7ec2"
+      },
+      {
+        "id": "two-actors-and-effect",
+        "processIndex": 2,
+        "path": "two-actors-and-effect-2.json",
+        "sha256": "b1b64ef11cd1bc281e91666aefa37d400595a4c555c9ca46b001d373d568e5b8"
+      },
+      {
+        "id": "two-actors-and-effect",
+        "processIndex": 3,
+        "path": "two-actors-and-effect-3.json",
+        "sha256": "f2e0c4f8a403fc8720115dc1d9aa6191dd106e817d1d5be352bfc893f6b15dc8"
+      },
+      {
+        "id": "prepared-shot-switch",
+        "processIndex": 1,
+        "path": "prepared-shot-switch-1.json",
+        "sha256": "ac5b39ea7a20940f73e73c293283cd465f47a6faf0bda3e9e6d47a1baf2cff9d"
+      },
+      {
+        "id": "prepared-shot-switch",
+        "processIndex": 2,
+        "path": "prepared-shot-switch-2.json",
+        "sha256": "55d57a567f94c8c2cadc1adedd41fcce8daac2ec0dde5f2a90ac40194c1b75b1"
+      },
+      {
+        "id": "prepared-shot-switch",
+        "processIndex": 3,
+        "path": "prepared-shot-switch-3.json",
+        "sha256": "ae17162f5a6844c943ea025cd2fa07d2ab53f4b5b60c3952d916864872da3f37"
+      },
+      {
+        "id": "repeated-resume",
+        "processIndex": 1,
+        "path": "repeated-resume-1.json",
+        "sha256": "9ff4020f1823e9e55bf4973da189d942e9c996a6acde3f8970ee1c436809dc68"
+      },
+      {
+        "id": "repeated-resume",
+        "processIndex": 2,
+        "path": "repeated-resume-2.json",
+        "sha256": "e27669f0341814005dfcb2133cac6698a65bf9a93766e3ae48313733c3e36ac1"
+      },
+      {
+        "id": "repeated-resume",
+        "processIndex": 3,
+        "path": "repeated-resume-3.json",
+        "sha256": "636893dfffb9f2f030324c9841cd679fd36354c70dfe62b7de00ca303059e6f6"
+      }
+    ],
+    "rebuiltKit": "artifacts/engine-0.2.4/g07/changelog-reuse/production-rebuild/device-kit",
+    "files": {
+      "bundle.js": "49b19c3f20f079c112e2f365c5a04a45b0f979a4f83ac8b00ff86d8ff48e8f69",
+      "index.html": "2934452a5581c0a251983881a898ff1e000e2666b2da8ee0d2249403e719b745",
+      "physical.mjs": "03930b5f94c0a6f23d503460655dddf47b18e8603147c068a939aaa6aa57867b",
+      "project/assets/arrival-en.wav": "f2df9cb90dd420d8cdac6bc88a33dc328195807de36c9cf1ca68f59bd3b2fd50",
+      "project/assets/arrival-zh.wav": "0f314e6031f5e1b334b213f7b261bebc192ff43706ba6a0b66a01efd4f1c5bf0",
+      "project/assets/harbor-loop.wav": "ba8a0775a31ff38523ded49540d47aeb767509eb5e304d8af59bad273b40b89f",
+      "project/assets/harbor.hya.json": "b91b35548403726db1a4e67bc8614f1836e5eb5ac646eba7480eef584d67a341",
+      "project/assets/keeper.hya.json": "c8868f446b17d5635d4217c1e17a0dc75026dd47ed9b9e7ade5eb2790dcd26c6",
+      "project/assets/lantern-en.wav": "f31d3c0cac290aa2fb6582eb7baadf26e1ad74c06908e987f620dcf1c705b5cb",
+      "project/assets/lantern-zh.wav": "c09c011dcfbc136e46b53dfe9333979ecb39201fb4d7ccdaed88dca961f40f63",
+      "project/assets/pier-en.wav": "ff8a40f319123d729c78a8317a17fe54079863b4c37926887fa9ce6076a6a535",
+      "project/assets/pier-zh.wav": "7d6f2489791ab6cb8c67288df758db3415db4bb93aae75e53579b1e14ae9d8f6",
+      "project/assets/rain.hya.json": "93379249e978ef2d023b4cf33593d7fdf561287b42c3aa8b9b952e8376d51baf",
+      "project/assets/signal.hya.json": "4a5fa3dc993c7015ca95aa3eb9ee107784b7d5ff1f3a07cb8ed71d1170e99efb",
+      "project/assets/tide-en.wav": "19f401e790df79a51e9b301d914f3bbd39537fbca83f94681de538f486fedf77",
+      "project/assets/tide-zh.wav": "e25fcbb2b600efaf8a3bed742810777163f965fc731118da6b66a7e389467b49",
+      "project/assets/traveler.hya.json": "9446a864ca3c82fbdf5ab45cdbf663cd4d227c609813278dd51a03708db9ab02",
+      "project/compiled.json": "fbcc5f40cdb2211aab663422dd6a498cfe42b9b04c86f777a750799b558984b6",
+      "style.css": "cc088fb923f691732381fc1511d838e8ca18f97f924aff2bd6a1ffbf1e1c295e"
+    }
+  }
+});
+
+export function validateEngine024ChangelogReuse(manifest, current) {
+  const pin = ENGINE_024_CHANGELOG_REUSE;
+  check(current.targetVersion === '0.2.4' && manifest.targetVersion === '0.2.4'
+    && manifest.changelogReuseDecision === pin.decision, 'Unknown 0.2.4 changelog reuse decision');
+  check(current.revision !== pin.captureRevision && current.dirty === false, 'Changelog reuse requires a new clean acceptance revision');
+  check(current.changelogLfSha256 === pin.changelogLfSha256, 'Changelog differs from the approved heading-only repair');
+  const paths = current.reuseChanges?.[pin.captureRevision];
+  check(Array.isArray(paths) && same(paths.toSorted(), pin.allowedChanges), 'Changelog reuse includes another source change');
+  check(same(Object.keys(manifest.reports ?? {}).sort(), Object.keys(pin.reports).sort())
+    && Object.entries(pin.reports).every(([kind, binding]) =>
+      Object.entries(binding).every(([key, value]) => manifest.reports[kind]?.[key] === value)),
+    'Changelog reuse requires all seven exact pinned reports');
+  return { decision: pin.decision, captureRevision: pin.captureRevision, acceptanceRevision: current.revision, changes: paths };
+}
+
+export function validateEngine024ProductionReuse(summary, records) {
+  const pin = ENGINE_024_CHANGELOG_REUSE;
+  check(summary?.status === 'passed' && summary.revision === pin.captureRevision, 'Production reuse requires its original passed capture');
+  check(Array.isArray(summary.rows) && summary.rows.length === pin.production.rows.length
+    && Array.isArray(records) && records.length === pin.production.rows.length, 'Production reuse requires all fifteen processes');
+  const seen = new Set();
+  for (const expected of pin.production.rows) {
+    const row = summary.rows.find(item => item.id === expected.id && item.processIndex === expected.processIndex);
+    const record = records.find(item => item.file === expected.path);
+    check(row && Object.entries(expected).every(([key, value]) => row[key] === value)
+      && record?.sha256 === expected.sha256 && !seen.has(record.file), 'Production reuse raw identity differs');
+    seen.add(record.file);
+    const raw = record.raw;
+    check(raw?.revision === pin.captureRevision && raw.scenario === expected.id, 'Production reuse capture revision differs');
+    check(raw.browserEvidence?.nativeBackend === true && raw.browserEvidence.presentationMode === 'visible-window'
+      && !/HeadlessChrome/.test(raw.browserEvidence.userAgent), 'Production reuse requires visible native WebGPU');
+    check(Array.isArray(raw.rows) && raw.rows.length >= 180 && raw.rows.every(row => row.cachedRegions <= 8
+      && row.retainedColorBytes <= 64 * 1024 * 1024), 'Production reuse cache or sample contract failed');
+    check(Array.isArray(raw.gpuFrames) && (raw.scenario === 'static-dialogue' ? raw.gpuFrames.length === 0 : raw.gpuFrames.length >= 30),
+      'Production reuse GPU population incomplete');
+    check(Array.isArray(raw.gpuErrors) && raw.gpuErrors.length === 0 && raw.final?.releasedOwnerResiduals === 0
+      && raw.retired?.releasedOwnerResiduals === 0, 'Production reuse GPU errors or owner residual');
+    check(['voices', 'buffers', 'audioNodes'].every(key => raw.audioAfterDispose?.[key] === 0), 'Production reuse audio residual');
+  }
+  return { status: 'passed', captureRevision: pin.captureRevision, processes: records.length };
+}
 /** Identity checks precede independent raw-artifact audits; summary status alone never qualifies a bundle. */
 export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2', 'Unknown qualification manifest');
@@ -183,6 +392,7 @@ export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision), 'Unknown evidence reuse decision');
   check(/^[a-f0-9]{40}$/.test(current.revision) && current.dirty === false && manifest.revision === current.revision,
     'Qualification requires the current clean revision');
+  if (manifest.changelogReuseDecision !== undefined) validateEngine024ChangelogReuse(manifest, current);
   check(same(Object.keys(manifest.reports ?? {}).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()) &&
     same(Object.keys(reports).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()), 'All seven complete reports are required');
   const paths = new Set(), hosts = new Set();
@@ -193,7 +403,8 @@ export function validateEngine021EvidenceBindings(manifest, reports, current) {
     paths.add(binding.file);
     check(binding.captureRevision === report?.revision && report.dirty === false &&
       (report.status === 'passed' || g05Kinds.includes(kind) && report.status === 'failed'), `${kind}: not a complete clean capture`);
-    if (current.targetVersion === '0.2.4') check(report.revision === current.revision, kind + ': 0.2.4 requires fresh candidate evidence');
+    if (current.targetVersion === '0.2.4') check(report.revision === current.revision || manifest.changelogReuseDecision === ENGINE_024_CHANGELOG_REUSE.decision,
+      kind + ': 0.2.4 requires fresh candidate evidence');
     validateEngine021RevisionReuse(report.revision, current, kind, binding, manifest.reuseDecision);
     check(Number.isFinite(Date.parse(report.generatedAt)) && Number.isFinite(Date.parse(report.finishedAt)) &&
       Date.parse(report.finishedAt) >= Date.parse(report.generatedAt), `${kind}: missing capture completion`);

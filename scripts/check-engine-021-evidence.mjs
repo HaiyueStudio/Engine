@@ -11,7 +11,7 @@ import { auditG09Preflight } from './webgpu-gate/framegraph-acceptance-policy.mj
 import { loadFrameGraphQualification } from './webgpu-gate/framegraph-qualification.mjs';
 import { buildDeferredFixture } from './webgpu-gate/deferred-fixture-builder.mjs';
 import { ENGINE_021_EVIDENCE_KINDS, validateEngine021EvidenceBindings, validateEngine021CompiledEvidence,
-  completeEngine021EvidenceAudit, validateEvidenceTargetVersion, ENGINE_021_READBACK_REUSE, ENGINE_021_PBR_REUSE, ENGINE_021_DOWNLOAD_REUSE } from './engine-021-evidence-policy.mjs';
+  completeEngine021EvidenceAudit, validateEvidenceTargetVersion, ENGINE_021_READBACK_REUSE, ENGINE_021_PBR_REUSE, ENGINE_021_DOWNLOAD_REUSE, ENGINE_024_CHANGELOG_REUSE, validateEngine024ProductionReuse } from './engine-021-evidence-policy.mjs';
 
 import {G13_STAGE9_REUSE} from './g13-stage9-reuse-policy.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
@@ -45,6 +45,7 @@ const current = { targetVersion, revision: git(['rev-parse', 'HEAD']), dirty: !!
   framegraphBaselineRevision: JSON.parse(await readFile(resolve(root, 'review/engine-0.2.1/g09/dependency-baseline.json'))).revision,
   inputs: { production: await productionEvidenceInputs(root), resources: await studyEvidenceInputs(root, 'resources'),
     ablation: await studyEvidenceInputs(root, 'ablation'), rooms: lightingInputs, instances: lightingInputs, forward: lightingInputs } };
+current.changelogLfSha256 = sha256(Buffer.from((await readFile(resolve(root, 'CHANGELOG.md'), 'utf8')).replaceAll('\r\n', '\n')));
 current.reuseChanges = {};
 current.stage9FixFiles=Object.fromEntries(await Promise.all(Object.keys(G13_STAGE9_REUSE.files).map(async path=>[path,sha256(await readFile(resolve(root,path)))])));
 current.readbackFixFiles = Object.fromEntries(await Promise.all(Object.keys(ENGINE_021_READBACK_REUSE.sourceFiles)
@@ -61,6 +62,34 @@ for (const revision of new Set(Object.values(reports).map(report => report.revis
   ]).split('\0').filter(Boolean).sort();
 }
 validateEngine021EvidenceBindings(manifest, reports, current);
+let changelogReuse;
+if (manifest.changelogReuseDecision !== undefined) {
+  const pin = ENGINE_024_CHANGELOG_REUSE;
+  const summaryBytes = await readArtifacts(pin.production.file);
+  if (sha256(summaryBytes) !== pin.production.sha256) throw Error('Pinned production summary bytes changed');
+  const summary = JSON.parse(summaryBytes);
+  const records = [];
+  const captureRoot = dirname(resolve(root, pin.production.file));
+  const readCapture = await reader(captureRoot);
+  for (const binding of pin.production.rows) {
+    const bytes = await readCapture(binding.path), raw = JSON.parse(bytes);
+    const readInput = await reader(resolve(captureRoot, binding.id));
+    for (const [path, hash] of Object.entries(raw.inputs)) {
+      if (sha256(await readInput(path)) !== hash) throw Error('Production capture input bytes changed: ' + path);
+    }
+    records.push({ file: binding.path, sha256: sha256(bytes), raw });
+  }
+  const production = validateEngine024ProductionReuse(summary, records);
+  const rebuilt = await reader(resolve(root, pin.production.rebuiltKit));
+  const kit = JSON.parse(await rebuilt('manifest.json'));
+  if (kit.revision !== current.revision || kit.diagnostic !== false || JSON.stringify(kit.files) !== JSON.stringify(pin.production.files))
+    throw Error('Production bundle must be rebuilt from the clean acceptance revision with identical bytes');
+  for (const [path, hash] of Object.entries(pin.production.files)) {
+    if (sha256(await rebuilt('dist/' + path)) !== hash) throw Error('Rebuilt production bytes differ: ' + path);
+  }
+  changelogReuse = { decision: pin.decision, captureRevision: pin.captureRevision, acceptanceRevision: current.revision,
+    changes: current.reuseChanges[pin.captureRevision], production, rebuiltKit: pin.production.rebuiltKit, rebuiltFiles: kit.files };
+}
 const productionRegistration = JSON.parse(await readers.production(reports.production.registration.file));
 if (productionRegistration.revision !== reports.production.revision || productionRegistration.dirty !== false) throw Error('Production registration is not bound to its clean capture revision');
 
@@ -114,6 +143,6 @@ const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,
     acceptanceStatus: 'passed', reused: reports[kind].revision !== current.revision }])),
   ...(stage9Reuse?{stage9Acceptance:{decision:G13_STAGE9_REUSE.decision,files:current.stage9FixFiles}}:{}),
-  reuseChanges: current.reuseChanges, rebuilds };
+  reuseChanges: current.reuseChanges, ...(changelogReuse ? { changelogReuse } : {}), rebuilds };
 await writeFile(resolve(auditDirectory, 'report.json'), JSON.stringify(evidence, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify(evidence, null, 2));

@@ -4,6 +4,7 @@ import {G13_STAGE9_REUSE,isG13Stage9Binding,validateG13Stage9Files,validateG13Ga
 import './stage9-selective-bundle.test.mjs';
 import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, completeEngine021EvidenceAudit,
   assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse,
+  ENGINE_024_CHANGELOG_REUSE as changelogRepair, validateEngine024ChangelogReuse, validateEngine024ProductionReuse,
   ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair,
   ENGINE_021_DOWNLOAD_REUSE as downloadRepair } from './engine-021-evidence-policy.mjs';
 
@@ -406,4 +407,67 @@ test('0.2.4 requires fresh evidence rather than rebinding an older capture', () 
   data.reports.production.revision = data.manifest.reports.production.captureRevision = older;
   data.current.reuseChanges = { [older]: [] };
   assert.throws(() => validate(data), /0.2.4 requires fresh candidate evidence/);
+});
+
+function changelogFixture() {
+  const data = fixture(), old = changelogRepair.captureRevision;
+  data.current.targetVersion = data.manifest.targetVersion = '0.2.4';
+  data.manifest.changelogReuseDecision = changelogRepair.decision;
+  data.manifest.reports = structuredClone(changelogRepair.reports);
+  data.current.changelogLfSha256 = changelogRepair.changelogLfSha256;
+  data.current.reuseChanges = { [old]: [...changelogRepair.allowedChanges] };
+  for (const report of Object.values(data.reports)) report.revision = old;
+  return data;
+}
+
+test('approved 0.2.4 heading repair admits only the exact seven immutable populations and four files', () => {
+  const data = changelogFixture();
+  assert.doesNotThrow(() => validate(data));
+  const proof = validateEngine024ChangelogReuse(data.manifest, data.current);
+  assert.equal(proof.captureRevision, changelogRepair.captureRevision);
+  assert.equal(proof.acceptanceRevision, data.current.revision);
+  assert.deepEqual(proof.changes, changelogRepair.allowedChanges);
+  for (const mutate of [
+    d => { d.manifest.changelogReuseDecision = 'unknown'; },
+    d => { d.current.targetVersion = d.manifest.targetVersion = '0.2.3'; },
+    d => { d.current.changelogLfSha256 = "0".repeat(64); },
+    d => { d.current.dirty = true; },
+    d => { delete d.current.reuseChanges; },
+    d => { d.current.reuseChanges[changelogRepair.captureRevision].pop(); },
+    d => { d.current.reuseChanges[changelogRepair.captureRevision].push('extensions/src/visual-novel/audio/ReadingAudio.ts'); },
+    d => { d.current.reuseChanges[changelogRepair.captureRevision].push('scripts/webgpu-gate/chrome-runner.mjs'); },
+    d => { d.current.reuseChanges[changelogRepair.captureRevision].push('config/visual-novel-024-contract.json'); },
+    d => { d.current.reuseChanges[changelogRepair.captureRevision].push('package-lock.json'); },
+    d => { d.manifest.reports.rooms.sha256 = "0".repeat(64); },
+    d => { d.manifest.reports.production.file = "artifacts/other/report.json"; },
+    d => { d.manifest.reports.correctness.captureRevision = "e".repeat(40); },
+    d => { delete d.manifest.reports.forward; },
+    d => { delete d.manifest.changelogReuseDecision; },
+  ]) { const copy = changelogFixture(); mutate(copy); assert.throws(() => validate(copy)); }
+});
+
+test('heading repair production reuse preserves all fifteen native processes and independent error channels', () => {
+  const summary = { status:"passed", revision:changelogRepair.captureRevision, rows:structuredClone(changelogRepair.production.rows) };
+  const records = summary.rows.map(row => ({ file:row.path, sha256:row.sha256, raw:{
+    revision:changelogRepair.captureRevision, scenario:row.id,
+    browserEvidence:{nativeBackend:true,presentationMode:"visible-window",userAgent:"Chrome/157.0"},
+    rows:Array.from({length:180},()=>({cachedRegions:1,retainedColorBytes:1024})),
+    gpuFrames:Array.from({length:row.id === "static-dialogue" ? 0 : 30},()=>({totalMs:1})),
+    gpuErrors:[], final:{releasedOwnerResiduals:0}, retired:{releasedOwnerResiduals:0},
+    audioAfterDispose:{voices:0,buffers:0,audioNodes:0},
+  }}));
+  assert.equal(validateEngine024ProductionReuse(summary,records).processes,15);
+  const before=JSON.stringify({summary,records});
+  for(const mutate of [
+    (s,r)=>s.rows.pop(), (s,r)=>r.pop(), (s,r)=>r[0].sha256="0".repeat(64),
+    (s,r)=>r[0].raw.revision="e".repeat(40), (s,r)=>s.status="diagnostic-complete",
+    (s,r)=>r[0].raw.rows.pop(), (s,r)=>r[3].raw.gpuFrames.pop(),
+    (s,r)=>r[0].raw.browserEvidence.nativeBackend=false,
+    (s,r)=>r[0].raw.browserEvidence.presentationMode="headless",
+    (s,r)=>r[0].raw.gpuErrors.push("validation error"),
+    (s,r)=>r[0].raw.retired.releasedOwnerResiduals=1,
+    (s,r)=>r[0].raw.audioAfterDispose.voices=1,
+    (s,r)=>r[0].raw.rows[0].retainedColorBytes=64*1024*1024+1,
+  ]){const s=structuredClone(summary),r=structuredClone(records);mutate(s,r);assert.throws(()=>validateEngine024ProductionReuse(s,r));}
+  assert.equal(JSON.stringify({summary,records}),before);
 });
