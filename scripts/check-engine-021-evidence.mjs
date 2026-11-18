@@ -65,7 +65,7 @@ validateEngine021EvidenceBindings(manifest, reports, current);
 let changelogReuse;
 if (manifest.changelogReuseDecision !== undefined) {
   const pin = ENGINE_024_CHANGELOG_REUSE;
-  const summaryBytes = await readArtifacts(pin.production.file);
+  const summaryBytes = await readArtifacts(relative(resolve(root, 'artifacts'), resolve(root, pin.production.file)));
   if (sha256(summaryBytes) !== pin.production.sha256) throw Error('Pinned production summary bytes changed');
   const summary = JSON.parse(summaryBytes);
   const records = [];
