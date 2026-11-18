@@ -104,6 +104,40 @@ test('background return and locked output preserve music settings and start no s
   assert.equal(h.mixer.stats.voices, 2);
 });
 
+test('a scheduled history voice survives a background suspension and finishes on the same source', async t => {
+  const h = await setup(t);
+  assert.equal(await h.audio.replayHistory('hello-en'), true);
+  const voice = h.context.sources.at(-1);
+  await h.mixer.suspend();
+  h.audio.update();
+  assert.equal(h.audio.historyPending, true);
+  assert.equal(voice.stops, 0);
+  assert.deepEqual(h.released, []);
+  assert.equal(h.bed.value, .4);
+  await h.mixer.resume();
+  h.audio.update();
+  assert.equal(h.context.sources.at(-1), voice);
+  voice.finish();
+  assert.equal(h.audio.historyPending, false);
+  assert.deepEqual(h.released, ['hello-en']);
+  assert.equal(h.bed.value, .8);
+});
+
+test('scene deactivation cancels a suspended history voice and prevents it from returning', async t => {
+  const h = await setup(t);
+  assert.equal(await h.audio.replayHistory('hello-en'), true);
+  const voice = h.context.sources.at(-1);
+  await h.mixer.suspend();
+  h.audio.setActive(false);
+  h.audio.setActive(true);
+  await h.mixer.resume();
+  assert.equal(h.audio.historyPending, false);
+  assert.equal(h.context.sources.at(-1), voice);
+  assert.equal(voice.stops, 1);
+  assert.deepEqual(h.released, ['hello-en']);
+  assert.equal(h.bed.value, .8);
+});
+
 test('disposing the scene audio owner retires child voices while leaving other owners alive', async t => {
   const h = await setup(t);
   const fx = h.game.play({ ...sound('ambient', .8, 'fx'), bus: 'sfx' });

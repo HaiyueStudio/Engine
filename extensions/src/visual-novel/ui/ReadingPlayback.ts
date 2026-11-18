@@ -96,6 +96,7 @@ export class ReadingPlayback {
   private preferences = defaults;
   private modal = false;
   private active = true;
+  private pageVisible = true;
   private ended = false;
   private snapshot!: ReadingView;
 
@@ -152,6 +153,7 @@ export class ReadingPlayback {
   }
 
   setModal(open: boolean): void {
+    if (this.modal === open) return;
     this.modal = open;
     if (!open) this.options.audio?.cancelHistory();
   }
@@ -159,6 +161,11 @@ export class ReadingPlayback {
   setActive(active: boolean): void {
     this.active = active;
     this.options.audio?.setActive(active);
+  }
+
+  setPageVisible(visible: boolean): void {
+    this.pageVisible = visible;
+    this.options.audio?.setPageVisible(visible);
   }
 
   setMode(mode: ReadingMode): void {
@@ -172,7 +179,7 @@ export class ReadingPlayback {
   }
 
   confirm(revision = this.view.revision): boolean {
-    if (this.ended || this.modal || !this.active || revision !== this.view.revision || this.view.kind !== 'dialogue') return false;
+    if (this.ended || this.modal || !this.active || !this.pageVisible || revision !== this.view.revision || this.view.kind !== 'dialogue') return false;
     if (this.view.visible < this.total) {
       this.updateView(this.total);
       this.readingMs = 0;
@@ -182,14 +189,14 @@ export class ReadingPlayback {
   }
 
   choose(id: string, revision = this.view.revision): boolean {
-    return !this.ended && !this.modal && this.active && this.options.runtime.choose(id, revision);
+    return !this.ended && !this.modal && this.active && this.pageVisible && this.options.runtime.choose(id, revision);
   }
 
   voiceAvailable(entry: ReadingEntry): boolean { return !!this.options.audio && !!this.voiceAsset(entry); }
   stopReplay(): void { this.options.audio?.cancelHistory(); }
 
   replayVoice(entry: ReadingEntry): Promise<boolean> {
-    if (this.ended || !this.active) return Promise.resolve(false);
+    if (this.ended || !this.active || !this.pageVisible) return Promise.resolve(false);
     const asset = this.voiceAsset(entry);
     return asset ? this.options.audio?.replayHistory(asset) ?? Promise.resolve(false) : Promise.resolve(false);
   }
@@ -199,7 +206,7 @@ export class ReadingPlayback {
     if (this.ended) return;
     const audio = this.options.audio;
     audio?.update();
-    if (this.modal || !this.active || this.view.kind !== 'dialogue') return;
+    if (this.modal || !this.active || !this.pageVisible || this.view.kind !== 'dialogue') return;
     if (this.view.visible < this.total) {
       const speed = this.preferences.textSpeed / 1000;
       const used = speed === 0 ? 0 : Math.min(deltaMs, (this.total - this.progress) / speed);

@@ -32,6 +32,8 @@ const error = value => { notice(value.message ?? String(value)); };
 const engine = new HaiyueEngine({ canvas:$('canvas'), msaaSamples:1, renderProfile:'simple', diagnostics:{enabled: true} });
 const mixer = new OwnerSafeAudioMixer();
 let session, i18n, unsubscribe, busy = false, disposed = false;
+let audioUnlocked = false;
+let audioActivity = Promise.resolve();
 const events = new AbortController();
 const assetRoot = new URL('./project/', import.meta.url);
 const previousKeys = new Map();
@@ -81,11 +83,25 @@ function translate() {
   render();
 }
 function listen(id,event,run) { $(id).addEventListener(event,run,{signal:events.signal}); }
+function syncAudioActivity() {
+  if (!audioUnlocked || disposed) return;
+  audioActivity = audioActivity.then(async () => {
+    if (disposed) return;
+    const background = document.hidden || !document.hasFocus();
+    if (background && mixer.stats.state === 'running') await mixer.suspend();
+    else if (!background && mixer.stats.state === 'suspended') await mixer.resume();
+  }).catch(failure => { if (!disposed) error(failure); });
+}
 function interact(id, operation) {
   listen(id,'click', async () => {
     if (!session || busy) return;
     busy = true; notice(copy('working')); render();
-    try { await mixer.unlock(); notice(await operation() ?? ''); }
+    try {
+      await mixer.unlock();
+      audioUnlocked = true;
+      if (document.hidden) syncAudioActivity();
+      notice(await operation() ?? '');
+    }
     catch (failure) { error(failure); }
     finally { busy = false; render(); }
   });
@@ -127,6 +143,9 @@ listen('language','change', async () => {
   try { await i18n.setLocale($('language').value); localStorage.setItem('last-lantern-language',$('language').value); translate(); }
   catch (failure) { error(failure); }
 });
+document.addEventListener('visibilitychange', syncAudioActivity, { signal:events.signal });
+window.addEventListener('blur', syncAudioActivity, { signal:events.signal });
+window.addEventListener('focus', syncAudioActivity, { signal:events.signal });
 async function dispose() {
   if (disposed) return;
   disposed = true; events.abort(); unsubscribe?.();

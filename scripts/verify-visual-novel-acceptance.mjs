@@ -24,10 +24,12 @@ const { positionals: [command], values } = parseArgs({
   options: {
     artifact: { type: 'string' }, packages: { type: 'string' }, template: { type: 'string' },
     host: { type: 'string' }, report: { type: 'string' }, cache: { type: 'string' }, offline: { type: 'boolean' },
-    diagnostic: { type: 'boolean' }, scenario: { type: 'string' },
+    diagnostic: { type: 'boolean' }, scenario: { type: 'string' }, 'history-audio': { type: 'boolean' },
   },
 });
 const destination = resolve(values.artifact ?? import.meta.dirname);
+const profile = values['history-audio'] ? 'history-audio' : 'full';
+assert(!values['history-audio'] || ['device', 'verify-device'].includes(command), 'History audio is a physical device profile.');
 
 async function inventory(root, folder = '') {
   const files = {};
@@ -42,7 +44,7 @@ async function inventory(root, folder = '') {
   return files;
 }
 
-function checkDevice(data, manifest, host) {
+function checkDevice(data, manifest, host, profile) {
   assert(data && typeof data === 'object', 'Missing device record.');
   const audit = Array.isArray(data.audit) ? data.audit : [];
   const gains = Array.isArray(data.gainChanges) ? data.gainChanges : [];
@@ -51,7 +53,9 @@ function checkDevice(data, manifest, host) {
   const restored = audit.find(row => ['load-settled','continue-settled'].includes(row.type) && row.node === 'arrival/fork' && row.time > (save?.time ?? Infinity));
   const first = audit.find(row => row.type === 'node' && /ending\/(?:lantern|tide)-end/u.test(row.node));
   const second = audit.find(row => row.type === 'node' && /ending\/(?:lantern|tide)-end/u.test(row.node) && row.node !== first?.node);
-  const voice = audit.find(row => row.type === 'voice' && row.trusted === true);
+  const voice = profile === 'history-audio'
+    ? audit.findLast(row => row.type === 'voice' && row.trusted === true)
+    : audit.find(row => row.type === 'voice' && row.trusted === true);
   const duck = gains.find(row => row.time >= (voice?.time ?? Infinity) && Math.abs(row.value - .2088) < 1e-6);
   const returned = gains.find(row => row.time > (duck?.time ?? Infinity) && Math.abs(row.value - .58) < 1e-6);
   const checks = {
@@ -69,6 +73,23 @@ function checkDevice(data, manifest, host) {
     operator: ['read','save','audio','foreground'].every(key => data.verifiedByOperator?.[key] === true),
     errors: Array.isArray(data.errors) && data.errors.length === 0 && Array.isArray(data.gpuErrors) && data.gpuErrors.length === 0,
   };
+  if (profile === 'history-audio') {
+    const trace = data.historyReplay;
+    const timing = Array.isArray(trace?.timing) ? trace.timing : [];
+    const paused = timing.find(point => point.state === 'suspended');
+    const resumed = timing.find(point => point.state === 'running' && point.time > (paused?.time ?? Infinity));
+    const ended = timing.find(point => point.state === 'ended' && point.time > (resumed?.time ?? Infinity));
+    delete checks.keyboardMouse;
+    delete checks.reading;
+    delete checks.bothEndingsAfterRestore;
+    checks.profile = data.profile === profile;
+    checks.trustedReplay = !!voice && data.trustedPointer > 0;
+    checks.foreground = !!(paused && resumed && trace?.returned === true);
+    checks.sameVoice = trace?.starts === 1 && !!(paused && resumed && ended) &&
+      Number.isFinite(paused.audioTime) && Number.isFinite(resumed.audioTime) && Number.isFinite(ended.audioTime) &&
+      paused.audioTime <= resumed.audioTime && resumed.audioTime < ended.audioTime;
+    checks.operator = data.verifiedByOperator?.audio === true && data.verifiedByOperator?.foreground === true;
+  } else checks.profile = data.profile === undefined || data.profile === 'full';
   const failures = Object.keys(checks).filter(key => !checks[key]);
   return { status: failures.length ? 'failed' : 'passed', checks, failures };
 }
@@ -139,14 +160,19 @@ async function prepare() {
   const manifest = { schemaVersion: 1, diagnostic: !!values.diagnostic, revision: report.sourceState.revision, packageReportSha256: await fileHash(reportPath),
     packages: published, files: await inventory(join(physical, 'dist')) };
   await save(join(physical, 'manifest.json'), manifest);
-  await writeFile(join(physical, 'README.md'), '# G07 真实设备验收\n\nWindows 解包后双击 `START-WINDOWS.cmd`。Mac 在解包目录运行下列命令。\n\n`node acceptance.mjs device --host mac`\n\n按 Chrome 页面底部清单操作。保存后回传终端显示的结果 JSON。\n');
+  await writeFile(join(physical, 'README.md'), '# G07 真实设备验收\n\nWindows 配音切回复测使用 `START-WINDOWS-AUDIO-RETEST.cmd`，完整验收使用 `START-WINDOWS.cmd`。Mac 在解包目录运行下列命令。\n\n`node acceptance.mjs device --host mac`\n\n按 Chrome 页面底部清单操作。保存后回传终端显示的结果 JSON。\n');
   await writeFile(join(physical, 'START-WINDOWS.cmd'), [
     '@echo off', 'setlocal EnableExtensions DisableDelayedExpansion',
     'node "%~dp0acceptance.mjs" device --host windows', 'set "g07_exit=%errorlevel%"',
     'echo G07 device exit code: %g07_exit%', 'pause', 'exit /b %g07_exit%', '',
   ].join('\r\n'));
+  await writeFile(join(physical, 'START-WINDOWS-AUDIO-RETEST.cmd'), [
+    '@echo off', 'setlocal EnableExtensions DisableDelayedExpansion',
+    'node "%~dp0acceptance.mjs" device --host windows --history-audio', 'set "g07_exit=%errorlevel%"',
+    'echo G07 history-audio retest exit code: %g07_exit%', 'pause', 'exit /b %g07_exit%', '',
+  ].join('\r\n'));
   run('tar', ['-czf', join(destination, 'visual-novel-device-kit.tar.gz'), '-C', physical,
-    'dist','manifest.json','acceptance.mjs','README.md','START-WINDOWS.cmd'], repository);
+    'dist','manifest.json','acceptance.mjs','README.md','START-WINDOWS.cmd','START-WINDOWS-AUDIO-RETEST.cmd'], repository);
   console.log(JSON.stringify({ status: manifest.diagnostic ? 'diagnostic-kit' : 'device-kit-ready', revision: manifest.revision, artifact: physical }));
 }
 
@@ -158,7 +184,7 @@ async function device() {
   const manifest = await json(join(destination, 'manifest.json'));
   assert.equal(manifest.diagnostic, false, 'This kit is for diagnostics only.');
   assert.deepEqual(await inventory(dir), manifest.files, 'Device kit bytes changed.');
-  const config = { revision: manifest.revision, bundleSha256: manifest.files['bundle.js'], nonce: randomUUID(), host };
+  const config = { revision: manifest.revision, bundleSha256: manifest.files['bundle.js'], nonce: randomUUID(), host, profile };
   const results = join(destination, 'device-results');
   await mkdir(results, { recursive: true });
   const profile = await mkdtemp(join(tmpdir(), 'haiyue-vn-device-'));
@@ -173,9 +199,10 @@ async function device() {
         for await (const chunk of request) { body += chunk; if (body.length > 512_000) throw Error('Device record too large.'); }
         const raw = JSON.parse(body);
         assert.equal(raw.nonce, config.nonce, 'Wrong physical run challenge.');
-        const verdict = checkDevice(raw, manifest, host);
-        const evidence = join(results, `${host}-${Date.now()}-${randomUUID().slice(0, 8)}.json`);
-        await save(evidence, { ...verdict, raw });
+        const verdict = checkDevice(raw, manifest, host, profile);
+        const label = profile === 'history-audio' ? host + '-history-audio' : host;
+        const evidence = join(results, `${label}-${Date.now()}-${randomUUID().slice(0, 8)}.json`);
+        await save(evidence, { ...verdict, profile, raw });
         console.log('Evidence: ' + evidence);
         response.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(verdict), () => {
           if (verdict.status === 'passed') setTimeout(() => complete.resolve(evidence), 700);
@@ -210,7 +237,7 @@ async function device() {
       '--enable-unsafe-webgpu', '--new-window', address], { stdio: 'ignore' });
     browser.once('error', error => complete.reject(error));
     browser.once('exit', () => complete.reject(Error('Chrome closed before a complete record was saved.')));
-    console.log(`G07 ${host} ${manifest.revision} ${address}`);
+    console.log(`G07 ${host} ${profile} ${manifest.revision} ${address}`);
     const result = await complete.promise;
     console.log('FINAL STATUS: passed\nEvidence: ' + result);
   } finally {
@@ -313,7 +340,7 @@ else if (command === 'verify-device') {
   const manifest = await json(join(destination, 'manifest.json'));
   assert.equal(manifest.diagnostic, false, 'Diagnostics cannot qualify a device.');
   const report = await json(resolve(values.report));
-  const result = checkDevice(report.raw, manifest, values.host);
+  const result = checkDevice(report.raw, manifest, values.host, profile);
   console.log(JSON.stringify(result));
   process.exitCode = result.status === 'passed' ? 0 : 1;
 } else throw Error('Use prepare, device, performance, or verify-device. See the device kit README.');

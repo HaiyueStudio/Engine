@@ -82,6 +82,7 @@ export class ReadingAudio {
   private volume: number;
   private sequence = 0;
   private active = true;
+  private pageVisible = true;
   private dead = false;
 
   constructor(private readonly options: ReadingAudioOptions) {
@@ -130,8 +131,19 @@ export class ReadingAudio {
     if (!active) { this.cancelLine(); this.cancelHistory(); }
   }
 
+  setPageVisible(visible: boolean): void {
+    this.pageVisible = visible;
+    if (visible) return;
+    this.cancelLine();
+    if (!this.requests.history?.voice) this.cancelHistory();
+  }
+
   update(): void {
-    if (this.port.kind() !== 'running') { this.cancelLine(); this.cancelHistory(); }
+    const state = this.port.kind();
+    if (state === 'running') return;
+    this.cancelLine();
+    // A suspended output retains the scheduled source and its position.
+    if (state !== 'suspended' || !this.requests.history?.voice) this.cancelHistory();
   }
 
   dispose(): void {
@@ -144,7 +156,7 @@ export class ReadingAudio {
 
   private async play(channel: Channel, assetId: string | null): Promise<boolean> {
     this.cancel(channel);
-    if (this.dead || !this.active || !assetId || this.port.kind() !== 'running') return false;
+    if (this.dead || !this.active || !this.pageVisible || !assetId || this.port.kind() !== 'running') return false;
     const request: VoiceRun = { controller: new AbortController(), eventId: `${this.owner}:${++this.sequence}` };
     this.requests[channel] = request;
     const { signal } = request.controller;

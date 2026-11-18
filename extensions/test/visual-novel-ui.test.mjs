@@ -46,9 +46,10 @@ function harness(t, extra = {}, definition = story) {
   return { runtime, i18n, playback };
 }
 
-function gui(t, playback, initial = [520, 420]) {
+function gui(t, playback, initial = [520, 420], document) {
   const root = new GuiRoot(), focus = new GuiFocusManager();
-  const view = new GuiReading({ root, gui: { focus }, playback, measure: (value, size) => readingOffsets(value, 'zh-Hans').length * size * .58 });
+  const view = new GuiReading({ root, gui: { focus }, playback, document,
+    measure: (value, size) => readingOffsets(value, 'zh-Hans').length * size * .58 });
   focus.setRoots([root.root]);
   const render = (width = initial[0], height = initial[1]) => { root.layout(width, height); focus.reconcile(); };
   t.after(() => { view.dispose(); focus.dispose(); root.destroy(); });
@@ -56,6 +57,34 @@ function gui(t, playback, initial = [520, 420]) {
   return { view, root, focus, render };
 }
 function descendants(element) { return [element, ...element.children.flatMap(descendants)]; }
+
+test('focus and document visibility leave history replay attached to the active scene', async t => {
+  const activeChanges = [], visibility = [];
+  let cancellations = 0;
+  const audio = { setVoiceVolume() {}, playLine: async () => true, replayHistory: async () => true,
+    cancelHistory() { cancellations++; }, setActive: value => activeChanges.push(value),
+    setPageVisible: value => visibility.push(value), dispose() {} };
+  const document = Object.assign(new EventTarget(), { hidden: false });
+  const { runtime, playback } = harness(t, { audio });
+  runtime.start('background-history');
+  const { focus, view } = gui(t, playback, [520, 420], document);
+  focus.next();
+  const entry = playback.history()[0];
+  assert.equal(await playback.replayVoice(entry), true);
+  const before = cancellations;
+  focus.blur();
+  document.hidden = true;
+  document.dispatchEvent(new Event('visibilitychange'));
+  assert.equal(playback.confirm(), false);
+  document.hidden = false;
+  document.dispatchEvent(new Event('visibilitychange'));
+  assert.equal(cancellations, before);
+  assert.deepEqual(activeChanges, []);
+  assert.deepEqual(visibility, [true, false, true]);
+  view.openHistory();
+  playback.setModal(false);
+  assert.equal(cancellations, before + 1);
+});
 
 test('dialogue reveal keeps extended graphemes whole and every prewrapped line in place', t => {
   const { runtime, playback } = harness(t);

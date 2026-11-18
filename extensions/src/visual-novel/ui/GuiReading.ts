@@ -181,7 +181,7 @@ export class GuiReading {
     const abort = () => this.dispose();
     signal?.addEventListener('abort', abort, { once: true });
     this.cleanup.push(() => signal?.removeEventListener('abort', abort));
-    const visible = () => playback.setActive(!options.document?.hidden);
+    const visible = () => playback.setPageVisible(!options.document?.hidden);
     options.document?.addEventListener('visibilitychange', visible);
     this.cleanup.push(() => options.document?.removeEventListener('visibilitychange', visible));
     if (options.document) visible();

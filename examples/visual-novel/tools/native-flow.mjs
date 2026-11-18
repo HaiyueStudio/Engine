@@ -20,6 +20,7 @@ async function until(label, predicate, timeout = 16_000) {
 }
 let app;
 const gains = [];
+const voiceSources = [];
 const gpuErrors = [];
 const $ = id => frame.contentDocument.getElementById(id);
 const view = () => app.session.view;
@@ -41,9 +42,55 @@ async function open() {
     gains.push(value);
     return setValue.call(this, value, ...args);
   };
+  const sourcePrototype = win.AudioBufferSourceNode.prototype;
+  const startSource = sourcePrototype.start;
+  sourcePrototype.start = function(...args) {
+    if (!this.loop) voiceSources.push(this);
+    return startSource.apply(this, args);
+  };
   app = (await win.eval("import('./bundle.js')")).app;
   await app.ready;
   app.engine.device.addEventListener('uncapturederror', event => gpuErrors.push(event.error.message));
+}
+async function verifyHistorySuspension() {
+  const win = frame.contentWindow, doc = frame.contentDocument;
+  const source = voiceSources.at(-1);
+  assert(source, 'History replay did not schedule a voice.');
+  const { context } = source;
+  const count = voiceSources.length;
+  let focused = true;
+  Object.defineProperty(doc, 'hasFocus', { configurable: true, value: () => focused });
+  try {
+    for (const event of ['focus', 'visibility']) {
+      progress.textContent = 'suspend history during ' + event + ' loss';
+      if (event === 'focus') {
+        focused = false;
+        win.dispatchEvent(new win.Event('blur'));
+      } else {
+        Object.defineProperty(doc, 'hidden', { configurable: true, value: true });
+        doc.dispatchEvent(new win.Event('visibilitychange'));
+      }
+      await until('history audio suspended', () => context.state === 'suspended');
+      const pausedAt = context.currentTime;
+      await sleep(160);
+      assert(context.currentTime === pausedAt, 'Audio advanced while the page was in the background.');
+      assert(view().audio.voices === 2, 'Backgrounding stopped the history voice.');
+      if (event === 'focus') {
+        focused = true;
+        win.dispatchEvent(new win.Event('focus'));
+      } else {
+        delete doc.hidden;
+        doc.dispatchEvent(new win.Event('visibilitychange'));
+      }
+      await until('original history voice resumes', () => context.state === 'running' && context.currentTime > pausedAt + .03);
+      assert(view().audio.voices === 2 && voiceSources.length === count && voiceSources.at(-1) === source,
+        'Returning failed to continue the same voice.');
+    }
+    proof.historyForeground = { focus: true, visibility: true, sameSource: true };
+  } finally {
+    delete doc.hasFocus;
+    delete doc.hidden;
+  }
 }
 const snapshotStorage = () => JSON.stringify(Object.entries(frame.contentWindow.localStorage).sort());
 async function choice(option) {
@@ -94,6 +141,7 @@ async function verify() {
   const startGain = gains.length;
   await click('voice');
   await until('history voice and BGM', () => view().audio.voices === 2);
+  await verifyHistorySuspension();
   await until('history voice completes', () => view().audio.voices === 1);
   proof.voiceGainSequence = gains.slice(startGain);
   assert(proof.voiceGainSequence.some(value => Math.abs(value - .58 * .36) < 1e-5), 'History replay did not attenuate BGM.');
