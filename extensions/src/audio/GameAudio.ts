@@ -6,9 +6,16 @@ import type{GameAudio,GameAudioOptions,GameAudioProfile,GameAudioEmitterOptions}
 interface SpatialGain {readonly pan:number;readonly factor:number;readonly volume?:number;}
 interface VoiceLease {play(request:AudioMixerPlayRequest,spatial?:SpatialGain):string|null;spatial(owner:string,channel:string,value:SpatialGain|null):boolean;release():void;}
 interface MixerPort {readonly version:1;acquire():VoiceLease;}
+interface GameAudioOwner {
+  readonly mixer: OwnerSafeAudioMixer;
+  readonly lease: VoiceLease;
+  readonly acquire: () => VoiceLease;
+  readonly cleanup: Set<() => void>;
+}
 interface Emitter {readonly owner:string;readonly channel:string;position:(()=>readonly[number,number])|null;readonly maxDistance:number;readonly attenuation:number;readonly panStrength:number;readonly volume:number|undefined;}
 interface Fade {readonly start:number;readonly target:number;readonly duration:number;elapsed:number;}
 const buses:readonly AudioMixerBus[]=['music','sfx','ui'],volumeKeys:readonly(keyof AudioMixerVolumes)[]=['master',...buses],origin=()=>[0,0]as const;
+const owners=new WeakMap<GameAudio,GameAudioOwner>();
 const unavailable=(message:string)=>new EngineError(EngineErrorCode.AudioCapabilityUnavailable,message,{docsPath:'errors/E_AUDIO_CAPABILITY_UNAVAILABLE',hint:'Resume the original mixer, check stereoPan, and pair the Engine/extensions 0.2.3 candidates.'});
 function amount(value:number,label:string,minimum=0,maximum=4):number {if(!Number.isFinite(value)||value<minimum||value>maximum)throw new RangeError('Invalid game audio '+label+'.');return value;}
 function id(value:string):string {if(typeof value!=='string'||!/^[A-Za-z0-9_.:-]{1,128}$/u.test(value))throw new TypeError('Invalid audio owner/channel.');return value;}
@@ -24,10 +31,13 @@ function profile(value:GameAudioProfile):GameAudioProfile {
   return Object.freeze({format:'haiyue-game-audio',version:1,volumes:volumes(data,{master:1,music:1,sfx:1,ui:1}),muted});
 }
 
+export const gameAudioOwner = (audio: GameAudio) => owners.get(audio);
+
 /** Configuration and bounded emitters; the original mixer alone owns live voices/nodes. */
 export class GameAudioRuntime implements GameAudio {
   private readonly mixer:OwnerSafeAudioMixer;
   private readonly lease:VoiceLease;
+  private readonly cleanup = new Set<() => void>();
   private listener:(()=>readonly[number,number])|null;
   private readonly emitters=new Map<string,Emitter>();
   private readonly fades=new Map<AudioMixerBus,Fade>();
@@ -41,6 +51,7 @@ export class GameAudioRuntime implements GameAudio {
     const port=(this.mixer as unknown as Record<symbol,MixerPort|undefined>)[Symbol.for('haiyue.audio.game-lease.v1')];
     if(port?.version!==1||typeof port.acquire!=='function')throw unavailable('The original mixer does not provide compatible voice ownership.');
     this.lease=port.acquire();if(initial)this.restoreProfile(initial);
+    owners.set(this, { mixer: this.mixer, lease: this.lease, acquire: () => port.acquire(), cleanup: this.cleanup });
   }
   private alive():void {const stats=this.mixer.stats;if(this.dead||stats.disposed||stats.state==='closed')throw new EngineError(EngineErrorCode.ResourceOwnerReleased,'Game audio or its borrowed mixer is released.');}
   private stereo():void {if(this.mixer.getCapabilities().stereoPan!==true)throw unavailable('2D emitters require an initialized stereo-panner host.');}
@@ -91,5 +102,12 @@ export class GameAudioRuntime implements GameAudio {
   }
   async suspend():Promise<void> {this.alive();await this.mixer.suspend();}
   async resume():Promise<void> {this.alive();await this.mixer.resume();}
-  dispose():void {if(this.dead)return;this.dead=true;for(const emitter of this.emitters.values())emitter.position=null;this.emitters.clear();this.fades.clear();this.listener=null;this.lease.release();}
+  dispose():void {
+    if(this.dead)return;this.dead=true;owners.delete(this);
+    for(const emitter of this.emitters.values())emitter.position=null;
+    this.emitters.clear();this.fades.clear();this.listener=null;
+    const errors:unknown[]=[];
+    for(const close of [...this.cleanup,this.lease.release])try{close();}catch(error){errors.push(error);}
+    if(errors.length)throw errors[0];
+  }
 }

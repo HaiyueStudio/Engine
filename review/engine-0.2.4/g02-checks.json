@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "goal": "g02-story-authoring",
+  "status": "passed-g02",
+  "source": {
+    "revision": "a8b7ae6ae44e441340200266a4082637b5ca4e37",
+    "workingTreeImplementation": true,
+    "node": "v24.19.0",
+    "platform": "win32"
+  },
+  "publishedBaseline": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "contract": {
+    "path": "config/visual-novel-024-contract.json",
+    "bytes": 7660,
+    "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+  },
+  "entry": "scripts/visual-novel-authoring/cli.mjs",
+  "example": "scripts/visual-novel-authoring/example/story.json",
+  "format": "Strict chapter JSON, existing LocalePack JSON, relative assets and named route presets.",
+  "checks": {
+    "focused": {
+      "passed": 42,
+      "story": 12,
+      "narrative": 16,
+      "i18n": 14
+    },
+    "extensions": {
+      "typecheck": "passed",
+      "build": "passed",
+      "testPassed": 1014,
+      "testFailed": 0,
+      "npmCache": "Temporary process-only override after the initial D-drive cache permission failure."
+    },
+    "example": {
+      "chapters": 3,
+      "locales": 2,
+      "playableRoutes": 2,
+      "endings": [
+        "lantern",
+        "tide"
+      ],
+      "strictCheck": "passed",
+      "deterministicRepeatsPerPreset": 2
+    },
+    "diagnostics": [
+      "source-located missing jump and stable IDs",
+      "duplicate chapter, choice, line and JSON keys",
+      "invalid asset reference, path, missing file and invalid HYA composition",
+      "missing translation and voice",
+      "closed automatic cycles and structurally unreachable endings"
+    ],
+    "isolatedPreview": {
+      "reused": [
+        "NarrativeRuntime",
+        "validateNarrativeDefinition",
+        "I18n"
+      ],
+      "pausedAt": [
+        "stage",
+        "choice",
+        "host action"
+      ],
+      "sameLineReload": true,
+      "failedReloadKeptLastView": true,
+      "originalPublishedRuntimeRestoredSnapshot": true
+    },
+    "workspaceBoundaries": "passed",
+    "repository": {
+      "typecheck": "passed",
+      "build": "passed",
+      "test": {
+        "status": "environment-blocked",
+        "fixture": {
+          "path": "shader-language/test/wgsl-includes.test.mjs",
+          "bytes": 5755,
+          "sha256": "37f270281a4d19e1d40b944051c53500b940aad22c2e4a1efcc6e9e4b9cc4ee9"
+        },
+        "cause": "Windows sandbox rejected file symlink creation (EPERM) in shader-language. Reproduced on the published baseline. The root chain ended at that workspace.",
+        "shaderLanguagePassed": 137,
+        "shaderLanguageFailed": 1
+      }
+    }
+  },
+  "handoff": "Stage operations are simulated for preview; G03 owns HYA stage playback and G07 owns package admission.",
+  "inputs": [
+    {
+      "path": "extensions/src/visual-novel/story/compile.ts",
+      "bytes": 13173,
+      "sha256": "ffbc4b1a50f4b9624129121a2417729ddcb37827de1708efc414c9b9caeef68d"
+    },
+    {
+      "path": "extensions/src/visual-novel/story/data.ts",
+      "bytes": 2362,
+      "sha256": "0f4d37dc47acf26382ced5138dfe42464a016857704e3f7bb110381a6bd2854c"
+    },
+    {
+      "path": "extensions/src/visual-novel/story/narrative-data.ts",
+      "bytes": 5244,
+      "sha256": "8ff30881e53e31e88c2e2cdf11b09a28d47aa2624ea172f449a9e62ce51f9946"
+    },
+    {
+      "path": "extensions/src/visual-novel/story/preview.ts",
+      "bytes": 7064,
+      "sha256": "a2c3b411ad2b8fa917e033e3cade0518466be3647267d0e4d85c76d3717aa62a"
+    },
+    {
+      "path": "extensions/src/visual-novel/story/stage-data.ts",
+      "bytes": 6898,
+      "sha256": "a1c1bad6604fc126f4efc5b3da0e72a48c8a79ac5c66cf46fa202e4f7f163aa6"
+    },
+    {
+      "path": "extensions/src/visual-novel/story/types.ts",
+      "bytes": 3166,
+      "sha256": "b840de689b33fe4c649eda2aa3f8468fd6159335cbcad72b4a8815e5b523e4ae"
+    },
+    {
+      "path": "extensions/test/visual-novel-story.test.mjs",
+      "bytes": 15197,
+      "sha256": "691ef6f7fc601728e5cf9a32b0df987f8cc698344aa0631c2f6c2fd10dd4b656"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/README.md",
+      "bytes": 3976,
+      "sha256": "9eb4f22499b7abf6808f943fb1c38cdfaac7fcb4563b4a1238d298799725279e"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/cli.mjs",
+      "bytes": 3726,
+      "sha256": "515cb2afde03bd623df5271b5a51a1a8d6dfbbfa1b84f6bb65a68a4c3f0f383d"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/arrival.json",
+      "bytes": 1013,
+      "sha256": "37a9e25bd408649efbe7b381b510841fb85af57ed3ab646d06144fd23a9971b5"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/en.json",
+      "bytes": 454,
+      "sha256": "ece467aff9a030e15f05dc183f8ad050199d2aca3769e79d2d55d4fe7d7e7103"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/ending.json",
+      "bytes": 244,
+      "sha256": "4c63a8a7687ae2dc087a15c7522ce0be582973ff1edeac4789e4e9e184d59d55"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/harbor.hya.json",
+      "bytes": 652,
+      "sha256": "4250c1ef26cbb50498f8c52c83102e9ac23daa1ec08d733bf506519e05c16ccc"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/keeper.hya.json",
+      "bytes": 649,
+      "sha256": "a400495291cabd53e116f79d1d275ea166e1fb19b319a9f8760b98c5245e9c98"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/pier.json",
+      "bytes": 594,
+      "sha256": "1f13e009940fc861c3ab371b3960da420074ba76147f54b70a75029b48451e2a"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/story.json",
+      "bytes": 1653,
+      "sha256": "87ae0f4741068cd892aff3b890b3e154c9baeda5856320f51dae44546a464eef"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/example/zh-Hans.json",
+      "bytes": 437,
+      "sha256": "01fcd832eeb91776852db2459ec844a41ffaed0d54cc18d898467db541a06a79"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/json-source.mjs",
+      "bytes": 1884,
+      "sha256": "abc9264754eae8f48b88a9266a736191c0db6d8e89fff24787fa10f27a82d97e"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/project.mjs",
+      "bytes": 6966,
+      "sha256": "244ec88dec18a7fc4ed5cbfa468606c0359fb350ef80aa54442625362f97e0b0"
+    },
+    {
+      "path": "scripts/visual-novel-authoring/source-loader.mjs",
+      "bytes": 1162,
+      "sha256": "0944cae9bf34fe50191da1f19757bd2de5d22efe820880fe8e2564550c19b9e0"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.4/g02/strict-check.json",
+      "bytes": 45,
+      "sha256": "a7800fa011396738930a786f1eaea998db1012c60fdefc7b4605d2f26dec07bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/harbor.compiled.json",
+      "bytes": 7714,
+      "sha256": "22b02a715844dee087fef50e3d02c49d18c017201b5699e4aa02b9b3a2afd3be"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/deterministic-routes.json",
+      "bytes": 6114,
+      "sha256": "51a7202445561aae9a0a91dd7d600af94c68bfe2ee9b48d1876aba47c16481b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/diagnostic-examples.json",
+      "bytes": 2856,
+      "sha256": "1c6f819a16f2ec2e2e3b6b0e7eabd217daf91435296449d947ce841b06a9890b"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/reload-and-diagnostics.json",
+      "bytes": 4676,
+      "sha256": "a04b3d187879685d1f6ec2ef2680269348b8e8d94af61fba43611814d524ff03"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/baseline-compatibility.json",
+      "bytes": 1343,
+      "sha256": "7f4272f5e2780f42a9cfa59f3f740f99ff2c0ffa620069c6a8c878a09fa77bf5"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/extensions-typecheck.log",
+      "bytes": 477,
+      "sha256": "f5ce40147bc7e33536fab1157c115d35f6b5f912e1c06b033e8587369bdd90a3"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/extensions-retest.log",
+      "bytes": 105537,
+      "sha256": "f12c52587afb2b4178a8b8304a65c53371a175b8753890d82d81876de05e5eaa"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/engine-validation-exit.txt",
+      "bytes": 30,
+      "sha256": "fa65628ac9f2be897e74996ec25724575b49ea564ae64920cccf6f0bcb84f5af"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/engine-typecheck.log",
+      "bytes": 3438,
+      "sha256": "0270033aa55c154728d9471347c362d8c5902ab2fd9963efe2b67dbbe359cf6a"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/engine-test.log",
+      "bytes": 15289,
+      "sha256": "6928d5c1a2e778a9ce38bbd7e6e1208e9e1c58bcad1225038cc4a1e4f0c1eabb"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/engine-build.log",
+      "bytes": 19169,
+      "sha256": "331b781317ca48ac2421cc28442ba3d52ce450223a8b6c093cdcfcc197fbd4fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.4/g02/published-wgsl-baseline.log",
+      "bytes": 1242,
+      "sha256": "c78d283eac760051324684c1f902ff73ca9ae39256ae78575321d1205e86651e"
+    }
+  ]
+}

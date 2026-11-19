@@ -1,0 +1,7 @@
+{
+  "id": "ending",
+  "nodes": {
+    "lantern": { "type": "end", "ending": "lantern", "lineId": "lantern-end", "textKey": "ending.lantern" },
+    "tide": { "type": "end", "ending": "tide", "lineId": "tide-end", "textKey": "ending.tide" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "messages": {
+    "keeper": "Lightkeeper",
+    "arrival.view": "The harbor light is still on.",
+    "arrival.offer": "Will you board the last boat?",
+    "choice.stay": "Stay with the light",
+    "choice.leave": "Take the boat",
+    "pier.shared": "The pier creaks beneath your feet.",
+    "ending.lantern": "You light the next lamp for the harbor.",
+    "ending.tide": "You board the boat at low tide."
+  }
+}

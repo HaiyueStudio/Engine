@@ -1,0 +1,438 @@
+{
+  "schemaVersion": 1,
+  "goal": "g05-save-resume",
+  "status": "passed-g05",
+  "source": {
+    "revision": "a8b7ae6ae44e441340200266a4082637b5ca4e37",
+    "workingTreeImplementation": true,
+    "node": "v24.19.0"
+  },
+  "publishedBaseline": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+  "contract": {
+    "path": "config/visual-novel-024-contract.json",
+    "bytes": 7660,
+    "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+  },
+  "relatedEvidence": [
+    {
+      "path": "review/engine-0.2.4/g01-checks.json",
+      "bytes": 5971,
+      "sha256": "402265fb3c12a296008d63bd27e26a07a7859b7b4ab489394136864f2e36e46c"
+    },
+    {
+      "path": "review/engine-0.2.4/g02-checks.json",
+      "bytes": 8784,
+      "sha256": "0929311fb0e144ba23835e09660168e0acdd0edb54b77fe30b33dd77c0c7b8d4"
+    },
+    {
+      "path": "review/engine-0.2.4/g03-checks.json",
+      "bytes": 11590,
+      "sha256": "9056f1399f546e609ece7c492ab05138c7caf1f44646ba9b51f30c4af6373dc9"
+    },
+    {
+      "path": "review/engine-0.2.4/g04-checks.json",
+      "bytes": 15423,
+      "sha256": "86fd0ae84b7b5fa13096fbceb90815fa1ee7737444fa7dbf19997f8c55d894bf"
+    }
+  ],
+  "implementation": [
+    "Use GameSaveService with a fixed manual/autosave slot catalog, validate and migrate each envelope and keep bad records isolated.",
+    "Prepare story, original HYA assets and audio state in a detached scene. Publish the ready state together and retire the last scene only after a successful switch.",
+    "Save chapter history with the slot. Save reading preferences, global read markers and unlocked replay entries separately.",
+    "Replay the recorded route and action results in a new presentation. The original save session, host rewards, actions and autosave remain isolated from replay."
+  ],
+  "native": {
+    "runner": "Chrome/157.0.8103.52",
+    "adapter": {
+      "vendor": "nvidia",
+      "architecture": "pascal",
+      "fallback": false
+    },
+    "method": "Navigate to a separate document in the same browser origin, load persisted LocalStorage and recreate native WebGPU and muted Web Audio.",
+    "checks": [
+      {
+        "id": "persistent-multi-slot-and-real-thumbnail",
+        "thumbnailChars": 17346,
+        "slots": [
+          [
+            "auto",
+            "valid"
+          ],
+          [
+            "manual",
+            "valid"
+          ],
+          [
+            "alternate",
+            "valid"
+          ],
+          [
+            "legacy",
+            "unreadable"
+          ]
+        ]
+      },
+      {
+        "id": "write-resource-cleanup",
+        "scenes": 0,
+        "sources": 0,
+        "voices": 0,
+        "gpuResiduals": 0
+      },
+      {
+        "id": "fresh-document-local-storage-continue",
+        "timeOrigin": 1794831365273.265,
+        "text": "请选择航线。",
+        "options": [
+          {
+            "id": "left",
+            "enabled": true,
+            "text": "左侧港湾"
+          },
+          {
+            "id": "right",
+            "enabled": true,
+            "text": "右侧岛屿"
+          }
+        ],
+        "history": [
+          "intro"
+        ],
+        "slots": [
+          {
+            "id": "background",
+            "assetId": "rain",
+            "bounds": [
+              0,
+              0,
+              320,
+              200
+            ],
+            "order": 0,
+            "time": 0.12
+          },
+          {
+            "id": "left",
+            "assetId": "left-motion",
+            "bounds": [
+              35,
+              18,
+              125,
+              115
+            ],
+            "order": 1,
+            "time": 0.12
+          },
+          {
+            "id": "right",
+            "assetId": "left",
+            "bounds": [
+              140,
+              24,
+              125,
+              115
+            ],
+            "order": 2,
+            "time": 0
+          },
+          {
+            "id": "effect",
+            "assetId": "effect",
+            "bounds": [
+              220,
+              31,
+              62,
+              55
+            ],
+            "order": 3,
+            "time": 0
+          }
+        ],
+        "music": {
+          "assetId": "music",
+          "playing": true,
+          "position": 0.125
+        },
+        "voices": 1
+      },
+      {
+        "id": "repeated-silent-restore-and-retirement",
+        "rounds": 3,
+        "logicalSlots": 4,
+        "liveScenes": 1
+      },
+      {
+        "id": "activation-failure-rolls-back-picture-and-audio",
+        "max": 0,
+        "count": 0,
+        "pixels": 64000,
+        "liveScenes": 1,
+        "voices": 1
+      },
+      {
+        "id": "chapter-and-cg-replay-isolation",
+        "unlocks": [
+          "chapter",
+          "cg"
+        ],
+        "rewardCommits": 1,
+        "handlerCalls": 2,
+        "returned": {
+          "max": 0,
+          "count": 0,
+          "pixels": 64000
+        }
+      },
+      {
+        "id": "read-resource-cleanup",
+        "scenes": 0,
+        "sources": 0,
+        "voices": 0,
+        "gpuResiduals": 0
+      },
+      {
+        "id": "full-image-restart-comparison",
+        "max": 0,
+        "count": 0,
+        "pixels": 64000
+      }
+    ],
+    "restartRgbaSha256": "e535a7be0d4da0db10fcba809a53a2f375b0c738653eab2785525e568c797ae5",
+    "releasedOwnerResiduals": 0,
+    "browserErrors": 0,
+    "gpuErrors": 0,
+    "report": {
+      "path": "artifacts/engine-0.2.4/g05/native-03/result.json",
+      "bytes": 8381,
+      "sha256": "35a0db4f0dc7344e039612f45a51c9387716990039d2f4e74ecb42fc1bbf9b94"
+    },
+    "images": [
+      {
+        "path": "artifacts/engine-0.2.4/g05/native-03/saved-choice.png",
+        "bytes": 12993,
+        "sha256": "e32413c0a498c1c5b5c0a88e6051d735032a333323d164af9ce5cc4028bb7db1"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/native-03/restored-choice.png",
+        "bytes": 12993,
+        "sha256": "e32413c0a498c1c5b5c0a88e6051d735032a333323d164af9ce5cc4028bb7db1"
+      }
+    ],
+    "served": [
+      {
+        "path": "artifacts/engine-0.2.4/g05/native-03/child.html",
+        "bytes": 153,
+        "sha256": "535db480d5bb592e0699dc158111ca480ef91ad330277870cb585133b226e867"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/native-03/fixture.mjs",
+        "bytes": 4616434,
+        "sha256": "35e8ddebc2288538cd629db89d4a9d80fe3459843a8b23e54f9e3af71b52438a"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/native-03/index.html",
+        "bytes": 198,
+        "sha256": "e24d5f3c1660217c2058f091f9dcc590fde12fa84c3456445aaaf2de54040949"
+      }
+    ]
+  },
+  "tests": {
+    "focused": {
+      "count": 40,
+      "log": {
+        "path": "artifacts/engine-0.2.4/g05/focused-test-final-02.log",
+        "bytes": 4520,
+        "sha256": "5ebef0105fdd4d570b5e5f639800a72b1f3f59f0ebc8dd6bcfbf7d3168a61a3e"
+      }
+    },
+    "root": {
+      "count": 2724,
+      "suites": {
+        "shader-language": 138,
+        "engine": 1409,
+        "animation-spec": 127,
+        "extensions": 1042,
+        "examples-catalog": 7,
+        "example-audio": 1
+      },
+      "log": {
+        "path": "artifacts/engine-0.2.4/g05/root-test.log",
+        "bytes": 277197,
+        "sha256": "18faf5a4ee00c0a8eadf2cf992281b5b78a858f4c6d77128fa8977257f06cb9f"
+      }
+    },
+    "logs": [
+      {
+        "path": "artifacts/engine-0.2.4/g05/extensions-build.log",
+        "bytes": 1212,
+        "sha256": "79325a7a5ca9f882b5c8c5a36a7b143e2ae0208b56333d8b2d1e4993b62da14f"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/root-typecheck.log",
+        "bytes": 3438,
+        "sha256": "070a7b2d5063c8887aae6776b43b5cec4221c41e6bd9e63147d16ead5b14cc45"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/root-build.log",
+        "bytes": 19165,
+        "sha256": "010f1dfbd2cc1f4b3f38024c0703cb2522aa414cc3a534708bcd4d432e18e9af"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/root-check-boundaries.log",
+        "bytes": 1150,
+        "sha256": "b04993722d9de89b44db84ae0b15f5c70b89d8f739d6076aed0d33571a51591c"
+      },
+      {
+        "path": "artifacts/engine-0.2.4/g05/root-api-check.log",
+        "bytes": 185,
+        "sha256": "acc73bebddd7a1137977a77019dcef37d3997d82b4af469100798a39188d4aca"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "path": "extensions/src/visual-novel/save/VisualNovelSaveSession.ts",
+      "bytes": 19320,
+      "sha256": "ae5792503a34e5d0fe531f27cee272c47c6beae01a6c9b67ad2ab67794ebae80"
+    },
+    {
+      "path": "extensions/src/visual-novel/save/profile.ts",
+      "bytes": 5108,
+      "sha256": "9d294df9dacdb9487b4f77c720090394d6a8735630a28687f69d695627e6f75a"
+    },
+    {
+      "path": "extensions/src/visual-novel/save/scene-presentation.ts",
+      "bytes": 5619,
+      "sha256": "1442f8ec78792cf7227e3f6197a815dd31096acd7c857fa2b934d6e6e2b12ee3"
+    },
+    {
+      "path": "extensions/src/visual-novel/save/slots.ts",
+      "bytes": 7388,
+      "sha256": "43f607e26edb813e8fe414e5c008732cb984f7fe063a07b9f0a1f0223337fb63"
+    },
+    {
+      "path": "extensions/src/visual-novel/save/snapshot.ts",
+      "bytes": 7773,
+      "sha256": "234c8cbd91e58d08b0047dbc58370b8086ad2acb89d89b6ff0d607fc33cbcbf9"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/VisualNovelStage.ts",
+      "bytes": 27469,
+      "sha256": "9bcf5c8fb8354b932a5ab95504cc5094082d1b60be687081ffb70617cbbf992f"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/hya-stage.ts",
+      "bytes": 11400,
+      "sha256": "099b350a4a602611ce5b7be0d38495a492c9f1f553087f73542391131d432220"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/narrative-stage.ts",
+      "bytes": 959,
+      "sha256": "743726417056817e9fb9b86782cbb44c3525d380d15a1dad527eb9174480f9c6"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/resources.ts",
+      "bytes": 1347,
+      "sha256": "1340352f634ce5a2cc5cf6eac454d25a7413c8d24ac22807c783658a987c0392"
+    },
+    {
+      "path": "extensions/src/visual-novel/stage/types.ts",
+      "bytes": 2970,
+      "sha256": "adbf87d66d2fb97a9a0a1a2183fc37e30efa75ce1c0d8a91becd2bc76fb20dae"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/GuiReading.ts",
+      "bytes": 26209,
+      "sha256": "3676ae3d2c8c14474f3186982f33efb91e4591726b9a8d029d7f358a7fd79d9c"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/ReadingPlayback.ts",
+      "bytes": 14103,
+      "sha256": "5f6feca39d58c760f75df9faca5c9c76c68f2ef68c7f816c48f28e7ce33de92b"
+    },
+    {
+      "path": "extensions/src/visual-novel/ui/reading-text.ts",
+      "bytes": 1517,
+      "sha256": "00428ccfb3a5a743991f0fe23488c03879a571dc87d646fb546dfb9fe62bb272"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/README.md",
+      "bytes": 1075,
+      "sha256": "3989fb171d400d0b5520ccef2fb9c2daface6d841facc0227eb0513edb7de371"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/build.mjs",
+      "bytes": 2239,
+      "sha256": "2a80687581e6a4a3608618ef2428ce483a554cfadca1224e0457c373537ed6a7"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/fixture.mjs",
+      "bytes": 17697,
+      "sha256": "2fc94a94a6cb4610886e3f0ff92719616e027b54972905f7b9407abb7c1eeb8a"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/run.mjs",
+      "bytes": 2803,
+      "sha256": "ad47dfbbf095fabd3c5eb99529743b6a0743ee0a5ec680d4a215383be33920bf"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/story.mjs",
+      "bytes": 2408,
+      "sha256": "d47358b9c9f3a4ea565b3c4d58d056ef16c55949a87efe1c824a8d67ad01f5d2"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/tsconfig.json",
+      "bytes": 367,
+      "sha256": "144952fc20e0c1b450530d691f586292b6c14f008d86ff5e587bbea74c6ba937"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-save/unit-entry.mjs",
+      "bytes": 105,
+      "sha256": "e84ad3797a4dfaacd263aefce13ca7f26658533d173635e8fa831a5a55613fb9"
+    },
+    {
+      "path": "scripts/fixtures/visual-novel-stage/assets.mjs",
+      "bytes": 5828,
+      "sha256": "59369c7e8c658ec8eec8482a5bdad5faddf453e8506f77aee70449063fdc79fc"
+    },
+    {
+      "path": "config/visual-novel-024-contract.json",
+      "bytes": 7660,
+      "sha256": "3e2fd47c9815b754c433ee0189c92f66914f2baeac697275ba6054d5b1481c36"
+    },
+    {
+      "path": "engine/dist/save.js",
+      "bytes": 31131,
+      "sha256": "e94fa578618f9f519bdf7c4a226017b921c79228074ca8146c8355a0fd06e8c7"
+    },
+    {
+      "path": "engine/dist/gui.js",
+      "bytes": 9805,
+      "sha256": "eb90c2e660b08328e3e752f2b53a25de8f5f44cf249ca5cd9cb9f0c3d01879dd"
+    },
+    {
+      "path": "engine/dist/audio.js",
+      "bytes": 22162,
+      "sha256": "2064cacf11dfd221a41faac11c938c84c8b1b5179f03f1da741b670c754c7f56"
+    },
+    {
+      "path": "extensions/dist/hya-player.js",
+      "bytes": 1245,
+      "sha256": "fdc4b55484531cae40505b77dab3d8a21b6be4db35c5b6e65771eef8df29b6f2"
+    },
+    {
+      "path": "extensions/test/visual-novel-save.test.mjs",
+      "bytes": 12079,
+      "sha256": "ffa655df2774de930f2dd634228e4dbb24372b88b960f52b3ff522ae5b2572ac"
+    }
+  ],
+  "finding": {
+    "problem": "The first native state assertion treated JSON member order as part of the state.",
+    "resolution": "Canonicalize object keys for the state oracle and still compare every RGBA channel.",
+    "evidence": {
+      "path": "artifacts/engine-0.2.4/g05/native-01/result.json",
+      "bytes": 8988,
+      "sha256": "adefc941e66a37586542d7dff482c479573934bdb182c19c744e417c70a22367"
+    }
+  }
+}

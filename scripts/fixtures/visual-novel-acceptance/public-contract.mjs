@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import * as visualNovel from '@haiyue/extensions/visual-novel';
+
+const { createVisualNovel, validateVisualNovelDefinition } = visualNovel;
+const story = JSON.parse(await readFile(new URL('./dist/project/compiled.json', import.meta.url), 'utf8'));
+const exports = ['createVisualNovel', 'validateVisualNovelDefinition'];
+const isInputError = error => error?.code === 'E_GAMEPLAY_INVALID_INPUT';
+assert.deepEqual(Object.keys(visualNovel).sort(), exports);
+assert.equal(validateVisualNovelDefinition(story.definition), story.definition);
+assert.throws(() => validateVisualNovelDefinition(null), isInputError);
+const badAsset = structuredClone(story.definition);
+badAsset.assets.harbor.path = '../harbor.hya.json';
+assert.throws(() => validateVisualNovelDefinition(badAsset), isInputError);
+badAsset.assets.harbor.path = 'assets/%2e%2e/harbor.hya.json';
+assert.throws(() => validateVisualNovelDefinition(badAsset), isInputError);
+const badPreset = structuredClone(story.definition);
+badPreset.presets['rain-night'][0].bounds[2] = 0;
+assert.throws(() => validateVisualNovelDefinition(badPreset), isInputError);
+assert.throws(() => createVisualNovel({ engine: {}, story }), isInputError);
+console.log(JSON.stringify({ status: 'passed', exports, resolved: import.meta.resolve('@haiyue/extensions/visual-novel') }));

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hans",
+  "messages": {
+    "keeper": "守灯人",
+    "traveler": "旅人",
+    "arrival.watch": "潮水涨了。最后一盏灯还在等晚归的人。",
+    "arrival.fork": "渡船即将离岸。你要把灯留给谁？",
+    "choice.stay": "留下，和守灯人一起点灯",
+    "choice.leave": "带上灯，乘末班渡船",
+    "pier.story": "我从海对岸来，靠的就是这束光。再亮一次吧。",
+    "ending.lanternLine": "你留了下来。今晚，回港的人还有灯可循。",
+    "ending.lantern": "结局 · 守灯",
+    "ending.tideLine": "船开了。你把灯挂在船尾，远远照着空下来的港口。",
+    "ending.tide": "结局 · 随潮"
+  }
+}

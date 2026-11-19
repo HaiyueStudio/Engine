@@ -1,0 +1,32 @@
+{
+  "id": "arrival",
+  "nodes": {
+    "set-stage": {
+      "type": "stage",
+      "cues": [
+        [{ "op": "show", "presetId": "evening" }],
+        [
+          { "op": "transition", "slotId": "actor", "transitionId": "fade-in", "seconds": 0.25, "decorative": true },
+          { "op": "wait", "kind": "duration", "seconds": 0.25 }
+        ]
+      ],
+      "next": "view"
+    },
+    "view": { "type": "dialogue", "lineId": "first-view", "textKey": "arrival.view", "speakerKey": "keeper", "next": "offer" },
+    "offer": {
+      "type": "choice",
+      "lineId": "harbor-choice",
+      "textKey": "arrival.offer",
+      "options": [
+        {
+          "id": "stay",
+          "textKey": "choice.stay",
+          "visibleWhen": { "op": "eq", "variable": "knowsHarbor", "value": true },
+          "effects": [{ "op": "add", "variable": "trust", "value": 1 }],
+          "next": "pier/restore-actor"
+        },
+        { "id": "leave", "textKey": "choice.leave", "next": "pier/restore-actor" }
+      ]
+    }
+  }
+}

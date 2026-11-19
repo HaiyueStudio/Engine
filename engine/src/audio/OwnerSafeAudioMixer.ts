@@ -76,15 +76,19 @@ interface Voice {
   readonly eventId: string;
   readonly owner: string;
   readonly channel: string;
+  readonly bus: AudioMixerBus;
   readonly priority: number;
   readonly sequence: number;
   readonly output: AudioMixerHostVoice;
   baseGain:number;
   basePan:number;
+  nominalGain:number;
   appliedGain:number;
   appliedPan:number;
   lease:VoiceLeaseState|null;
   retired: boolean;
+  gainFactors?: Map<object,number>;
+  ended?: Set<()=>void>;
 }
 interface SpatialGain {readonly pan:number;readonly factor:number;readonly volume?:number;}
 interface VoiceLeaseState {readonly voices:Set<string>;closed:boolean;}
@@ -92,6 +96,10 @@ interface VoiceLeaseState {readonly voices:Set<string>;closed:boolean;}
 interface GameAudioLease {
   play(request:AudioMixerPlayRequest,spatial?:SpatialGain):string|null;
   spatial(owner:string,channel:string,value:SpatialGain|null):boolean;
+  attenuate(id:string,factor:number):(()=>void)|null;
+  onEnd(id:string,callback:()=>void):(()=>void)|null;
+  stop(id:string):boolean;
+  gain(id:string,value:number):boolean;
   release():void;
 }
 
@@ -208,7 +216,7 @@ export class OwnerSafeAudioMixer {
     const options={bus:request.bus,loop:request.loop??false,frequency,gain:volume,pan};
     const output=this.#host?this.#host.openVoice(buffer,options):this.#openWebVoice(buffer,options);
     const sequence=++this.#sequence,id=`voice:${sequence}`;
-    const voice:Voice={id,eventId,owner,channel,priority,sequence,output,baseGain:volume,basePan:pan,appliedGain:volume,appliedPan:pan,lease:null,retired:false};
+    const voice:Voice={id,eventId,owner,channel,bus:request.bus,priority,sequence,output,baseGain:volume,basePan:pan,nominalGain:volume,appliedGain:volume,appliedPan:pan,lease:null,retired:false};
     this.#voices.set(id,voice);this.#channels.set(ownerChannel,id);
     this.#ownerCounts.set(owner,(this.#ownerCounts.get(owner)??0)+1);this.#voiceNodes+=output.nodeCount;
     try{
@@ -233,7 +241,7 @@ export class OwnerSafeAudioMixer {
   setGain(owner:string,channel:string,value:number):boolean {
     this.#assertLive();const ownerId=identifier(owner,'owner'),channelId=identifier(channel,'channel'),gain=finiteRange(value,0,4,'gain');
     const id=this.#channels.get(`${ownerId}\u0000${channelId}`),voice=id===undefined?undefined:this.#voices.get(id);if(!voice)return false;
-    voice.output.setGain(gain);voice.baseGain=gain;voice.appliedGain=gain;return true;
+    return this.#applyGain(voice,gain,true);
   }
   getVolumes():AudioMixerVolumes {return Object.freeze({master:this.#masterVolume,music:this.#busVolumes.get('music')!,sfx:this.#busVolumes.get('sfx')!,ui:this.#busVolumes.get('ui')!});}
   getCapabilities():AudioMixerCapabilities {return Object.freeze({stereoPan:this.#host?.stereoPan??this.#stereoPan,maxDecodedChannels:2});}
@@ -309,10 +317,30 @@ export class OwnerSafeAudioMixer {
     const count=(this.#ownerCounts.get(voice.owner)??1)-1;if(count)this.#ownerCounts.set(voice.owner,count);else this.#ownerCounts.delete(voice.owner);
     voice.lease?.voices.delete(voice.id);voice.lease=null;
     const key=`${voice.owner}\u0000${voice.channel}`;if(this.#channels.get(key)===voice.id)this.#channels.delete(key);
-    voice.output.dispose();
+    voice.gainFactors?.clear();
+    try { voice.output.dispose(); }
+    finally {
+      for (const ended of voice.ended ?? []) try { ended(); } catch { /* observer only */ }
+      voice.ended?.clear();
+    }
+  }
+  #applyGain(voice: Voice, nominal: number, direct = false): boolean {
+    let gain = nominal;
+    if (voice.gainFactors) for (const factor of voice.gainFactors.values()) gain *= factor;
+    if (direct || gain !== voice.appliedGain) {
+      voice.output.setGain(gain);
+      voice.appliedGain = gain;
+    }
+    voice.nominalGain = nominal;
+    if (direct) voice.baseGain = nominal;
+    return true;
   }
   #newLease():GameAudioLease {
     this.#assertLive();const state:VoiceLeaseState={voices:new Set(),closed:false};
+    const owned=(id:string)=>{
+      const voice=this.#voices.get(id);
+      return !state.closed&&!this.#disposed&&voice?.lease===state?voice:undefined;
+    };
     return Object.freeze({
       play:(request:AudioMixerPlayRequest,spatial?:SpatialGain)=>{
         if(state.closed)throw new EngineError(EngineErrorCode.ResourceOwnerReleased,'Game audio lease is released.');
@@ -324,11 +352,32 @@ export class OwnerSafeAudioMixer {
       spatial:(owner:string,channel:string,value:SpatialGain|null)=>{
         if(state.closed||this.#disposed)return false;
         const id=this.#channels.get(`${owner}\u0000${channel}`),voice=id===undefined?undefined:this.#voices.get(id);if(!voice||voice.lease!==state)return false;
-        if(value)checkedSpatial(value);const gain=value?(value.volume??voice.baseGain)*value.factor:voice.baseGain,pan=value?value.pan:voice.basePan;
-        if(voice.appliedGain!==gain){voice.output.setGain(gain);voice.appliedGain=gain;}
+        if(value)checkedSpatial(value);const pan=value?.pan??voice.basePan;
+        this.#applyGain(voice,(value?.volume??voice.baseGain)*(value?.factor??1));
         if(voice.output.stereoPan&&voice.appliedPan!==pan){voice.output.setPan(pan);voice.appliedPan=pan;}return true;
       },
-      release:()=>{if(state.closed)return;state.closed=true;for(const id of state.voices)this.stopVoice(id);state.voices.clear();},
+      attenuate:(id:string,factor:number)=>{
+        const voice=owned(id);if(!voice||voice.bus!=='music')return null;finiteRange(factor,0,1,'gain factor');
+        const token={},factors=voice.gainFactors??=new Map();factors.set(token,factor);
+        try{this.#applyGain(voice,voice.nominalGain);}catch(error){factors.delete(token);throw error;}
+        return()=>{if(factors.delete(token)&&!voice.retired)this.#applyGain(voice,voice.nominalGain);};
+      },
+      onEnd:(id:string,callback:()=>void)=>{
+        const voice=owned(id);if(!voice)return null;
+        const listeners=voice.ended??=new Set();listeners.add(callback);return()=>{listeners.delete(callback);};
+      },
+      stop:(id:string)=>owned(id)?this.stopVoice(id):false,
+      gain:(id:string,value:number)=>{
+        const voice=owned(id);return voice?this.#applyGain(voice,finiteRange(value,0,4,'gain'),true):false;
+      },
+      release:()=>{
+        if(state.closed)return;
+        state.closed=true;
+        const errors:unknown[]=[];
+        for(const id of state.voices)try{this.stopVoice(id);}catch(error){errors.push(error);}
+        state.voices.clear();
+        if(errors.length)throw errors[0];
+      },
     });
   }
   #assertLive(): void { if (this.#disposed) throw new Error('Audio mixer is disposed.'); }

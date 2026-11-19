@@ -9,6 +9,24 @@ export function npmArgs(args, environment = process.env) {
   return [resolveNpmCli(environment), ...args];
 }
 
+export function parseNpmPackManifest(stdout, packageName) {
+  for (const { index } of stdout.matchAll(/^[\t ]*[\[{]/gmu)) {
+    let output;
+    try {
+      output = JSON.parse(stdout.slice(index));
+    } catch {
+      // npm lifecycle scripts can print to stdout before the JSON payload.
+      continue;
+    }
+    const manifests = Array.isArray(output) ? output : Object.values(output);
+    const [manifest] = manifests;
+    if (manifests.length === 1 && manifest?.name === packageName && typeof manifest.filename === 'string' &&
+      /^[^/\\:]+\.tgz$/u.test(manifest.filename)) return manifest;
+    break;
+  }
+  throw new Error(`npm pack did not return one valid tarball manifest for ${packageName}.`);
+}
+
 export function resolveNpmCli(environment = process.env, {execPath = process.execPath, exists = existsSync, realpath = realpathSync, pathDelimiter = delimiter, paths = {dirname,resolve}} = {}) {
   const executableDirectory = paths.dirname(execPath);
   const candidates = [

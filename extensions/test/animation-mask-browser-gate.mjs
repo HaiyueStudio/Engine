@@ -3,11 +3,13 @@ import {resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runChromeWebGpuFixture} from '../../scripts/webgpu-gate/chrome-runner.mjs';
-import {npmCommand,npmArgs} from '../../scripts/npm-process.mjs';
+import {npmCommand,npmArgs,parseNpmPackManifest} from '../../scripts/npm-process.mjs';
 const root=process.cwd(),out=resolve('artifacts/engine-0.2.2/g11/mask-native-'+Date.now());mkdirSync(out,{recursive:true});
 const sha=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
-const before=resolve('artifacts/engine-0.2.2/g11/mask-pool-before'),original=JSON.parse(readFileSync(resolve(before,'pack.json'),'utf8').replace(/^\uFEFF/u,''))[0];
-const pack=JSON.parse(execFileSync(npmCommand(),npmArgs(['pack','./extensions','--pack-destination',out,'--ignore-scripts','--offline','--json']),{cwd:root,encoding:'utf8',windowsHide:true}))[0];writeFileSync(resolve(out,'candidate-pack.json'),JSON.stringify(pack,null,2));
+const before=resolve('artifacts/engine-0.2.2/g11/mask-pool-before'),packageName='@haiyue/extensions';
+const original=parseNpmPackManifest(readFileSync(resolve(before,'pack.json'),'utf8').replace(/^\uFEFF/u,''),packageName);
+const stdout=execFileSync(npmCommand(),npmArgs(['pack','./extensions','--pack-destination',out,'--ignore-scripts','--offline','--json']),{cwd:root,encoding:'utf8',windowsHide:true});
+const pack=parseNpmPackManifest(stdout,packageName);writeFileSync(resolve(out,'candidate-pack.json'),JSON.stringify(pack,null,2));
 const mounts=[];for(const [name,file]of [['reference',resolve(before,original.filename)],['candidate',resolve(out,pack.filename)]]){const dir=resolve(out,name);mkdirSync(dir);execFileSync('tar',['-xf',file,'-C',dir],{windowsHide:true});mounts.push({prefix:'/g11-mask-'+name,directory:resolve(dir,'package')});}
 const imports={'@g11/mask-candidate':'/g11-mask-candidate/dist/animation.js','@g11/mask-reference':'/g11-mask-reference/dist/animation.js','earcut':'/node_modules/earcut/src/earcut.js','opentype.js':'/node_modules/opentype.js/dist/opentype.module.js','tslib':'/node_modules/tslib/tslib.es6.mjs','wgpu-matrix':'/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js'};
 for(const workspace of ['engine','animation-spec']){const pkg=JSON.parse(readFileSync(resolve(workspace,'package.json'),'utf8'));for(const [key,entry]of Object.entries(pkg.exports)){const path=typeof entry==='string'?entry:entry.import;if(path?.endsWith('.js'))imports[pkg.name+(key==='.'?'':key.slice(1))]='/'+workspace+'/'+path.replace(/^\.\//u,'');}}

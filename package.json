@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/engine-repository",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "license": "MIT",
   "repository": "https://github.com/HaiyueStudio/Engine.git",
@@ -180,7 +180,7 @@
     "release:publication:verify": "node scripts/publication.mjs verify",
     "release:publication:test": "node --test scripts/publication-policy.test.mjs scripts/publication-cli.test.mjs",
     "hya:physical": "node scripts/hya-corpus/qualify-physical.mjs",
-    "release:render:evidence:check": "node scripts/check-engine-021-evidence.mjs --manifest=artifacts/engine-0.2.3/qualification.json"
+    "release:render:evidence:check": "node scripts/check-engine-021-evidence.mjs"
   },
   "devDependencies": {
     "@babylonjs/core": "9.21.2",

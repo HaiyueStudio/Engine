@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {resolve,posix} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {EventEmitter} from 'node:events';
-import {npmArgs,npmCommand,resolveNpmCli,tarCommand} from './npm-process.mjs';
+import {npmArgs,npmCommand,parseNpmPackManifest,resolveNpmCli,tarCommand} from './npm-process.mjs';
 import {assertPublicationTerminal,runTerminalNpm} from './publication-terminal.mjs';
 import {createDeterministicTar} from './release-archive.mjs';
 import {stageQualifiedPackages} from './hya-corpus/packed-browser.mjs';
@@ -19,6 +19,16 @@ test('npm locator handles relocated Node, Debian share layout and PATH symlink w
  found.clear();found.add('/custom/bin/npm');found.add('/srv/npm/bin/npm-cli.js');assert.equal(resolveNpmCli({PATH:'/custom/bin'}, {...opts,realpath:()=>'/srv/npm/bin/npm-cli.js'}),'/srv/npm/bin/npm-cli.js');
  assert.throws(()=>resolveNpmCli({}, {...opts,exists:()=>false}),/Unable to locate/);
  assert.equal(npmCommand(),process.execPath);assert.ok(npmArgs(['--version'])[0].endsWith('npm-cli.js'));
+});
+test('npm pack reads the expected manifest from npm 11 arrays and npm 12 keyed output', () => {
+ const manifest = { name: '@haiyue/engine', filename: 'haiyue-engine-0.2.4.tgz', files: [{ path: 'package.json' }] };
+ const precedingOutput = '> prepare\r\n[package-declarations] ready\r\n';
+ for (const payload of [[manifest], { [manifest.name]: manifest }]) {
+  assert.deepEqual(parseNpmPackManifest(precedingOutput + JSON.stringify(payload, null, 2), manifest.name), manifest);
+ }
+ for (const payload of [[], [manifest, manifest], [ { ...manifest, name: '@haiyue/other' } ], [ { ...manifest, filename: '../wrong.tgz' } ]]) {
+  assert.throws(() => parseNpmPackManifest(JSON.stringify(payload), manifest.name), /valid tarball manifest for @haiyue\/engine/);
+ }
 });
 test('any piped console stream rejects before creating a process',()=>{
  for(const stream of ['stdin','stdout','stderr'])assert.throws(()=>assertPublicationTerminal({...tty,[stream]:{isTTY:false}}),/G02_TERMINAL_REQUIRED/);

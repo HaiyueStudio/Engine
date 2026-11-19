@@ -1,0 +1,17 @@
+{
+  "id": "arrival",
+  "nodes": {
+    "open-stage": { "type": "stage", "cues": [[{ "op": "show", "presetId": "rain-night" }]], "next": "watch" },
+    "watch": {
+      "type": "dialogue", "lineId": "first-lantern", "textKey": "arrival.watch", "speakerKey": "keeper",
+      "voices": { "zh-Hans": "arrival-zh", "en": "arrival-en" }, "next": "fork"
+    },
+    "fork": {
+      "type": "choice", "lineId": "harbor-choice", "textKey": "arrival.fork",
+      "options": [
+        { "id": "stay", "textKey": "choice.stay", "effects": [{ "op": "set", "variable": "trust", "value": 1 }], "next": "pier/approach" },
+        { "id": "leave", "textKey": "choice.leave", "next": "pier/approach" }
+      ]
+    }
+  }
+}

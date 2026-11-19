@@ -1,0 +1,17 @@
+{
+  "format": "haiyue-composition",
+  "version": 1,
+  "parts": [{
+    "id": "core", "extension": "org.haiyue.animation-core@1", "required": true, "requires": [], "dependencies": [],
+    "document": {
+      "format": "haiyue-animation", "version": "1.0", "duration": 2,
+      "canvas": { "width": 1280, "height": 720, "coordinateSystem": "screen-y-down" },
+      "extensionsUsed": [], "resources": [], "tracks": [],
+      "nodes": [{
+        "id": "harbor", "transform": { "position": [640, 360] },
+        "components": [{ "type": "shape2d", "shape": "rect", "size": [1280, 720], "fill": [0.08, 0.16, 0.25, 1] }]
+      }]
+    }
+  }],
+  "targets": []
+}

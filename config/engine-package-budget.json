@@ -88,11 +88,11 @@
     },
     "@haiyue/extensions": {
       "workspace": "extensions",
-      "maxPackedBytes": 570000,
+      "maxPackedBytes": 600000,
       "maxUnpackedBytes": 3000000,
       "capacity": {
         "reviewed": {
-          "packedBytes": 513428,
+          "packedBytes": 543428,
           "unpackedBytes": 2651601,
           "fileCount": 188
         },
@@ -100,7 +100,7 @@
           "packedBytes": 56572,
           "unpackedBytes": 348399
         },
-        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative; 0.2.3 G08 borrowed atlas, dirty chunk windows and submission-safe bounded storage reuse original 2D programs and owners"
+        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative; 0.2.3 G08 borrowed atlas and bounded storage; ADR 0140 G07 admits 30,000 packed bytes for the focused visual novel capability, with the original reserve and unpacked limit preserved"
       },
       "declaredFiles": [
         "README.md",
@@ -979,6 +979,22 @@
         "capabilityBasis": "G01 exact Engine audio 7 / extensions audio 5 exports; original mixer, private live voice lease and original nodes; no second decoder/cache/context/clock or HYA/GUI/3D closure",
         "decision": "review/engine-0.2.3/g09-checks.json",
         "reviewedGzipBytes": 8341
+      }
+    },
+    "extensions-visual-novel": {
+      "entrypoint": "./visual-novel",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-visual-novel.mjs",
+      "maxGzipBytes": 520000,
+      "requiredExports": [
+        "createVisualNovel",
+        "validateVisualNovelDefinition"
+      ],
+      "loading": {
+        "schemaVersion": 1,
+        "maxInitialGzipBytes": 140000,
+        "maxTotalGzipBytes": 520000,
+        "deferredModuleMarkers": ["hya-stage", "opentype"]
       }
     },
     "extensions-gui-controls": {

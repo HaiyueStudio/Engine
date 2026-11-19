@@ -30,7 +30,7 @@ import {
   validateEnginePackManifest,
   parsePackageVerificationArgs,
 } from './engine-package-policy.mjs';
-import { npmArgs, npmCommand } from './npm-process.mjs';
+import { npmArgs, npmCommand, parseNpmPackManifest } from './npm-process.mjs';
 import { canonicalPackageMetadata } from './package-metadata-encoding.mjs';
 import { measureConsumerLoading, validateConsumerLoading } from './engine-package-loading-policy.mjs';
 
@@ -185,7 +185,7 @@ try {
 function packPublicPackage({ packageName, policy }) {
   const workspace = resolve(root, policy.workspace);
   const workspacePackageJson = JSON.parse(readFileSync(resolve(workspace, 'package.json'), 'utf8'));
-  const sourceManifest = npmPackManifest({ cwd: workspace, destination: resolve(temporaryRoot, 'source-pack', slug(packageName)), dryRun: true });
+  const sourceManifest = npmPackManifest({ packageName, cwd: workspace, destination: resolve(temporaryRoot, 'source-pack', slug(packageName)), dryRun: true });
   const staging = resolve(temporaryRoot, 'staging', slug(packageName));
   const sourceExcludedFiles = [];
   const stagingErrors = [];
@@ -215,8 +215,8 @@ function packPublicPackage({ packageName, policy }) {
 
   const firstDirectory = resolve(temporaryRoot, 'packed-a', slug(packageName));
   const secondDirectory = resolve(temporaryRoot, 'packed-b', slug(packageName));
-  const firstManifest = npmPackManifest({ cwd: staging, destination: firstDirectory, ignoreScripts: true });
-  const secondManifest = npmPackManifest({ cwd: staging, destination: secondDirectory, ignoreScripts: true });
+  const firstManifest = npmPackManifest({ packageName, cwd: staging, destination: firstDirectory, ignoreScripts: true });
+  const secondManifest = npmPackManifest({ packageName, cwd: staging, destination: secondDirectory, ignoreScripts: true });
   const firstTarball = resolve(firstDirectory, firstManifest.filename);
   const secondTarball = resolve(secondDirectory, secondManifest.filename);
   const firstSha256 = sha256File(firstTarball);
@@ -554,7 +554,7 @@ function commandCheck(result, label) {
   return { status: 'passed', detail: (result.stdout || '').trim() || `${label} passed` };
 }
 
-function npmPackManifest({ cwd, destination, dryRun = false, ignoreScripts = false }) {
+function npmPackManifest({ packageName, cwd, destination, dryRun = false, ignoreScripts = false }) {
   mkdirSync(destination, { recursive: true });
   const args = ['pack', '--json', '--pack-destination', destination];
   if (dryRun) args.push('--dry-run');
@@ -566,22 +566,9 @@ function npmPackManifest({ cwd, destination, dryRun = false, ignoreScripts = fal
     timeout: 120_000,
   });
   assertCommand(result, `npm pack ${relative(root, cwd)}`);
-  const manifest = parseNpmJsonOutput(result.stdout)[0];
-  if (!manifest?.filename || !Array.isArray(manifest.files)) throw new Error(`npm pack returned an invalid manifest for ${cwd}.`);
+  const manifest = parseNpmPackManifest(result.stdout, packageName);
+  if (!Array.isArray(manifest.files)) throw new Error(`npm pack returned an invalid manifest for ${cwd}.`);
   return manifest;
-}
-
-function parseNpmJsonOutput(stdout) {
-  const starts = [...stdout.matchAll(/^[\t ]*\[/gmu)].map(match => match.index ?? 0).reverse();
-  for (const start of starts) {
-    try {
-      const parsed = JSON.parse(stdout.slice(start));
-      if (Array.isArray(parsed)) return parsed;
-    } catch {
-      // npm lifecycle scripts may write arbitrary stdout before the final --json payload.
-    }
-  }
-  throw new Error('npm pack did not return a parseable JSON manifest.');
 }
 
 function buildAnimationSpec() {

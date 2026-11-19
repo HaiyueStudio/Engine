@@ -2,6 +2,25 @@ import test from'node:test';import assert from'node:assert/strict';
 import{OwnerSafeAudioMixer as Mixer}from'../dist/audio.js';import{OwnerSafeAudioMixer as Legacy}from'./owner-safe-audio-legacy.mjs';
 import{AudioContextAudit,audioBuffer,audioRequest}from'./owner-safe-audio-fixture.mjs';
 async function create(Type=Mixer,options={}){const context=new AudioContextAudit(),mixer=new Type({context,...options});mixer.installBuffer('tone',audioBuffer('tone'));await mixer.unlock();return{context,mixer};}
+test('transient voice gain composes with scene music settings and only its lease can change or observe it',async()=>{
+ const {mixer,context}=await create();
+ const capability=mixer[Symbol.for('haiyue.audio.game-lease.v1')];
+ const owner=capability.acquire(),other=capability.acquire();
+ const bed=owner.play({...audioRequest('bed','scene','music'),bus:'music',volume:.8});
+ const foreign=other.play({...audioRequest('foreign','other','music'),bus:'music',volume:.7});
+ assert.equal(owner.attenuate(foreign,.5),null);assert.equal(other.onEnd(bed,()=>{}),null);assert.equal(other.stop(bed),false);
+ const voiceGain=context.gains[4].gain,unrelated=context.gains[5].gain;
+ const restore=owner.attenuate(bed,.5),restoreSecond=owner.attenuate(bed,.25);
+ assert.equal(voiceGain.value,.1);assert.equal(unrelated.value,.7);
+ owner.spatial('scene','music',{factor:.5,pan:0});assert.equal(voiceGain.value,.05);
+ mixer.setGain('scene','music',.6);assert.equal(voiceGain.value,.075);
+ mixer.setBusVolume('music',.4);assert.equal(mixer.getVolumes().music,.4);
+ restoreSecond();assert.equal(voiceGain.value,.3);restore();restore();assert.equal(voiceGain.value,.6);
+ let ended=0;owner.onEnd(bed,()=>{ended++;});
+ const pending=owner.attenuate(bed,.5);context.sources[0].finish();pending();
+ assert.equal(ended,1);assert.equal(owner.stop(bed),false);assert.equal(unrelated.value,.7);
+ owner.release();other.release();mixer.dispose();
+});
 test('seeded scheduling/stop/ending traces remain equivalent to the frozen mixer at both admission workloads',async()=>{
  for(const maximum of[32,128]){
   const current=await create(Mixer,{maxVoicesTotal:maximum,maxVoicesPerOwner:maximum/4}),old=await create(Legacy,{maxVoicesTotal:maximum,maxVoicesPerOwner:maximum/4});let seed=12345;

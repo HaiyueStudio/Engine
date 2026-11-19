@@ -50,6 +50,7 @@ test('example catalog derives every group, label, order, and URL from manifest m
   assert.equal(entries.find(entry => entry.id === 'pbr-showcase').label, 'PBR Showcase');
   assert.equal(entries.find(entry => entry.id === 'gpu-driven-instancing').url, './gpu-driven-instancing/index.html');
   assert.equal(entries.find(entry => entry.id === 'gpu-driven-instancing').sourceUrl, './gpu-driven-instancing/main.ts');
+  assert.equal(entries.find(entry => entry.id === 'visual-novel').sourceUrl, './visual-novel/main.mjs');
   await Promise.all(entries.map(entry => readFile(new URL(entry.sourceUrl, import.meta.url), 'utf8')));
 });
 
