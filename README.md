@@ -1,6 +1,6 @@
 # HaiYue Engine
 
-> 0.2.1 的冻结候选、发布范围与剩余验收见 [Engine 0.2.1](review/engine-0.2.1/README.md)。
+> 0.2.4 已提供视觉小说能力；版本、用法与验收见 [发布说明](docs/engine-guide/release-notes-0.2.4.md) 和 [验收结论](review/engine-0.2.4/README.md)。
 > Rive 研发范围保留在 `feature/rive-development` 分支，边界见 [ADR 0104](docs/for-ai/adr/0104-rive-development-branch.md)。
 
 HaiYue Engine 是一个以 WebGPU 为唯一渲染后端、面向现代浏览器的 TypeScript 图形与交互引擎。仓库包含核心运行时、可选扩展、HYA 动画规范、着色器构建工具，以及由清单统一管理的可执行示例。

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "goal": "g07-integration-candidate",
-  "status": "validating",
+  "status": "passed",
   "targetVersion": "0.2.4",
-  "fullG07Complete": false,
-  "releaseQualified": false,
+  "fullG07Complete": true,
+  "releaseQualified": true,
   "previousGoals": [
     {
       "path": "review/engine-0.2.4/g01-checks.json",
@@ -32,11 +32,11 @@
     }
   ],
   "packageReport": {
-    "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/packages-qualified/public-packages.json",
-    "sha256": "c06bb4cf07eb1bb6dc82818955ed52acb56df5a8b59aebe013e5302fb6fa5629",
-    "phase": "qualified-clean-candidate",
+    "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/packages/public-packages.json",
+    "sha256": "05e92aacfbbc83192018bd7fe55ced3940279ca0f3610b80a559cfc9f643f691",
+    "phase": "clean-candidate-package-gate",
     "source": {
-      "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
+      "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
       "workingTreeDirty": false
     }
   },
@@ -130,7 +130,7 @@
       "path": "artifacts/engine-0.2.4/g07/approved-draft-pack/public-packages.json",
       "sha256": "39406f895d9bab4a33b233f0a77a5ab4bfeb367b6386df4593bc560258807a55"
     },
-    "observedBytes": 596926,
+    "observedBytes": 597072,
     "initialGzipBytes": 71092,
     "deferredGzipBytes": 417703,
     "totalGzipBytes": 488795,
@@ -216,14 +216,16 @@
     ]
   },
   "verification": {
-    "candidateRevision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
+    "candidateRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
     "windowsDevice": "passed",
     "macDevice": "passed",
     "productionPerformance": "passed",
     "rendererCaptures": "passed",
     "globalGate": "passed",
     "rehearsal": "passed",
-    "independentArtifactAudit": "passed"
+    "independentArtifactAudit": "passed",
+    "cloudFast": "passed",
+    "cloudFull": "failed-approved-named-software-investigation"
   },
   "frozenCandidate": {
     "revision": "8e0507d0da70aeed72d759ec54f1b8ac896386bb",
@@ -353,23 +355,31 @@
     "windowsFormalRetryLauncher": "D:/HaiyueStudio/Engine-rc-024-20261118/artifacts/engine-0.2.4/g07/global-f204b9b/START-WINDOWS-FORMAL-WAIT.cmd"
   },
   "finalCandidate": {
-    "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
-    "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a",
-    "root": "D:/HaiyueStudio/Engine-rc-024-20261119",
-    "qualification": {
-      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/final-qualification.json",
-      "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
+    "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "captureRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "root": "D:/HaiyueStudio/Engine-release-024-20261119",
+    "nativeAutomatedAudit": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/automated-return-audit-20261120.json",
+      "sha256": "ee028de5bcccfd8f49a3216ab2aed9bba2cfa324ecadfbe42cb716ce420d59b8"
     },
-    "sourceClean": true,
+    "softwareCiInvestigation": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/software-ao-024-investigation-admission.json",
+      "sha256": "d684e93c9aceeaa36e17a410d7e4bcf691923d66b799d463956df2f80912b2c0"
+    },
+    "status": "qualified",
     "fullG07Complete": true,
     "releaseQualified": true,
-    "published": false,
-    "baselinePromoted": false
+    "published": true,
+    "windowsPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/windows-device-qualification-20261122.json",
+      "sha256": "0d2a2041e2eafc59b9979b68b5ae9f40b149c1ec7f1164419c63cd35aa126d9e"
+    },
+    "macPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/mac-device-qualification-20261124.json",
+      "sha256": "73a3703269d2e60ba74e2ceddc636c9a9e2eafd1e9a93b91b41e9f1d329a66a7"
+    }
   },
-  "pending": [
-    "integrate already-published 0.2.3 history without dropping its fixes",
-    "qualify the merged release source and its actual package bytes before publication"
-  ],
+  "pending": [],
   "changelogRepairCandidate": {
     "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
     "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a",
@@ -504,31 +514,32 @@
     "finalQualification": {
       "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/final-qualification.json",
       "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
-    }
+    },
+    "status": "historical-qualification-superseded-by-published-history-alignment"
   },
   "activeCandidate": {
-    "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
-    "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a",
-    "root": "D:/HaiyueStudio/Engine-rc-024-20261119",
-    "returnAudit": {
-      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/return-audit-20261119.json",
-      "sha256": "a645c04426f24814c300b67e719540b91101a8b81fdb121fbea1ccfda78b5d28"
+    "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "captureRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "root": "D:/HaiyueStudio/Engine-release-024-20261119",
+    "nativeAutomatedAudit": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/automated-return-audit-20261120.json",
+      "sha256": "ee028de5bcccfd8f49a3216ab2aed9bba2cfa324ecadfbe42cb716ce420d59b8"
     },
-    "windowsDeviceAudit": {
-      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/windows-device-qualification-20261119.json",
-      "sha256": "bdbb3a6aa63cf954b29a6da1e4635d6b9c6c1615e01c084e74b04262f5a22233"
+    "softwareCiInvestigation": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/software-ao-024-investigation-admission.json",
+      "sha256": "d684e93c9aceeaa36e17a410d7e4bcf691923d66b799d463956df2f80912b2c0"
     },
-    "macDeviceAudit": {
-      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/mac-device-qualification-20261119.json",
-      "sha256": "687ad7dd461943135c829093471d8d5cb21a0db0871965520576b805b7f0b898"
+    "windowsPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/windows-device-qualification-20261122.json",
+      "sha256": "0d2a2041e2eafc59b9979b68b5ae9f40b149c1ec7f1164419c63cd35aa126d9e"
     },
-    "qualification": {
-      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/final-qualification.json",
-      "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
-    }
+    "macPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/mac-device-qualification-20261124.json",
+      "sha256": "73a3703269d2e60ba74e2ceddc636c9a9e2eafd1e9a93b91b41e9f1d329a66a7"
+    },
+    "published": true
   },
-  "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
-  "completedAt": "2026-11-19T13:36:46.084Z",
+  "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
   "draftPackageReport": {
     "path": "artifacts/engine-0.2.4/g07/working-draft-pack/public-packages.json",
     "sha256": "76576b5e0209f8a04d6f182b77a232e2fa9312c4a983d5bcdf2207af1509d148",
@@ -542,9 +553,9 @@
     {
       "name": "@haiyue/engine",
       "version": "0.2.4",
-      "sha256": "c5ec896c941653770fea71aeac161d8856ca364777f5713f9b95ec05730e7110",
-      "packedBytes": 2042447,
-      "unpackedBytes": 8512102
+      "sha256": "de1945eb8b6bffbbb891a19482b2297b732cc5a33e9e71ccaa685986fa5c8b94",
+      "packedBytes": 2049905,
+      "unpackedBytes": 8541320
     },
     {
       "name": "@haiyue/animation-spec",
@@ -556,9 +567,9 @@
     {
       "name": "@haiyue/extensions",
       "version": "0.2.4",
-      "sha256": "35a99ae917dcf1981189b7203a38570e4d471db6d86776f4deb8c11e6e96abe4",
-      "packedBytes": 596926,
-      "unpackedBytes": 2283620
+      "sha256": "dcbe452cc5f94efe103b7462773c0092461976049b84c5292977fde673142173",
+      "packedBytes": 597072,
+      "unpackedBytes": 2284031
     },
     {
       "name": "@haiyue/shader-language",
@@ -620,15 +631,13 @@
     }
   },
   "qualification": {
-    "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/final-qualification.json",
-    "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
+    "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/final-qualification-20261124.json",
+    "sha256": "b2afadea6348574f926b002a69ecdd316aeb634d653f9ee48bda734ed17e2d0f"
   },
   "publicationPlan": {
-    "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/publication-plan.json",
-    "sha256": "85213558f8d155b53e608d76badb85d9306fca06c203d9773f9deeb985a155d6",
-    "status": "local-preflight-passed",
-    "submitted": false,
-    "networkUsed": false,
+    "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/publication-plan-20261124.json",
+    "sha256": "0a64bf5153a8d10884810161755daae987a05852536dc18c78b45796caa81479",
+    "status": "npm-verified",
     "selectedPackages": [
       "@haiyue/engine@0.2.4",
       "@haiyue/extensions@0.2.4"
@@ -639,13 +648,235 @@
     "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
   },
   "releaseReadiness": {
-    "status": "blocked-until-published-history-is-integrated",
+    "status": "npm-and-github-verified",
     "finding": {
       "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/release-alignment-20261119/alignment-finding.json",
       "sha256": "adfaf7dc8ca0d03635ccc70e6251bf472f4249b8f5ec6f59b262647fdfa071f6"
     },
     "sourceCandidate": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
     "remoteMaster": "28e402fca80c7f29bf42a84606a9e608cf2ea4d2",
-    "worktree": "D:/HaiyueStudio/Engine-release-024-20261119"
+    "worktree": "D:/HaiyueStudio/Engine-release-024-20261119",
+    "mergedRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "mergeReceipt": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/merge-receipt.json",
+      "sha256": "0bc9d514110243a7f9c4007d0162318110ad9a5bbd1531b78ccad07956d55c12"
+    },
+    "ci": [
+      {
+        "id": 44537645285,
+        "name": "Engine Fast",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/44537645285"
+      },
+      {
+        "id": 44537656052,
+        "name": "Engine No-publish Rehearsal",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/44537656052"
+      }
+    ],
+    "preparation": {
+      "path": "artifacts/engine-0.2.4/g07/published-history-alignment/preparation.json",
+      "sha256": "ddc2c6e2f8cedb29148a4148ec362ec4abe7fca593e3888b62f2dfc2a5f81b3d"
+    },
+    "formalEntry": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/START-WINDOWS-FORMAL.cmd",
+    "packageReport": {
+      "path": "artifacts/engine-0.2.4/g07/published-history-alignment/packages/public-packages.json",
+      "sha256": "05e92aacfbbc83192018bd7fe55ced3940279ca0f3610b80a559cfc9f643f691"
+    },
+    "macArchive": {
+      "path": "D:\\HaiyueStudio\\Engine-release-024-20261119\\artifacts\\engine-0.2.4\\g07\\published-history-alignment\\mac-handoff\\visual-novel-device-kit-c744e83-mac.tar.gz",
+      "sha256": "33b002f64ffd1d7301647539b451bcaf1cdafb828e5a86d883a287d3ba304155"
+    },
+    "localFast": "passed",
+    "publicPackages": "passed",
+    "windowsLinuxNoPublication": "passed",
+    "cloudFast": "passed",
+    "cloudFullRun": 44537656052,
+    "physicalWindows": "passed",
+    "physicalMac": "passed",
+    "independentFormal": {
+      "journal": "D:\\HaiyueStudio\\Engine-release-024-20261119\\artifacts\\engine-0.2.4\\g07\\published-history-alignment\\independent-launch-5a473e47.json",
+      "startupConfirmed": true,
+      "task": "Haiyue-Engine-024-c744e83-formal-5a473e47",
+      "pid": 16852,
+      "status": "started",
+      "published": false
+    },
+    "nativeAutomatedAudit": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/automated-return-audit-20261120.json",
+      "sha256": "ee028de5bcccfd8f49a3216ab2aed9bba2cfa324ecadfbe42cb716ce420d59b8"
+    },
+    "formalResult": "passed",
+    "productionProcesses": 15,
+    "rendererCaptures": 580,
+    "globalGate": "passed",
+    "rehearsal": "passed",
+    "cloudFull": "failed-software-ao-600s",
+    "cloudExceptionProposal": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/software-ao-024-investigation-proposal.json",
+      "sha256": "0b60d48ee4301082299c172c8335ba1b04f798b5250b217ab5b11a9ea73db133"
+    },
+    "softwareCiInvestigation": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/software-ao-024-investigation-admission.json",
+      "sha256": "d684e93c9aceeaa36e17a410d7e4bcf691923d66b799d463956df2f80912b2c0"
+    },
+    "cloudExceptionApproved": true,
+    "windowsIncompleteRecord": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/production/device-kit/device-results/windows-1795129899892-45b53f36.json",
+      "sha256": "6dc8df91e4f2374ff0e98d30b822022ed3c99589098126c88c4341235c3d0e38"
+    },
+    "windowsPhysicalAttempt": {
+      "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+      "phase": "passed",
+      "address": "http://127.0.0.1:51118",
+      "nodePid": 22252,
+      "chromePid": 8372,
+      "terminalPid": 27500,
+      "profile": "haiyue-vn-device-aKyqrd",
+      "previousIncompleteRecordRetained": true,
+      "firstEndingCheckpoint": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/windows-physical-first-ending-20261122.json",
+        "sha256": "5794160996be1e1fec35b84071bf4f509050fe6f47470fce88b70e80f72caea4"
+      },
+      "originalRecord": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/production/device-kit/device-results/windows-1795351967391-607f1af3.json",
+        "sha256": "a0b27e615b8b8cac41a541ecb6558ea0be3c6363ebd54c11edf156449cb6305e"
+      },
+      "bothEndingsCheckpoint": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/windows-physical-both-endings-20261122.json",
+        "sha256": "0adb5e294e396659caa37b338f7dbb542ae8bb9951502785131124c4adb69034"
+      },
+      "finalRecord": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/production/device-kit/device-results/windows-1795352578261-95f222cb.json",
+        "sha256": "641cd565740570f2e8adc3b8daeabd4793730d4f2830000ddcf4c55072d80da7"
+      }
+    },
+    "windowsPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/windows-device-qualification-20261122.json",
+      "sha256": "0d2a2041e2eafc59b9979b68b5ae9f40b149c1ec7f1164419c63cd35aa126d9e"
+    },
+    "macPhysicalAttempt": {
+      "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+      "phase": "passed",
+      "receipt": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/mac-device-qualification-20261124.json",
+        "sha256": "73a3703269d2e60ba74e2ceddc636c9a9e2eafd1e9a93b91b41e9f1d329a66a7"
+      },
+      "record": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/production/device-kit/device-results/mac-user-return-b7800dfa-4dc2-4b84-8d05-85419e4c523d.json",
+        "sha256": "feb8f45cbf811f86abeb4fe875ca2bc96549e555ef57cf0336281921771cf854"
+      },
+      "passedChecks": 11
+    },
+    "macPhysical": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/mac-device-qualification-20261124.json",
+      "sha256": "73a3703269d2e60ba74e2ceddc636c9a9e2eafd1e9a93b91b41e9f1d329a66a7"
+    },
+    "previousMacIncompleteAttempt": {
+      "revision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+      "phase": "closed-incomplete-new-session-required",
+      "receipt": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/mac-physical-incomplete-20261122.json",
+        "sha256": "30d048bc082af6036dc5f62b44f6f1e3efe9c039951872a93e6dbc28f5a0783f"
+      },
+      "record": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/production/device-kit/device-results/mac-user-return-3428e1d9-dc9e-4923-ba73-707eaec91126.json",
+        "sha256": "2b100b42d15872fc83e4b1f37895784dfcf944d9972eb259c3069ef3d38cf975"
+      },
+      "passedChecks": 10,
+      "missing": [
+        "bothEndingsAfterRestore"
+      ],
+      "windowClosedByOperator": true
+    },
+    "finalQualification": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/final-qualification-20261124.json",
+      "sha256": "b2afadea6348574f926b002a69ecdd316aeb634d653f9ee48bda734ed17e2d0f"
+    },
+    "signedTag": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/remote-tag-20261124.json",
+      "sha256": "f70d4f4dab4c3e89f756556b34e0ceb90298ad4a545cae2adf2fd1fb9d107293"
+    },
+    "tagCiRun": 45412738240,
+    "publicationJournal": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/publication-journal-20261124.json",
+    "npmPublication": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/npm-publication-verified-20261124.json",
+      "sha256": "c5e8bde74db37fe328cbc8e32cccaa2d70dacf2a836a088c0539fbbe0bdcd990"
+    },
+    "tagCiReview": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/tag-ci-45412738240/investigation-review.json",
+      "sha256": "62b2d34d9c5c5be3a50db09ebe3eb039fab69a0690153794a4060f8503a99f64"
+    },
+    "githubRelease": {
+      "id": 456896784,
+      "tag": "v0.2.4",
+      "url": "https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.4",
+      "draft": false,
+      "published": true,
+      "receipt": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/github-release-verified-20261124.json",
+        "sha256": "afac53bc579bf1171c70307fea82e8b0ad703dc15a3a6964628356d45c70beae"
+      }
+    },
+    "githubAssetPlan": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/github-assets-upload-plan-20261124.json",
+      "sha256": "6483f8918acb8ddd56797c9a135456764409cef0c3f367912b485d1dc610de2f"
+    },
+    "githubAssetJournal": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/github-assets-upload-journal-20261124.json",
+    "transportAdapter": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/resume-release-assets-curl-file-20261124.mjs",
+      "sha256": "88dfd7d5281813b2112a621d9fcdb9b9bfc3f6c24b1e959ca78f7bc6830fe9b0"
+    }
+  },
+  "historicalQualifiedCandidate": {
+    "revision": "9dcff0736fdcc49cf3f840784d985b8f03753be0",
+    "captureRevision": "f204b9b96f73677f56e71c50546161ae7f0eb45a",
+    "root": "D:/HaiyueStudio/Engine-rc-024-20261119",
+    "qualification": {
+      "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/final-qualification.json",
+      "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
+    },
+    "sourceClean": true,
+    "fullG07Complete": true,
+    "releaseQualified": true,
+    "published": false,
+    "baselinePromoted": false
+  },
+  "captureRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+  "lastVerifiedAt": "2026-11-24T14:21:09.950Z",
+  "historicalQualificationCompletedAt": "2026-11-19T13:36:46.084Z",
+  "completedAt": "2026-11-24T14:21:09.950Z",
+  "historicalPublicationPlan": {
+    "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/publication-plan.json",
+    "sha256": "85213558f8d155b53e608d76badb85d9306fca06c203d9773f9deeb985a155d6",
+    "status": "local-preflight-passed",
+    "submitted": false,
+    "networkUsed": false,
+    "selectedPackages": [
+      "@haiyue/engine@0.2.4",
+      "@haiyue/extensions@0.2.4"
+    ]
+  },
+  "npmPublished": true,
+  "published": true,
+  "publication": {
+    "status": "npm-and-github-verified",
+    "version": "0.2.4",
+    "runtimeRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
+    "signatureVerified": true,
+    "npm": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/npm-publication-verified-20261124.json",
+      "sha256": "c5e8bde74db37fe328cbc8e32cccaa2d70dacf2a836a088c0539fbbe0bdcd990"
+    },
+    "github": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/github-release-verified-20261124.json",
+      "sha256": "afac53bc579bf1171c70307fea82e8b0ad703dc15a3a6964628356d45c70beae"
+    },
+    "url": "https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.4",
+    "assetCount": 8,
+    "pages": {
+      "url": "https://haiyuestudio.github.io/Engine/releases/0.2.4/examples/",
+      "workflow": "https://github.com/HaiyueStudio/Engine/actions/workflows/deploy-pages-ci.yml"
+    },
+    "baselinePromoted": false
   }
 }

@@ -4,4 +4,6 @@
 
 用[《雾港》制作指南](visual-novel.md)开始。示例包含中英文、三章和两个结局，可以替换出场预设或特效并增加分支。
 
-本次版本目标为 `@haiyue/engine@0.2.4` 和 `@haiyue/extensions@0.2.4`。配套版本为 `@haiyue/animation-spec@0.2.2` 和 `@haiyue/shader-language@0.2.3`。
+本次已发布 `@haiyue/engine@0.2.4` 和 `@haiyue/extensions@0.2.4`。配套版本为 `@haiyue/animation-spec@0.2.2` 和 `@haiyue/shader-language@0.2.3`。
+
+[正式 Release](https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.4) · [《雾港》示例](https://haiyuestudio.github.io/Engine/releases/0.2.4/examples/visual-novel/) · [验收结论](../../review/engine-0.2.4/README.md)

@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-## 0.2.4 （候选，未发布）
+## 0.2.4 - 2026-11-24
 
 - 新增聚焦入口 `@haiyue/extensions/visual-novel`，装配分支台本、分层 HYA、阅读 GUI、历史配音、读档续读与隔离回看。
 - 《雾港》示例展示中英文、三章和双结局。可用独立模板试做预设、特效与条件结局。
-- [候选说明](docs/engine-guide/release-notes-0.2.4.md)列出配套版本与使用入口。
+- [发布说明](docs/engine-guide/release-notes-0.2.4.md)列出配套版本与使用入口。
 
 ## 0.2.3 （候选，未发布）
 

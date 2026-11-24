@@ -1,11 +1,9 @@
 # Engine 0.2.4 验收
 
-G01–G06 证据覆盖公开合同、台本编译、HYA 舞台、阅读与语音、存档及示例。[G01](g01-checks.json) · [G02](g02-checks.json) · [G03](g03-checks.json) · [G04](g04-checks.json) · [G05](g05-checks.json) · [G06](g06-checks.json)
+视觉小说入口 `@haiyue/extensions/visual-novel` 装配分支台本、分层 HYA、阅读 GUI、历史配音与存档续读。G01–G06 的合同和功能证据见 [G07 检查索引](g07-checks.json)。
 
-G07 集成 `@haiyue/extensions/visual-novel` 及《雾港》示例。0.2.4 的发布计划仅选入 Engine 和 Extensions。Animation Spec 与 Shader Language 的版本及制品哈希沿用 npm 已发布证据。Extensions 压缩包上限经批准从 570,000 B 调整为 600,000 B，原失败保留。
+已接受源码为 `c744e8323b2848178ad8f487e36968ac5fe263b2`，包含已发布 0.2.3 的全部修复。此前候选缺少发布历史、配音切回恢复及设备启动目录的问题均已解决。Windows 与 Mac 完整真机各 11 项通过，浏览器与 GPU 错误均为 0；同候选新采的 15 次生产冷进程、七组 580 次渲染、Windows 全局门禁、无发布演练及制品审计通过。
 
-候选 `9dcff07` 已通过公开包与独立消费者、完整全局门禁、无发布演练及制品审计。Windows 与 macOS 完整真机各 11 项检查全部通过，覆盖键鼠、双结局、存读档、听音及前后台恢复，两端运行时与 GPU 错误均为 0。配音切回恢复、设备启动目录与演练版本标题问题已解决。
+Ubuntu／SwiftShader AO 全矩阵保留原 600 秒超时：[原运行](https://github.com/HaiyueStudio/Engine/actions/runs/44537656052)完成 15／18 组，第 16 组有 13／30 样本；[标签复跑](https://github.com/HaiyueStudio/Engine/actions/runs/45412738240)完成 16／18 组，第 17 组有 3／30 样本。两次可执行指纹一致，无浏览器／GPU 错误。同候选 Windows 原生 18 组和 36 项 P95 检查通过。本候选经明确批准按原生资格继续；云端失败、后续未执行阶段、原样本、时限及预算均保留。
 
-采样候选 `f204b9b` 的 15 次生产冷进程采集和七组 580 次渲染捕获，经用户限定批准按哈希复核复用；四个 tarball、19 个生产文件和 19 个渲染可执行 chunk 均重建一致。原失败、原样本和现行预算保留。
-
-正式发布预检发现该候选未包含远端已发布 0.2.3 的 54 条提交，原资格和两包计划仅保留为该候选的验收记录。G07 已恢复为验证中，先在独立发布目录整合既有修复，再验证合并源码和实际制品；旧证据不自动授予新候选资格。未发布、未更新基线。[G07 检查索引](g07-checks.json)
+`@haiyue/engine@0.2.4` 和 `@haiyue/extensions@0.2.4` 已从 npm 下载并通过 SHA-256／SRI 校验。配套包保持 `animation-spec@0.2.2` 和 `shader-language@0.2.3`。Extensions 为 597,072 B，处于原批准的 600,000 B 上限内，原包体失败保留。[正式 Release](https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.4) 的八份附件已逐文件从 GitHub 回读，字节数与 SHA-256 全部一致。示例通过 [版本化入口](https://haiyuestudio.github.io/Engine/releases/0.2.4/examples/) 提供，部署由 master 文档对齐提交触发。未更新性能基线。
