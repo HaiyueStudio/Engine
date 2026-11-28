@@ -8,6 +8,7 @@ import {
 import { EngineError, EngineErrorCode } from './EngineError';
 import type { PluginLifecycleState } from './Lifecycle';
 import { createGPUResourceOwner, type GPUResourceTracker } from './GPUResourceTracker';
+import { Cleanup } from './Cleanup';
 
 export type EnginePluginHostScope = 'engine' | 'scene' | 'editor';
 
@@ -136,8 +137,7 @@ export class EnginePluginHost<TContext extends PluginRuntimeContext = PluginRunt
     return this;
   }
 
-  private _disablePlugin(name: string): void {
-    const installed = this._plugins.get(name);
+  private _disablePlugin(name: string, installed = this._plugins.get(name)): void {
     if (!installed || !installed.enabled) return;
     try {
       this._withOwner(installed.resourceOwner, () => this._disable(installed.plugin, installed.context));
@@ -165,21 +165,23 @@ export class EnginePluginHost<TContext extends PluginRuntimeContext = PluginRunt
   private _removePlugin(name: string): void {
     const installed = this._plugins.get(name);
     if (!installed) return;
-    try {
-      this._disablePlugin(name);
-      this._withOwner(installed.resourceOwner, () => this._uninstall(installed.plugin, installed.context));
-    } finally {
-      installed.context.unregister();
-      if (installed.resourceOwner) this._options.gpuResourceTracker?.releaseOwner(installed.resourceOwner);
-      this._plugins.delete(name);
-      installed.enabled = false;
-      installed.state = 'removed';
-      this._options.onUninstalled?.(name, installed);
-    }
+    // Remove the identity before invoking user code so a reentrant removal is a no-op.
+    this._plugins.delete(name);
+    const cleanup = new Cleanup();
+    cleanup.run(() => this._disablePlugin(name, installed));
+    cleanup.run(() => this._withOwner(installed.resourceOwner, () => this._uninstall(installed.plugin, installed.context)));
+    cleanup.run(() => installed.context.unregister());
+    if (installed.resourceOwner) cleanup.run(() => this._options.gpuResourceTracker?.releaseOwner(installed.resourceOwner!));
+    installed.enabled = false;
+    installed.state = 'removed';
+    cleanup.run(() => this._options.onUninstalled?.(name, installed));
+    cleanup.complete(`Plugin "${name}" cleanup failed.`);
   }
 
   clear(): void {
-    for (const name of this._topologicalOrder().reverse()) this._removePlugin(name);
+    const cleanup = new Cleanup();
+    for (const name of this._topologicalOrder().reverse()) cleanup.run(() => this._removePlugin(name));
+    cleanup.complete('Plugin host cleanup failed.');
   }
 
   disableAll(): void {

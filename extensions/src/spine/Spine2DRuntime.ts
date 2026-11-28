@@ -433,10 +433,8 @@ async function loadSpineRuntimeUnchecked(
   throwIfAborted(options.signal);
   const data = parsed.data as SpineData;
   const atlas = new Map(parsed.regions);
-  const pages = await gpuRenderer.loadAtlasPages(component, atlas);
-  throwIfAborted(options.signal);
-  const runtimeBuffers = gpuRenderer.createRuntimeBuffers();
-  return createSpineRuntimeState(data, atlas, pages, runtimeBuffers);
+  const pages = await gpuRenderer.loadAtlasPages(component, atlas, options.signal);
+  return gpuRenderer.createRuntime(pages, buffers => createSpineRuntimeState(data, atlas, pages, buffers), options.signal);
 }
 
 function requireSpineParsedAsset(value: unknown, source: string): SpineParsedAsset {

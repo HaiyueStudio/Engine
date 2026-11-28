@@ -126,9 +126,10 @@ export function parseAnimationValue(
   limit(tracksInput.length, limits.maxTracks, 'tracks', '$.tracks');
   let keyframeCount = 0;
   const tracks = tracksInput.map((value, index) => {
-    const track = parseBinaryTrackValue(value, index, nodeIds, duration, options.copyFloatData === true);
-    keyframeCount += track.times.length;
-    limit(keyframeCount, limits.maxKeyframes, 'keyframes', `$.tracks[${index}].times`);
+    const track = parseBinaryTrackValue(value, index, nodeIds, duration, options.copyFloatData === true, count => {
+      keyframeCount += count;
+      limit(keyframeCount, limits.maxKeyframes, 'keyframes', `$.tracks[${index}].times`);
+    });
     return track;
   });
 
@@ -513,11 +514,11 @@ function parseComponent(
     const commands = nonEmptyString(component.commands, `${path}.commands`).toUpperCase();
     if (!/^[MLQCZ]+$/.test(commands) || commands[0] !== 'M') fail('Path commands must start with M and contain only M, L, Q, C, Z.', `${path}.commands`);
     validatePathTopology(commands, `${path}.commands`);
+    countBudget('path', floatArrayLength(component.values, `${path}.values`));
     const values = floatArray(component.values, `${path}.values`, options.copyFloatData === true);
     const expected = pathValueCount(commands);
     if (values.length !== expected) fail(`Path values length must be ${expected} for command stream "${commands}".`, `${path}.values`);
     if (!commands.includes('Z')) fail('Filled path must contain at least one closed contour (Z).', `${path}.commands`);
-    countBudget('path', values.length);
     return Object.freeze({
       type,
       commands,
@@ -630,18 +631,21 @@ function parseComponent(
     if (!/^[MLQCZ]+$/.test(commands) || commands[0] !== 'M') fail('Path morph commands must start with M and contain only M, L, Q, C, Z.', `${path}.commands`);
     validatePathTopology(commands, `${path}.commands`);
     if (!commands.includes('Z')) fail('Filled path morph must contain at least one closed contour (Z).', `${path}.commands`);
-    const times = floatArray(component.times, `${path}.times`, options.copyFloatData === true);
-    const values = floatArray(component.values, `${path}.values`, options.copyFloatData === true);
+    const timeCount = floatArrayLength(component.times, `${path}.times`);
+    const valueCount = floatArrayLength(component.values, `${path}.values`);
+    countBudget('path', valueCount);
     const valueSize = safeInteger(component.valueSize, `${path}.valueSize`);
     if (valueSize !== pathValueCount(commands)) fail(`Path morph valueSize must be ${pathValueCount(commands)} for command stream "${commands}".`, `${path}.valueSize`);
-    if (times.length === 0 || values.length !== times.length * valueSize) fail('Path morph values must contain valueSize numbers for every keyframe.', `${path}.values`);
+    if (timeCount === 0 || valueCount !== timeCount * valueSize) fail('Path morph values must contain valueSize numbers for every keyframe.', `${path}.values`);
+    const interpolation = literal(component.interpolation, ['step', 'linear', 'cubic-bezier'] as const, `${path}.interpolation`);
+    const easingCount = component.easings === undefined ? undefined : floatArrayLength(component.easings, `${path}.easings`);
+    if (interpolation === 'cubic-bezier' && easingCount !== Math.max(0, timeCount - 1) * 4) fail('Cubic path morph easing data must contain four numbers per segment.', `${path}.easings`);
+    const times = floatArray(component.times, `${path}.times`, options.copyFloatData === true);
+    const values = floatArray(component.values, `${path}.values`, options.copyFloatData === true);
     for (let index = 0; index < times.length; index++) {
       if (times[index]! < 0 || (index > 0 && times[index]! <= times[index - 1]!)) fail('Path morph times must be non-negative and strictly increasing.', `${path}.times`);
     }
-    const interpolation = literal(component.interpolation, ['step', 'linear', 'cubic-bezier'] as const, `${path}.interpolation`);
     const easings = component.easings === undefined ? undefined : floatArray(component.easings, `${path}.easings`, options.copyFloatData === true);
-    if (interpolation === 'cubic-bezier' && easings?.length !== Math.max(0, times.length - 1) * 4) fail('Cubic path morph easing data must contain four numbers per segment.', `${path}.easings`);
-    countBudget('path', values.length);
     return Object.freeze({
       type,
       commands,
@@ -659,6 +663,9 @@ function parseComponent(
     const commands = nonEmptyString(component.commands, `${path}.commands`).toUpperCase();
     if (!/^[MLQCZ]+$/.test(commands) || commands[0] !== 'M') fail('Vector shape commands must start with M and contain only M, L, Q, C, Z.', `${path}.commands`);
     validatePathTopology(commands, `${path}.commands`, component.fill !== undefined);
+    const morphInput = component.morph === undefined ? undefined : record(component.morph, `${path}.morph`);
+    countBudget('path', floatArrayLength(component.values, `${path}.values`)
+      + (morphInput ? floatArrayLength(morphInput.values, `${path}.morph.values`) : 0));
     const values = floatArray(component.values, `${path}.values`, options.copyFloatData === true);
     const valueSize = pathValueCount(commands);
     if (values.length !== valueSize) fail(`Vector shape values length must be ${valueSize}.`, `${path}.values`);
@@ -679,7 +686,6 @@ function parseComponent(
       ));
     if (modifiers && (modifiers.length < 1 || modifiers.length > 8)) fail('Vector shape modifiers must contain 1–8 entries.', `${path}.modifiers`);
     if (!fill && !stroke) fail('Vector shape requires a fill or stroke paint.', path);
-    countBudget('path', values.length + (morph?.values.length ?? 0));
     return Object.freeze({
       type,
       commands,
@@ -936,16 +942,18 @@ function parseVectorValueTrack(
   if (valueSize < 1 || valueSize > 4096 || (expectedValueSize !== undefined && valueSize !== expectedValueSize)) {
     fail(`Vector track valueSize must be ${expectedValueSize ?? 'between 1 and 4096'}.`, `${path}.valueSize`);
   }
+  const timeCount = floatArrayLength(track.times, `${path}.times`), valueCount = floatArrayLength(track.values, `${path}.values`);
+  if (timeCount < 1 || valueCount !== timeCount * valueSize) fail('Vector track values must contain valueSize numbers for every keyframe.', `${path}.values`);
+  const interpolation = literal(track.interpolation, ['step', 'linear', 'cubic-bezier'] as const, `${path}.interpolation`);
+  const easingCount = track.easings === undefined ? undefined : floatArrayLength(track.easings, `${path}.easings`);
+  if (interpolation === 'cubic-bezier' && easingCount !== Math.max(0, timeCount - 1) * 4) fail('Cubic vector track easing data must contain four numbers per segment.', `${path}.easings`);
+  if (interpolation !== 'cubic-bezier' && easingCount !== undefined) fail('Vector track easings require cubic-bezier interpolation.', `${path}.easings`);
   const times = floatArray(track.times, `${path}.times`, copy);
   const values = floatArray(track.values, `${path}.values`, copy);
-  if (times.length < 1 || values.length !== times.length * valueSize) fail('Vector track values must contain valueSize numbers for every keyframe.', `${path}.values`);
   for (let index = 0; index < times.length; index++) {
     if (times[index]! < 0 || (index > 0 && times[index]! <= times[index - 1]!)) fail('Vector track times must be non-negative and strictly increasing.', `${path}.times`);
   }
-  const interpolation = literal(track.interpolation, ['step', 'linear', 'cubic-bezier'] as const, `${path}.interpolation`);
   const easings = track.easings === undefined ? undefined : floatArray(track.easings, `${path}.easings`, copy);
-  if (interpolation === 'cubic-bezier' && easings?.length !== Math.max(0, times.length - 1) * 4) fail('Cubic vector track easing data must contain four numbers per segment.', `${path}.easings`);
-  if (interpolation !== 'cubic-bezier' && easings !== undefined) fail('Vector track easings require cubic-bezier interpolation.', `${path}.easings`);
   return Object.freeze({ times, values, valueSize, interpolation, ...(easings ? { easings } : {}) });
 }
 
@@ -962,6 +970,8 @@ function parseVectorFill(value: unknown, path: string, copy: boolean) {
       ...(opacityTrack ? { opacityTrack } : {}),
     });
   }
+  const stopCount = floatArrayLength(fill.stops, `${path}.stops`);
+  if (stopCount < 10 || stopCount > 40 || stopCount % 5 !== 0) fail('Gradient stops must contain 2–8 offset,r,g,b,a tuples.', `${path}.stops`);
   const stops = floatArray(fill.stops, `${path}.stops`, copy);
   if (stops.length < 10 || stops.length > 40 || stops.length % 5 !== 0) fail('Gradient stops must contain 2–8 offset,r,g,b,a tuples.', `${path}.stops`);
   let previousOffset = -Infinity;
@@ -985,6 +995,10 @@ function parseVectorFill(value: unknown, path: string, copy: boolean) {
 
 function parseVectorStroke(value: unknown, path: string, copy: boolean) {
   const stroke = record(value, path);
+  if (stroke.dash !== undefined) {
+    const count = floatArrayLength(stroke.dash, `${path}.dash`);
+    if (count < 1 || count > 32) fail('Stroke dash values must contain 1–32 non-negative numbers.', `${path}.dash`);
+  }
   const dash = stroke.dash === undefined ? undefined : floatArray(stroke.dash, `${path}.dash`, copy);
   if (dash && (dash.length < 1 || dash.length > 32 || Array.from(dash).some(value => value < 0))) fail('Stroke dash values must contain 1–32 non-negative numbers.', `${path}.dash`);
   const gradient = stroke.gradient === undefined ? undefined : parseVectorFill(stroke.gradient, `${path}.gradient`, copy);
@@ -1044,15 +1058,17 @@ function parseCompositeLayer(value: unknown, path: string, copy: boolean) {
 }
 
 /** @internal Compact-binary structural decoder entry point. */
-export function parseBinaryTrackValue(value: unknown, index: number, nodeIds: Set<string>, duration: number, copy: boolean): ParsedAnimationTrack {
+export function parseBinaryTrackValue(value: unknown, index: number, nodeIds: Set<string>, duration: number, copy: boolean, countKeyframes?: (count: number) => void): ParsedAnimationTrack {
   const path = `$.tracks[${index}]`;
   const track = record(value, path);
   const node = nonEmptyString(track.node, `${path}.node`);
   if (!nodeIds.has(node)) fail(`Track references missing node "${node}".`, `${path}.node`);
   const property = literal(track.property, ['position', 'rotation', 'scale', 'opacity'] as const, `${path}.property`);
   const interpolation = literal(track.interpolation, ['step', 'linear', 'cubic-bezier'] as const, `${path}.interpolation`);
+  const timeCount = floatArrayLength(track.times, `${path}.times`);
+  countKeyframes?.(timeCount);
+  if (timeCount < 1) fail('Track must contain at least one keyframe.', `${path}.times`);
   const times = floatArray(track.times, `${path}.times`, copy);
-  if (times.length < 1) fail('Track must contain at least one keyframe.', `${path}.times`);
   let previous = -Infinity;
   // Track pools are Float32-backed. A source key exactly at a non-representable
   // composition duration may round above the Float64 duration, but no later
@@ -1065,6 +1081,11 @@ export function parseBinaryTrackValue(value: unknown, index: number, nodeIds: Se
     previous = current;
   }
   const valueSize = trackValueSize(property);
+  if (floatArrayLength(track.values, `${path}.values`) !== timeCount * valueSize) fail(`Track values length must equal keyframe count × ${valueSize}.`, `${path}.values`);
+  const easingCount = track.easings === undefined ? undefined : floatArrayLength(track.easings, `${path}.easings`);
+  if (interpolation === 'cubic-bezier' && easingCount !== Math.max(0, timeCount - 1) * 4) fail(`Cubic track easings length must be ${Math.max(0, timeCount - 1) * 4}.`, `${path}.easings`);
+  if (interpolation !== 'cubic-bezier' && easingCount !== undefined) fail('easings are only valid for cubic-bezier tracks.', `${path}.easings`);
+  if (track.spatialTangents !== undefined && (property !== 'position' || interpolation === 'step' || floatArrayLength(track.spatialTangents, `${path}.spatialTangents`) !== Math.max(0, timeCount - 1) * 4)) fail(`spatialTangents require position, non-step and ${Math.max(0, timeCount - 1) * 4} values.`, `${path}.spatialTangents`);
   const values = floatArray(track.values, `${path}.values`, copy);
   if (values.length !== times.length * valueSize) {
     fail(`Track values length must equal keyframe count × ${valueSize}.`, `${path}.values`);
@@ -1147,6 +1168,7 @@ function validateHierarchy(nodes: readonly Readonly<AnimationNode>[], ids: Set<s
 
 function validateComposites(nodes: readonly Readonly<AnimationNode>[], ids: Set<string>): void {
   const indexById = new Map(nodes.map((node, index) => [node.id, index]));
+  const sources: number[][] = [];
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index]!;
     const layers = compositeLayers(node.composite);
@@ -1156,16 +1178,28 @@ function validateComposites(nodes: readonly Readonly<AnimationNode>[], ids: Set<
       if (!ids.has(source)) fail(`Composite references missing source node "${source}".`, sourcePath);
       if (source === node.id) fail('Composite source cannot reference its own node.', sourcePath);
     }
+    sources.push(layers.map(layer => indexById.get(layer.source)!));
   }
-  const states = new Uint8Array(nodes.length);
-  const visit = (index: number): void => {
-    if (states[index] === 2) return;
-    if (states[index] === 1) fail('Composite graph contains a cycle.', `$.nodes[${index}].composite`);
-    states[index] = 1;
-    for (const layer of compositeLayers(nodes[index]!.composite)) visit(indexById.get(layer.source)!);
-    states[index] = 2;
-  };
-  for (let index = 0; index < nodes.length; index++) visit(index);
+  validateCompositeGraph(sources, index => fail('Composite graph contains a cycle.', `$.nodes[${index}].composite`));
+}
+
+/** @internal Both codecs traverse the same bounded graph without using the JavaScript call stack. */
+export function validateCompositeGraph(sources: readonly (readonly number[])[], cycle: (index: number) => never, states = new Uint8Array(sources.length)): void {
+  states.fill(0);
+  const nodes = new Uint32Array(sources.length), edges = new Uint32Array(sources.length);
+  for (let root = 0; root < sources.length; root++) {
+    if (states[root] === 2) continue;
+    let depth = 1;
+    nodes[0] = root; edges[0] = 0; states[root] = 1;
+    while (depth) {
+      const top = depth - 1, index = nodes[top]!, next = edges[top]!, children = sources[index]!;
+      if (next === children.length) {states[index] = 2; depth--; continue;}
+      const child = children[next]!; edges[top] = next + 1;
+      if (states[child] === 1) cycle(child);
+      if (states[child] === 2) continue;
+      nodes[depth] = child; edges[depth] = 0; states[child] = 1; depth++;
+    }
+  }
 }
 
 function compositeLayers(composite: Readonly<AnimationNode>['composite']): readonly AnimationCompositeLayer[] {
@@ -1189,6 +1223,10 @@ function extensionContext(extension: string, path: string) {
 
 function trackValueSize(property: AnimationTrackProperty): 1 | 2 {
   return property === 'position' || property === 'scale' ? 2 : 1;
+}
+
+function floatArrayLength(value: unknown, path: string): number {
+  return value instanceof Float32Array ? value.length : array(value, path).length;
 }
 
 function floatArray(value: unknown, path: string, copy: boolean): Float32Array {

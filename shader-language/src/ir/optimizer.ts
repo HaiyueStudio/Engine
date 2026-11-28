@@ -133,6 +133,7 @@ function optimizeEntry(entry: ShaderIrEntry): EntryOptimization {
   const oldToIntermediate = new Map<number, number>();
   const intermediate: ShaderIrNode[] = [];
   const expressionIds = new Map<string, number>();
+  const mergedSources = new Map<number, Map<string, ShaderIrSource>>();
   const protectedCounts: [number, number, number, number] = [0, 0, 0, 0];
   let foldedCount = 0;
   let cseCount = 0;
@@ -149,7 +150,7 @@ function optimizeEntry(entry: ShaderIrEntry): EntryOptimization {
     if (replacement !== null) {
       foldedCount += 1;
       oldToIntermediate.set(node.id, replacement);
-      mergeNodeSources(intermediate, replacement, nodeSources(candidate));
+      mergeNodeSources(intermediate, replacement, nodeSources(candidate), mergedSources);
       continue;
     }
     const folded = foldConstantNode(candidate, intermediate);
@@ -168,7 +169,7 @@ function optimizeEntry(entry: ShaderIrEntry): EntryOptimization {
     if (existing !== undefined) {
       cseCount += 1;
       oldToIntermediate.set(node.id, existing);
-      mergeNodeSources(intermediate, existing, nodeSources(normalized));
+      mergeNodeSources(intermediate, existing, nodeSources(normalized), mergedSources);
       continue;
     }
     expressionIds.set(key, normalized.id);
@@ -176,6 +177,10 @@ function optimizeEntry(entry: ShaderIrEntry): EntryOptimization {
     oldToIntermediate.set(node.id, normalized.id);
   }
 
+  for (const [id, sources] of mergedSources) {
+    const values = [...sources.values()], node = intermediate[id]!;
+    intermediate[id] = Object.freeze({...node, ...(values.length <= 1 ? {} : {sourceAliases: Object.freeze(values.slice(1))})});
+  }
   const intermediateInputIds = entry.inputs.map(input => oldToIntermediate.get(input.nodeId)!);
   const intermediateOutputId = entry.output ? oldToIntermediate.get(entry.output.nodeId)! : null;
   const compacted = compactNodes(intermediate, intermediateInputIds, intermediateOutputId);
@@ -199,15 +204,19 @@ function optimizeEntry(entry: ShaderIrEntry): EntryOptimization {
 }
 
 function requiredNodeIds(entry: ShaderIrEntry): ReadonlySet<number> {
-  const required = new Set(entry.inputs.map(input => input.nodeId));
-  const visit = (id: number): void => {
-    if (required.has(id)) return;
-    const node = entry.nodes[id];
-    if (!node) return;
+  return collectRequiredNodes(entry.nodes, entry.inputs.map(input => input.nodeId), entry.output?.nodeId ?? null);
+}
+
+function collectRequiredNodes(nodes: readonly ShaderIrNode[], inputIds: readonly number[], outputId: number | null): ReadonlySet<number> {
+  const required = new Set(inputIds), pending = outputId === null ? [] : [outputId];
+  while (pending.length) {
+    const id = pending.pop()!;
+    if (required.has(id)) continue;
+    const node = nodes[id];
+    if (!node) continue;
     required.add(id);
-    for (const operand of node.operands) visit(operand);
-  };
-  if (entry.output) visit(entry.output.nodeId);
+    for (let index = node.operands.length - 1; index >= 0; index--) pending.push(node.operands[index]!);
+  }
   return required;
 }
 
@@ -216,15 +225,7 @@ function compactNodes(
   inputIds: readonly number[],
   outputId: number | null,
 ): { readonly nodes: readonly ShaderIrNode[]; readonly oldToNew: ReadonlyMap<number, number> } {
-  const required = new Set(inputIds);
-  const visit = (id: number): void => {
-    if (required.has(id)) return;
-    const node = nodes[id];
-    if (!node) return;
-    required.add(id);
-    for (const operand of node.operands) visit(operand);
-  };
-  if (outputId !== null) visit(outputId);
+  const required = collectRequiredNodes(nodes, inputIds, outputId);
   const oldToNew = new Map<number, number>();
   for (const node of nodes) if (required.has(node.id)) oldToNew.set(node.id, oldToNew.size);
   const compacted = nodes.filter(node => required.has(node.id)).map(node => Object.freeze({
@@ -459,28 +460,16 @@ function expressionKey(node: ShaderIrNode): string {
   ]);
 }
 
-function mergeNodeSources(nodes: ShaderIrNode[], id: number, additions: readonly ShaderIrSource[]): void {
+function mergeNodeSources(nodes: readonly ShaderIrNode[], id: number, additions: readonly ShaderIrSource[], merged: Map<number, Map<string, ShaderIrSource>>): void {
   const node = nodes[id];
   if (!node) return;
-  const sources = uniqueSources([...nodeSources(node), ...additions]);
-  nodes[id] = Object.freeze({
-    ...node,
-    ...(sources.length <= 1 ? {} : { sourceAliases: Object.freeze(sources.slice(1)) }),
-  });
+  let sources = merged.get(id);
+  if (!sources) {sources = new Map(nodeSources(node).map(source => [JSON.stringify(source), source])); merged.set(id, sources);}
+  for (const source of additions) {const key = JSON.stringify(source); if (!sources.has(key)) sources.set(key, source);}
 }
 
 function nodeSources(node: ShaderIrNode): readonly ShaderIrSource[] {
   return Object.freeze([node.source, ...(node.sourceAliases ?? [])]);
-}
-
-function uniqueSources(sources: readonly ShaderIrSource[]): ShaderIrSource[] {
-  const seen = new Set<string>();
-  return sources.filter(source => {
-    const key = JSON.stringify(source);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
 }
 
 function incrementProtectedCount(counts: [number, number, number, number], operation: ShaderIrNodeOperation): void {

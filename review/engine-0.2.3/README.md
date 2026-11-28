@@ -1,6 +1,6 @@
 # Engine 0.2.3 验收入口
 
-G11 已完成。冻结候选 `4beb46f` 已通过设备验收、Windows 正式性能与 HYA 检查、Ubuntu CI、全局门禁和无发布演练。四个重建 tarball 的 SHA-256 与已验收制品一致。正式发布仍待确定从冻结候选还是从合入后的主干发布。 [G11 检查索引](g11-checks.json) · [候选资格证明](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/g11-final-qualification.json)
+G11 已完成。冻结候选 `4beb46f` 已通过设备验收、Windows 正式性能与 HYA 检查、Ubuntu CI、全局门禁和无发布演练。四个重建 tarball 的 SHA-256 与已验收制品一致。Engine 0.2.3 已发布。签名标签绑定 `4beb46f`，Pages 用 `28e402f` 部署。 [G11 检查索引](g11-checks.json) · [候选资格证明](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/g11-final-qualification.json)
 
 合同：[ADR 0139](../../docs/for-ai/adr/0139-engine-023-gameplay-contracts.md) · [行为](contract.md) · [目标声明](api-contract.d.ts) · [机器合同](../../config/gameplay-023-contract.json)。本页汇总结论和剩余责任，逐次尝试与本次整理前原文见[归档清单](../archive/engine-review-entry-history-20261102.json)。原 checks JSON、原始捕获、合同和源码身份保留。
 
@@ -43,7 +43,7 @@ G08–G10 的原生像素、独立消费者、包体、资源及整仓检查均�
 - Windows 最终候选的真实 IME、手柄和听音均已通过。手柄覆盖关卡启动、角色移动、导航、配置恢复、B 键起跳和落地，起点碰撞体挡住起跳的记录保留。听音的 13 个检查点覆盖声道、距离静音、淡出、配置恢复和切回前台。 [Windows IME](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-ime-4beb46f-final-acceptance.json) · [Windows 手柄](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-gamepad-4beb46f-final-acceptance.json) · [Windows 听音](../../artifacts/engine-0.2.3/g11/final-apple-retest/windows-hearing-4beb46f-final-acceptance.json)
 - Mac 浏览器现场听音已通过。第一轮 12 个检查点覆盖声道、远处静音、淡出、音量重置、静音切换、暂停／恢复和切回前台后的播放。补测的三个关键检查点确认静音配置保存、取消静音、恢复静音均生效。新包 210 个清单文件逐项校验，原 204 个文件字节一致，音频、GPU 和测试进程残留为 0。 [Mac 最终听音复核](../../artifacts/engine-0.2.3/g11/final-apple-retest/returned-20261115T231035/mac-browser-hearing-final-acceptance.json)
 - HYA 布局按原 27 组口径复测通过，HUD 10% 变更组三轮文本测量 P95 为 1.080、0.884、0.901 ms，均在 2 ms 上限内。23 项语料三轮通过。30 项 HYA 生产 GPU 捕获已独立复核，四组 GPU P95 均满足 5% 门槛，12 项候选生产帧节奏均通过。Windows 全局门禁第三轮通过，随后完成无发布演练及独立复核。前两轮的 npm 回执和 Rollup 退出失败保留。 [门禁及包哈希](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/global-gate-npm11-windows-cleanup-result.json) · [演练报告](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/global-gate-continuation/passed-evidence/rehearsal-report.json)
-- 当前主干 `a8b7ae6` 与冻结候选 `4beb46f` 分叉。重新比对发现 57 个交付树路径不同，其中 15 个为运行时源码。验收继续绑定冻结候选，正式发布需明确采用该源码或完成差异合入并复验受影响部分。 [当前差异](../../artifacts/engine-0.2.3/g11/final-qualification-4beb46f/release-source-alignment-audit.json) · [历史差异](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json)
+- 发布源码为冻结候选 `4beb46f`。Pages 部署提交 `28e402f` 包含发布候选，交付输入一致，公开目录复核通过。 [GitHub Release](https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.3) · [示例站点](https://haiyuestudio.github.io/Engine/releases/0.2.3/examples/) · [发布回执](../../artifacts/engine-0.2.3/g11/release-preparation-20261116/execution/publication-result.json)
 
 iPhone 音频无声由运行时接线顺序导致，旧路径断在 voice-out → ui-in。Native `0e9db72` 先接好声音链，再接入总线，退役时断开总线并复用混音节点。该候选的 Mac 原生音频专项 14/14 通过。iPhone 真机通过左右／居中、距离静音、淡出、静音切换、音量及前后台恢复，退出后被追踪的音频与 GPU 资源归零。 [完整音频验收](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-bus-last/returned-20261110T124527/physical-audio-acceptance.json) [原断连证据](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-graph-paused/macos-graph-comparison.json)
 

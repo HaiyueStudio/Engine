@@ -1,7 +1,8 @@
 import type {GuiStyle, GuiElementOptions} from './GuiTypes';
 import type {GuiImageSource} from './components/GuiImage';
 
-export type GuiThemeState = Readonly<{hover: boolean; focus: boolean; pressed: boolean; disabled: boolean}>;
+export type GuiThemeState = Readonly<{hover: boolean; focus: boolean; pressed: boolean; disabled: boolean;
+  checked?: boolean; selected?: boolean; invalid?: boolean; loading?: boolean; readOnly?: boolean; open?: boolean}>;
 
 export interface GuiNineSliceOptions extends GuiElementOptions {
   readonly source: GuiImageSource;

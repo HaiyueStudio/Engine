@@ -171,13 +171,49 @@
     "./gui-controls": {
       "types": "./dist/gui-controls.d.ts",
       "import": "./dist/gui-controls.js"
+    },
+    "./gui-display": {
+      "types": "./dist/gui-display.d.ts",
+      "import": "./dist/gui-display.js"
+    },
+    "./gui-overlays": {
+      "types": "./dist/gui-overlays.d.ts",
+      "import": "./dist/gui-overlays.js"
+    },
+    "./gui-forms": {
+      "types": "./dist/gui-forms.d.ts",
+      "import": "./dist/gui-forms.js"
+    },
+    "./gui-data": {
+      "types": "./dist/gui-data.d.ts",
+      "import": "./dist/gui-data.js"
+    },
+    "./gui-content": {
+      "types": "./dist/gui-content.d.ts",
+      "import": "./dist/gui-content.js"
+    },
+    "./gui-pickers": {
+      "types": "./dist/gui-pickers.d.ts",
+      "import": "./dist/gui-pickers.js"
+    },
+    "./gui-assets": {
+      "types": "./dist/gui-assets.d.ts",
+      "import": "./dist/gui-assets.js"
+    },
+    "./gui-composition": {
+      "types": "./dist/gui-composition.d.ts",
+      "import": "./dist/gui-composition.js"
+    },
+    "./gui-assistive": {
+      "types": "./dist/gui-assistive.d.ts",
+      "import": "./dist/gui-assistive.js"
     }
   },
   "scripts": {
     "build": "node ../scripts/build-rollup-once.mjs && node ../scripts/build-rollup-once.mjs rollup.worker.config.js && node ../scripts/prune-package-declarations.mjs extensions",
     "build:animation-runtime-tests": "node -e \"require('node:fs').rmSync('dist-test', { recursive: true, force: true })\" && tsc -p tsconfig.animation-runtime-tests.json",
     "test": "npm run build && npm run build:animation-runtime-tests && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit && tsc -p tsconfig.controls-type-tests.json && tsc -p tsconfig.i18n-type-tests.json && tsc -p tsconfig.narrative-type-tests.json && tsc -p tsconfig.share-content-type-tests.json && tsc -p tsconfig.achievements-type-tests.json"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit && tsc -p tsconfig.controls-type-tests.json && tsc -p tsconfig.i18n-type-tests.json && tsc -p tsconfig.narrative-type-tests.json && tsc -p tsconfig.share-content-type-tests.json && tsc -p tsconfig.achievements-type-tests.json && tsc -p tsconfig.gui-p1-type-tests.json && tsc -p tsconfig.gui-p2-type-tests.json && tsc -p tsconfig.gui-p3-type-tests.json"
   },
   "dependencies": {
     "draco3dgltf": "^1.5.7",

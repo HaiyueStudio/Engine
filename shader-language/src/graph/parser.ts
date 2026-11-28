@@ -4,6 +4,7 @@ import {
   type ShaderDiagnosticCode,
 } from '../contracts';
 import { shaderError } from '../diagnostics';
+import {shaderGraphNodeLocations} from './sourceLocations';
 import {
   SHADER_GRAPH_V1_REQUIRED_ROOT_FIELDS,
   SHADER_GRAPH_V1_ROOT_FIELDS,
@@ -15,7 +16,6 @@ import {
   type ShaderGraphResourceFrequency,
   type ShaderGraphResourceKind,
   type ShaderGraphResourceV1,
-  type ShaderGraphSourceLocation,
   type ShaderGraphV1,
   type ShaderGraphValueV1,
 } from './contracts';
@@ -84,10 +84,7 @@ export function parseShaderGraphV1(
   const metadata = root.metadata === undefined
     ? Object.freeze({})
     : Object.freeze({ ...objectValue(root.metadata, 'metadata', sourceName) });
-  const nodeLocations = Object.freeze(Object.fromEntries(nodes.flatMap(node => {
-    const location = sourceText === null ? null : locateNode(sourceText, node.id);
-    return location ? [[node.id, location]] : [];
-  })));
+  const nodeLocations = sourceText === null ? Object.freeze({}) : shaderGraphNodeLocations(sourceText);
 
   return Object.freeze({
     format: 'haiyue-shader-graph' as const,
@@ -259,19 +256,6 @@ function expectUnique(values: readonly string[], path: string, sourceName: strin
     if (seen.has(value)) graphError('E_SHADER_GRAPH_INVALID', `Duplicate ${path} id ${value}.`, `${path}.${index}`, sourceName);
     seen.add(value);
   }
-}
-
-function locateNode(source: string, id: string): ShaderGraphSourceLocation | null {
-  const pattern = new RegExp(`\\"id\\"\\s*:\\s*${escapeRegExp(JSON.stringify(id))}`);
-  const match = pattern.exec(source);
-  if (!match || match.index === undefined) return null;
-  const before = source.slice(0, match.index);
-  const lines = before.split('\n');
-  return Object.freeze({ line: lines.length, column: (lines[lines.length - 1]?.length ?? 0) + 1 });
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function graphError(

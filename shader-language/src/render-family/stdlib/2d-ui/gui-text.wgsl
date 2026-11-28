@@ -1,5 +1,3 @@
-override GUI_LINEAR_OUTPUT: bool = false;
-fn gui_to_linear(c:vec3<f32>)->vec3<f32>{return select(c/12.92,pow((c+0.055)/1.055,vec3<f32>(2.4)),c>vec3<f32>(0.04045));}
 struct Viewport {
   size : vec2<f32>,
   _pad : vec2<f32>,
@@ -39,14 +37,9 @@ fn vs_main(input : VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
-  if (
-    input.screenPos.x < input.clip.x ||
-    input.screenPos.y < input.clip.y ||
-    input.screenPos.x > input.clip.z ||
-    input.screenPos.y > input.clip.w
-  ) {
-    discard;
-  }
+  let aa=max(0.5,length(fwidth(input.screenPos))*0.5);
+  let clipAlpha=gui_clip(input.screenPos,input.clip,aa);
+  if(clipAlpha<=0.001){discard;}
   let sample = textureSample(fontTex, fontSampler, input.uv);
   let alpha = sample.a * input.color.a;
   if (alpha <= 0.01) {
@@ -54,5 +47,6 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   }
   let rgb = select(sample.rgb, gui_to_linear(sample.rgb), GUI_LINEAR_OUTPUT);
   // Negative tint marks a color glyph; ordinary/legacy atlases remain alpha masks.
-  return vec4<f32>(select(input.color.rgb, rgb, input.color.r < 0.0), alpha);
+  let result=vec4<f32>(select(input.color.rgb, rgb, input.color.r < 0.0), alpha);
+  return vec4<f32>(result.rgb,result.a*clipAlpha);
 }

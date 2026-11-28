@@ -1,5 +1,6 @@
 import type {GuiElement,GuiElementOptions,GuiFocusManager} from '@haiyue/engine/gui';
-export interface GuiCollectionRow<T> {readonly element:GuiElement;bind(item:T,key:string,index:number):()=>void;dispose():void;}
+export interface GuiCollectionRowState {readonly selected:boolean;readonly depth:number;readonly expanded:boolean;readonly leaf:boolean;}
+export interface GuiCollectionRow<T> {readonly element:GuiElement;bind(item:T,key:string,index:number):()=>void;setState?(state:GuiCollectionRowState):void;dispose():void;}
 export interface GuiCollectionStats {readonly logicalItems:number;readonly first:number;readonly last:number;readonly rowInstances:number;readonly boundRows:number;}
 export interface GuiVirtualListOptions<T> {
   readonly items:readonly T[];readonly keyOf:(item:T)=>string;readonly rowHeight:number;readonly height:number;

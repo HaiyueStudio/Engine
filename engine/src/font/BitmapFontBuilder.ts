@@ -20,6 +20,8 @@ export interface BuildFontOptions {
   atlasSize?: number;
   /** Font weight (default: 'normal') */
   fontWeight?: string;
+  /** Stable font ascent/descent and fractional advances; ink retains legacy metrics. */
+  metrics?: 'ink' | 'font';
 }
 
 export interface BuiltFont {
@@ -73,12 +75,13 @@ export function buildBitmapFontGlyphs(options: BuildFontOptions, characters: rea
   for (const ch of new Set(characters)) {
     if (!ch.codePointAt(0)) continue;
     const m = pctx.measureText(ch);
-    const ascent  = Math.ceil(m.actualBoundingBoxAscent)  + 1;
-    const descent = Math.ceil(m.actualBoundingBoxDescent) + 1;
-    const advance = Math.ceil(m.width) + 1;
+    const precise=options.metrics==='font';
+    const ascent  = Math.ceil(precise&&Number.isFinite(m.fontBoundingBoxAscent)?m.fontBoundingBoxAscent:m.actualBoundingBoxAscent) + 1;
+    const descent = Math.ceil(precise&&Number.isFinite(m.fontBoundingBoxDescent)?m.fontBoundingBoxDescent:m.actualBoundingBoxDescent) + 1;
+    const advance = precise?m.width:Math.ceil(m.width) + 1;
     maxAscent  = Math.max(maxAscent,  ascent);
     maxDescent = Math.max(maxDescent, descent);
-    glyphs.push({ char: ch, code: ch.codePointAt(0)!, cellW: advance, ascent, descent, xadvance: advance });
+    glyphs.push({ char: ch, code: ch.codePointAt(0)!, cellW: Math.ceil(advance), ascent, descent, xadvance: advance });
   }
 
   const lineHeight = maxAscent + maxDescent + padding * 2;
@@ -132,7 +135,7 @@ export function buildBitmapFontGlyphs(options: BuildFontOptions, characters: rea
   const data = createBitmapFontData({
     face:       fontFamily,
     size:       fontSize,
-    bold:       fontWeight === 'bold',
+    bold:       fontWeight === 'bold' || Number(fontWeight)>=600,
     italic:     false,
     lineHeight,
     base,

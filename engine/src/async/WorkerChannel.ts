@@ -136,10 +136,10 @@ export class WorkerChannel {
 
     const id = this.nextId++;
     const message: WorkerChannelRequestEnvelope = {
+      ...payload,
       version: WORKER_CHANNEL_PROTOCOL_VERSION,
       id,
       type,
-      ...payload,
     };
     return new Promise<T>((resolve, reject) => {
       const pending: PendingWorkerTask = {

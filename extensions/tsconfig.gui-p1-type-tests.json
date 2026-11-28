@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/extensions/gui-display": ["./src/gui-display.ts"],
+      "@haiyue/extensions/gui-overlays": ["./src/gui-overlays.ts"],
+      "@haiyue/extensions/gui-controls": ["./src/gui-controls.ts"],
+      "@haiyue/extensions/gui-collections": ["./src/gui-collections.ts"]
+    },
+    "types": ["@webgpu/types"]
+  },
+  "include": ["type-tests/gui-p1-contract.type-test.ts"]
+}

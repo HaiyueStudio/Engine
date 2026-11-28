@@ -58,6 +58,7 @@
 能力是否进入 stable 以 [API stability](../for-ai/api-stability.md) 和发布包 exports 为准，不应根据源码目录推断公共 API。
 
 - [Scrollable GUI and rule help](./gui.md)
+- [GUI component library](./gui-library.md)：展示／反馈、菜单／浮层、自定义部件与内容借用（下一 minor 开发能力）。
 
 - [GPU 实例与模拟（experimental）](gpu-instances.md)
 - [固定 GUI 与连续 3D 分区（0.2.2 开发候选）](region-rendering.md)
@@ -70,3 +71,5 @@
 
 - [Gameplay Kit](gameplay-kit.md)：0.2.3 候选的设置、加载、角色／相机、地图、集合 GUI 和音频组合。
 - [0.2.3 候选说明](release-notes-0.2.3.md)：逐包版本、新能力和验收边界；尚未发布。
+- [GUI 数据、表单与内容组合（开发中）](gui-data-content.md)：原生编辑器、虚拟行与共享浮层上的可定制组件。
+- [GUI 专项组件（开发中）](gui-specialty.md)：日历时间、上传／二维码、页面组合、输入辅助及显式宿主接入。

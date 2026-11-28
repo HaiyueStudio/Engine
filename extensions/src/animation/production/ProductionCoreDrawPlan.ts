@@ -9,12 +9,15 @@ import {AnimationVisual2D} from '../AnimationVisual2D.js';
 import {writeAnimationVisualMatrix} from '../AnimationVisualMatrix.js';
 import type {AnimationTextBitmapSnapshot} from '../AnimationTextRasterizer.js';
 import {ProductionDrawError, type ProductionDrawPlan, type ProductionDrawTexture, type ProductionDrawTextures} from '../layout/production/ProductionDrawPlan.js';
+import type {CoreGeometrySnapshotCache} from './CoreGeometrySnapshotCache.js';
 import {ProductionTexturePending} from '../layout/production/ProductionTextureOwner.js';
 
 export interface ProductionCoreDrawOptions {
   readonly viewport: readonly [number, number]; readonly dpr: number;
   /** Explicit caller ceiling, including the original renderer's xy/uv/index upload representation. */
   readonly maxGeometryBytes: number;
+  /** Private per-core cache; cached storage is an owned immutable copy, never a borrowed author array. */
+  readonly geometrySnapshots?: CoreGeometrySnapshotCache;
   readonly textures?: Pick<ProductionDrawTextures, 'bitmap'>;
   /** Must acquire an independent ready lease; never return the runtime's borrowed handle. */
   readonly image?: (visual: AnimationVisual2D) => ProductionDrawTexture;
@@ -50,10 +53,10 @@ export function compileProductionCoreDrawPlan(world: World, cameraEntity: Entity
       const source = entity.getComponent(AnimationVisual2D);
       if (!source || isEntityDisabledInHierarchyCached(entity, disabled)) continue;
       const path = '$.core.visuals[' + JSON.stringify(source.nodeKey) + ']';
-      const positions = source.geometry.positions.slice(), indices = source.geometry.indices?.slice();
-      geometryBytes += positions.byteLength * 2 + (indices?.byteLength ?? 0);
+      geometryBytes += source.geometry.positions.byteLength * 2 + (source.geometry.indices?.byteLength ?? 0);
       if (!Number.isSafeInteger(geometryBytes) || geometryBytes > options.maxGeometryBytes) fail('E_HYA_RUNTIME_LIMIT', path + '.geometry', 'core snapshot exceeds its explicit geometry ceiling');
-      const geometry = new Geometry2D(positions, indices, {topology: source.geometry.topology});
+      const geometry = options.geometrySnapshots?.geometry(source.geometry)
+        ?? new Geometry2D(source.geometry.positions.slice(), source.geometry.indices?.slice(), {topology: source.geometry.topology});
       const local = new Float32Array(16);
       writeAnimationVisualMatrix(local, world.frameData.getWorldMatrix2D(entity), source.localTransform);
       const matrix = mat4.multiply(projection, local);
@@ -85,7 +88,7 @@ export function compileProductionCoreDrawPlan(world: World, cameraEntity: Entity
         color: source.color, multiplyColor: source.multiplyColor, screenColor: source.screenColor, blendMode: source.blendMode,
         culling: source.culling, sourceOnly: source.sourceOnly, localTransform: transform,
         ...(source.compositeLayers.length ? {composite: {layers: source.compositeLayers.map(layer => ({...layer}))}} : {}),
-        ...(source.uvs ? {uvs: source.uvs.slice()} : {}), uvRect: source.uvRect,
+        ...(source.uvs ? {uvs: options.geometrySnapshots?.uvs(source.uvs) ?? source.uvs.slice()} : {}), uvRect: source.uvRect,
         gradient: source.gradient ? {...source.gradient, start: [...source.gradient.start], end: [...source.gradient.end], stops: source.gradient.stops.slice()} : null,
         effects: source.effects.map(effect => ({kind: effect.kind, values: effect.values.slice()})),
         ...(texture ? {requiresTexture: true, textureAlphaMode: texture.alphaMode,

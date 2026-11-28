@@ -88,19 +88,19 @@
     },
     "@haiyue/extensions": {
       "workspace": "extensions",
-      "maxPackedBytes": 600000,
+      "maxPackedBytes": 655000,
       "maxUnpackedBytes": 3000000,
       "capacity": {
         "reviewed": {
-          "packedBytes": 543428,
-          "unpackedBytes": 2651601,
-          "fileCount": 188
+          "packedBytes": 649527,
+          "unpackedBytes": 2478465,
+          "fileCount": 382
         },
         "growthReserve": {
-          "packedBytes": 56572,
-          "unpackedBytes": 348399
+          "packedBytes": 5473,
+          "unpackedBytes": 521535
         },
-        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative; 0.2.3 G08 borrowed atlas and bounded storage; ADR 0140 G07 admits 30,000 packed bytes for the focused visual novel capability, with the original reserve and unpacked limit preserved"
+        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative; 0.2.3 G08 borrowed atlas and bounded storage; ADR 0140 G07 admits 30,000 packed bytes for the focused visual novel capability, with the original reserve and unpacked limit preserved; ADR 0142: focused GUI P1 composition and overlays, measured installed closures, original owners retained; ADR 0143: measured P2 forms/data/content, original editor/window/layout/input owners; duplicate and leaf closure audit in review/gui-p2-20261127.md; ADR 0144 P3 adds 14 specialized controllers in four optional entries, explicit hosts and original-owner reuse. Deterministic 649407 B raw probe and leaf closure audit retained in artifacts/gui-p3; existing consumers and performance/resource/pixel limits unchanged."
       },
       "declaredFiles": [
         "README.md",
@@ -297,7 +297,7 @@
     },
     "gui-font": {
       "fixture": "scripts/fixtures/engine-consumers/gui-font.mjs",
-      "maxGzipBytes": 95000,
+      "maxGzipBytes": 108000,
       "requiredExports": [
         "GuiSystem",
         "GuiToast"
@@ -306,11 +306,18 @@
         "2d-ui-shader-artifact"
       ],
       "capacityReview": {
-        "previousMaxGzipBytes": 55000,
-        "reviewedGzipBytes": 80635,
-        "growthReserveBytes": 14365,
-        "capabilityBasis": "G03–G11 shared GUI layout, region scheduling, routed input, Unicode editing, skins, drag, cursor and HYA presentation; one Engine GUI owner, no OpenType parser",
-        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+        "previousMaxGzipBytes": 95000,
+        "reviewedGzipBytes": 105992,
+        "growthReserveBytes": 2008,
+        "capabilityBasis": "GUI P0 shared semantic themes, state/part cascade, typography, analytic boxes/rounded clips and visible activity. Same Engine GUI/input/font/layout owners, existing three GPU passes; installed class identity and deferred heavy capabilities passed; no duplicate renderer or DOM/OpenType dependency.",
+        "decision": "docs/for-ai/adr/0141-gui-visual-foundation.md",
+        "priorReview": {
+          "previousMaxGzipBytes": 55000,
+          "reviewedGzipBytes": 80635,
+          "growthReserveBytes": 14365,
+          "capabilityBasis": "G03–G11 shared GUI layout, region scheduling, routed input, Unicode editing, skins, drag, cursor and HYA presentation; one Engine GUI owner, no OpenType parser",
+          "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+        }
       }
     },
     "input-action-map": {
@@ -492,16 +499,15 @@
       "entrypoint": "./narrative",
       "fixture": "scripts/fixtures/engine-consumers/extensions-narrative-gui.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 23000,
+      "maxGzipBytes": 29000,
       "requiredExports": [
         "NarrativeGui"
       ],
       "capacityReview": {
-        "previousMaxGzipBytes": 13000,
-        "reviewedGzipBytes": 19014,
-        "growthReserveBytes": 3986,
-        "capabilityBasis": "Narrative GUI adapter plus shared Engine controls and text editing; no second narrative or GUI runtime",
-        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+        "reviewedGzipBytes": 28388,
+        "growthReserveBytes": 612,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
       }
     },
     "extensions-animation": {
@@ -822,7 +828,7 @@
       "entrypoint": "./gui-layout",
       "fixture": "scripts/fixtures/engine-consumers/extensions-gui-layout.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 40000,
+      "maxGzipBytes": 48000,
       "requiredExports": [
         "attachGuiLayout",
         "createGuiContainer",
@@ -836,10 +842,10 @@
         "class NarrativeGui"
       ],
       "capacityReview": {
-        "reviewedGzipBytes": 33251,
-        "growthReserveBytes": 6749,
-        "capabilityBasis": "G01 named gui-layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
-        "decision": "review/engine-0.2.2/g13-package-admission.md"
+        "reviewedGzipBytes": 46197,
+        "growthReserveBytes": 1803,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
       }
     },
     "extensions-scene-flow": {
@@ -945,7 +951,7 @@
       "entrypoint": "./gui-collections",
       "packageName": "@haiyue/extensions",
       "fixture": "scripts/fixtures/engine-consumers/extensions-gui-collections.mjs",
-      "maxGzipBytes": 15700,
+      "maxGzipBytes": 20500,
       "requiredExports": [
         "createGuiVirtualList",
         "createGuiVirtualTree"
@@ -959,10 +965,10 @@
         "class GuiSystem"
       ],
       "capacityReview": {
-        "reviewedGzipBytes": 13881,
-        "growthReserveBytes": 1819,
-        "capabilityBasis": "G01 exact 9 frozen collection exports; shared pure window and list pooling, original GUI classes, no heavy HYA/OpenType/3D/physics/input-owner duplication. Reviewed bytes use the existing deterministic installed gate when available; final installed bytes must remain inside the finite capacity. Local diagnostic closure is preserved separately.",
-        "decision": "review/engine-0.2.3/g07-checks.json"
+        "reviewedGzipBytes": 19606,
+        "growthReserveBytes": 894,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
       }
     },
     "extensions-audio": {
@@ -994,18 +1000,22 @@
         "schemaVersion": 1,
         "maxInitialGzipBytes": 140000,
         "maxTotalGzipBytes": 520000,
-        "deferredModuleMarkers": ["hya-stage", "opentype"]
+        "deferredModuleMarkers": [
+          "hya-stage",
+          "opentype"
+        ]
       }
     },
     "extensions-gui-controls": {
       "entrypoint": "./gui-controls",
       "packageName": "@haiyue/extensions",
       "fixture": "scripts/fixtures/engine-consumers/extensions-gui-controls.mjs",
-      "maxGzipBytes": 29200,
+      "maxGzipBytes": 42000,
       "requiredExports": [
         "GuiBreadcrumb",
         "GuiBadge",
-        "GuiCollapse"
+        "GuiCollapse",
+        "GuiExpandable"
       ],
       "forbiddenStaticTokens": [
         "class GuiSystem",
@@ -1017,10 +1027,454 @@
       ],
       "allowedGeneratedShaderArtifacts": [],
       "capacityReview": {
-        "reviewedGzipBytes": 25330,
-        "growthReserveBytes": 3870,
-        "capabilityBasis": "G01 exact 12 GUI-controls symbols; original GuiContent/painters, original modal/scroll/focus, borrowed content frames and shared pure layout. Three application-state controllers, no duplicate layout/render/input/font owner. Final installed bytes must fit this finite capacity.",
-        "decision": "review/engine-0.2.3/g10-checks.json"
+        "reviewedGzipBytes": 40052,
+        "growthReserveBytes": 1948,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
+      }
+    },
+    "extensions-gui-display": {
+      "entrypoint": "./gui-display",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-display.mjs",
+      "maxGzipBytes": 35000,
+      "requiredExports": [
+        "GuiCard",
+        "GuiDivider",
+        "GuiTag",
+        "GuiAvatar",
+        "GuiImageView",
+        "GuiAlert",
+        "GuiEmpty",
+        "GuiSpin",
+        "GuiSkeleton",
+        "GuiButtonGroup",
+        "GuiSegmented"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 32577,
+        "growthReserveBytes": 2423,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
+      }
+    },
+    "extensions-gui-overlays": {
+      "entrypoint": "./gui-overlays",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-overlays.mjs",
+      "maxGzipBytes": 38000,
+      "requiredExports": [
+        "GuiMenu",
+        "GuiDropdown",
+        "GuiContextMenu",
+        "GuiPopover",
+        "GuiPopconfirm",
+        "GuiDialog",
+        "GuiDrawer",
+        "GuiNotificationCenter"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 35480,
+        "growthReserveBytes": 2520,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
+      }
+    },
+    "extensions-gui-display-card": {
+      "entrypoint": "./gui-display",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-display-card.mjs",
+      "maxGzipBytes": 26000,
+      "requiredExports": [
+        "GuiCard"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "class GuiMenu",
+        "class GuiNotificationCenter"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 24322,
+        "growthReserveBytes": 1678,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
+      }
+    },
+    "extensions-gui-overlays-popover": {
+      "entrypoint": "./gui-overlays",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-overlays-popover.mjs",
+      "maxGzipBytes": 30000,
+      "requiredExports": [
+        "GuiPopover"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "class MenuCore",
+        "class GuiDialog",
+        "class GuiNotificationCenter"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 28820,
+        "growthReserveBytes": 1180,
+        "capabilityBasis": "P1 measured installed tarballs; shared original GUI owners, focused composition and overlay protocols; duplicate/closure audit in review/gui-p1-20261126.md",
+        "decision": "docs/for-ai/adr/0142-gui-p1-composition-and-overlays.md"
+      }
+    },
+    "extensions-gui-forms": {
+      "entrypoint": "./gui-forms",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-forms.mjs",
+      "maxGzipBytes": 46000,
+      "requiredExports": [
+        "GuiForm",
+        "GuiFormItem",
+        "GuiInputNumber",
+        "GuiAutoComplete"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 44734,
+        "growthReserveBytes": 1266,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-data": {
+      "entrypoint": "./gui-data",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-data.mjs",
+      "maxGzipBytes": 52000,
+      "requiredExports": [
+        "GuiTable",
+        "GuiPagination",
+        "GuiTreeSelect",
+        "GuiCascader"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 50738,
+        "growthReserveBytes": 1262,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-content": {
+      "entrypoint": "./gui-content",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-content.mjs",
+      "maxGzipBytes": 42000,
+      "requiredExports": [
+        "GuiSteps",
+        "GuiTimeline",
+        "GuiDescriptions",
+        "GuiRate",
+        "GuiResult",
+        "GuiRibbon",
+        "GuiImagePreview",
+        "GuiCarousel",
+        "GuiDraggable",
+        "GuiResizable"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 40536,
+        "growthReserveBytes": 1464,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-forms-number": {
+      "entrypoint": "./gui-forms",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-forms-number.mjs",
+      "maxGzipBytes": 38000,
+      "requiredExports": [
+        "GuiInputNumber"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 36120,
+        "growthReserveBytes": 1880,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-data-table": {
+      "entrypoint": "./gui-data",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-data-table.mjs",
+      "maxGzipBytes": 43000,
+      "requiredExports": [
+        "GuiTable"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 41162,
+        "growthReserveBytes": 1838,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-content-rate": {
+      "entrypoint": "./gui-content",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-content-rate.mjs",
+      "maxGzipBytes": 25000,
+      "requiredExports": [
+        "GuiRate"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 21279,
+        "growthReserveBytes": 3721,
+        "capabilityBasis": "P2 original editor/IME, virtual rows and shared modal composition; leaf audit excludes unrelated components and duplicate runtime owners. Measured installed tarballs; review/gui-p2-20261127.md",
+        "decision": "docs/for-ai/adr/0143-gui-p2-data-forms-content.md"
+      }
+    },
+    "extensions-gui-pickers": {
+      "entrypoint": "./gui-pickers",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-pickers.mjs",
+      "maxGzipBytes": 46000,
+      "requiredExports": [
+        "GuiDatePicker",
+        "GuiTimePicker"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 43935,
+        "growthReserveBytes": 2065,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
+      }
+    },
+    "extensions-gui-assets": {
+      "entrypoint": "./gui-assets",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-assets.mjs",
+      "maxGzipBytes": 36000,
+      "requiredExports": [
+        "GuiUpload",
+        "GuiQRCode",
+        "createGuiQrCanvasRasterizer"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 34588,
+        "growthReserveBytes": 1412,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
+      }
+    },
+    "extensions-gui-composition": {
+      "entrypoint": "./gui-composition",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-composition.mjs",
+      "maxGzipBytes": 34000,
+      "requiredExports": [
+        "GuiAnchor",
+        "GuiAffix",
+        "GuiMasonry",
+        "GuiTour",
+        "GuiWatermark",
+        "GuiBorderBeam"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 32591,
+        "growthReserveBytes": 1409,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
+      }
+    },
+    "extensions-gui-assistive": {
+      "entrypoint": "./gui-assistive",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-assistive.mjs",
+      "maxGzipBytes": 47000,
+      "requiredExports": [
+        "GuiMentions",
+        "GuiVirtualKeyboard",
+        "GuiVirtualMouse",
+        "GuiHistoryControls"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 45308,
+        "growthReserveBytes": 1692,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
+      }
+    },
+    "extensions-gui-pickers-time": {
+      "entrypoint": "./gui-pickers",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-pickers-time.mjs",
+      "maxGzipBytes": 40000,
+      "requiredExports": [
+        "GuiTimePicker"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 38649,
+        "growthReserveBytes": 1351,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
+      }
+    },
+    "extensions-gui-assets-qr": {
+      "entrypoint": "./gui-assets",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-assets-qr.mjs",
+      "maxGzipBytes": 27000,
+      "requiredExports": [
+        "GuiQRCode"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime",
+        "qrcodegen",
+        "QrCode.encodeText"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 25329,
+        "growthReserveBytes": 1671,
+        "capabilityBasis": "P3 deterministic real installed tarballs and retained-export consumers; four focused families / two leaf closures reuse original owners without duplicate editor, row pool or renderer. Review gui-p3-20261128; final source-frozen verification required.",
+        "decision": "docs/for-ai/adr/0144-gui-p3-specialty-components.md"
       }
     }
   },

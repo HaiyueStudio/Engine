@@ -28,9 +28,18 @@ export function parseHyaStateMachineV2(
   options: ParseStateMachineV2Options = {},
 ): HyaStateMachineV2Document {
   const limits = resolveStateMachineV2Limits(options.limits);
+  // Reuse the same read-only rules before allocating a snapshot. In particular,
+  // reject unknown fields and aggregate count limits before structuredClone.
+  validateDocument(value, limits);
   let cloned: unknown;
   try { cloned = structuredClone(value); } catch { fail('E_STATE_MACHINE_V2_FORMAT', '$', 'document must be structured-cloneable data'); }
-  const root = object(cloned, '$');
+  // Validate the actual snapshot as well; accessors/hosts need not return the
+  // same values when read twice. Never freeze or trust the caller's objects.
+  return deepFreeze(validateDocument(cloned, limits)) as unknown as HyaStateMachineV2Document;
+}
+
+function validateDocument(value: unknown, limits: StateMachineV2Limits): Record<string, unknown> {
+  const root = object(value, '$');
   keys(root, ['format', 'extension', 'channels', 'clips', 'stateMachines', 'components'], '$');
   literal(root.format, HYA_STATE_MACHINE_V2_FORMAT, '$.format');
   literal(root.extension, HYA_STATE_MACHINE_V2_EXTENSION_ID, '$.extension');
@@ -137,7 +146,7 @@ export function parseHyaStateMachineV2(
   });
 
   validateNestedReferences(machineValues, componentValues, componentIds, limits);
-  return deepFreeze(root) as unknown as HyaStateMachineV2Document;
+  return root;
 }
 
 function validateLayer(value: unknown, path: string, inputs: ReadonlyMap<string, HyaMachineInput['type']>, channels: ReadonlyMap<string, HyaTimelineChannel>, clipIds: ReadonlySet<string>, limits: StateMachineV2Limits, totals: Totals, layerIds: Set<string>, orders: Set<number>): void {

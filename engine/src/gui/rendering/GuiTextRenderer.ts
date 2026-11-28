@@ -1,3 +1,4 @@
+import {guiParameterGroup, type GuiParameterGroups} from './GuiPaintParameters';
 import type {RenderCommandContext} from '../../core/RenderCommandContext';
 import {GuiGpuResources} from './GuiGpuResources';
 import {guiLinearSurface,updateGuiViewport,type GuiRenderSurface} from './GuiRenderSurface';
@@ -26,9 +27,9 @@ export class GuiTextRenderer extends BaseRenderer {
   private pipelineLayout!: GPUPipelineLayout;
   private resources!:GuiGpuResources;
   private readonly viewportKey={};
-  private viewportGroups=new WeakMap<GPUBuffer,GPUBindGroup>();
+  private viewportGroups: GuiParameterGroups = new WeakMap();
   private viewportVersion=0;
-  private readonly viewportData = new Float32Array(4);
+  private readonly viewportData = new Float32Array(24);
   private fontCache = new Map<number, FontGpuData>();
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
@@ -45,7 +46,7 @@ export class GuiTextRenderer extends BaseRenderer {
     const { device } = engine;
     try {
       this.viewportBindGroupLayout = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, {binding:1,visibility:GPUShaderStage.FRAGMENT,buffer:{type:'read-only-storage'}}],
     });
     this.fontBindGroupLayout = device.createBindGroupLayout({
       entries: [
@@ -59,8 +60,7 @@ export class GuiTextRenderer extends BaseRenderer {
     ]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
-    const viewport=this.resources.reserve(this.viewportKey,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-text:viewport');
-    this.viewportGroups.set(viewport,device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewport}}]}));
+    this.resources.reserve(this.viewportKey,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-text:viewport');
     this.defaultTexture = device.createTexture({
       size: [1, 1],
       format: 'rgba8unorm',
@@ -94,8 +94,8 @@ export class GuiTextRenderer extends BaseRenderer {
       this.viewportVersion++;
       this.viewportUploaded = true;
     }
-    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-text:viewport',context);
-    let viewportGroup=this.viewportGroups.get(viewportBuffer);if(!viewportGroup){viewportGroup=this.engine.device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewportBuffer}}]});this.viewportGroups.set(viewportBuffer,viewportGroup);}
+    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-text:viewport',context);
+    const viewportGroup = guiParameterGroup(this.resources,this.engine.device,this.viewportBindGroupLayout,viewportBuffer,batch.parameters,context,this.viewportGroups);
 
     const vertexBuffer = this.uploadBatch(batch,context);
     const fontData = this.getFontGpuData(font);
@@ -114,7 +114,7 @@ export class GuiTextRenderer extends BaseRenderer {
     this.addPipelineWarmup(plan, key, 'GUI text', () => this.pipelineDescriptor(), this.engine.device);
   }
 
-  releaseBatch(batch: GuiTextBatch): void {this.resources?.release(batch);}
+  releaseBatch(batch: GuiTextBatch): void {this.resources?.release(batch.parameters);this.resources?.release(batch);}
 
   /** Retire an atlas only after the work submitted with its previous generation is complete. */
   releaseFont(font: BitmapFontData): void {

@@ -10,6 +10,7 @@ import type {RuntimeChannel, StateMachinePose} from '../../hya-state-machine/v2/
 import {ProductionFrameError} from './FrameTransaction.js';
 import {ProductionCoreResources} from './ProductionCoreResources.js';
 import {productionStrokeCoverage} from './ProductionStrokeCoverage.js';
+import {coreComponentHasTimeDependency, coreNodeHasTimeDependency} from './CoreTimelineDependencies.js';
 
 const coreResourceOwners = new WeakMap<ProductionCoreStateVisualRuntime, ProductionCoreResources>();
 function resources(runtime: ProductionCoreStateVisualRuntime): ProductionCoreResources {let owner = coreResourceOwners.get(runtime); if (!owner) {owner = new ProductionCoreResources(); coreResourceOwners.set(runtime, owner);} return owner;}
@@ -47,7 +48,7 @@ export class ProductionCoreStateVisualRuntime extends Animation2DStateMachineVis
     validateProductionCoreChannels(animation, channels);
     super(owner, animation, extensions, assets, coreResources); this.channels = new Map(channels.map(channel => [channel.id, channel]));
     this._hasAuthoredTracks = animation.tracks.length > 0; this._authoredDuration = animation.duration;
-    this.timeDependent = animation.nodes.some(node => (node.components ?? []).some(animated));
+    this.timeDependent = animation.nodes.some(coreNodeHasTimeDependency);
     this.additionalPaints = animation.nodes.reduce((count, node) => count + (node.components ?? []).filter(component => component.type === 'org.haiyue.vector-shape@1' && component.fill && component.stroke).length, 0);
     for (const node of animation.nodes) for (const [index, component] of (node.components ?? []).entries()) if (component.type === 'org.haiyue.vector-stroke@1' || component.type === 'org.haiyue.vector-shape@1' && component.stroke) this.managed.add(key(node.id, index));
   }
@@ -165,7 +166,7 @@ export class ProductionCoreStateVisualRuntime extends Animation2DStateMachineVis
     for (const node of this._nodes) for (const index of new Set(node.visuals.map(visual => visual.sourceComponentIndex))) {
       const id = key(node.source.id, index); if (!this.managed.has(id)) continue;
       const style = selected.get(id) ?? {}, source = node.source.components![index]!, previous = this.styles.get(id), morph = morphs.get(id);
-      const dynamic = this.dynamic.get(source) ?? animated(source); this.dynamic.set(source, dynamic);
+      const dynamic = this.dynamic.get(source) ?? coreComponentHasTimeDependency(source); this.dynamic.set(source, dynamic);
       const signature = JSON.stringify([style, dynamic ? pose.mixerTime : 0, morph ? [...morph] : null]);
       if (previous?.signature !== signature) {
         this._applyProductionVisualStyle(node, index, componentWithStyle(source, style), pose.mixerTime, previous === undefined || previous.width !== style.width, morph, style.text, productionStrokeCoverage);
@@ -218,7 +219,6 @@ function componentWithStyle(source: Readonly<AnimationComponent>, style: Style):
   if (source.type === 'org.haiyue.vector-stroke@1') return {...source, ...(style.stroke ? {color: style.stroke} : {}), ...(style.width === undefined ? {} : {width: style.width})};
   return source;
 }
-function animated(value: unknown): boolean {if (!value || typeof value !== 'object' || ArrayBuffer.isView(value)) return false;return Object.entries(value).some(([name, child]) => name === 'morph' || name.endsWith('Track') || name === 'documents' || name === 'animators' || name === 'expression' || animated(child));}
 
 /** Pure preflight shared by the composition compiler and the original visual owner. */
 export function validateProductionCoreChannels(animation: ParsedAnimation, channels: readonly RuntimeChannel[]): void {

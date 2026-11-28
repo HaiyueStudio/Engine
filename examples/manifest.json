@@ -2520,6 +2520,29 @@
       "performance": null
     },
     {
+      "id": "gui-library",
+      "title": "GUI Library · Surfaces and Overlays",
+      "entry": "gui-library/main.ts",
+      "capabilities": [
+        "gui",
+        "gui-display",
+        "gui-overlays",
+        "theme",
+        "virtual-collections"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 114
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
       "id": "gameplay-kit",
       "title": "Gameplay Kit · Integrated 0.2.3",
       "entry": "gameplay-kit/main.ts",
@@ -2546,6 +2569,54 @@
         "group": "interaction",
         "order": 112
       }
+    },
+    {
+      "id": "gui-data-library",
+      "title": "GUI Library · Data, Forms and Content",
+      "entry": "gui-data-library/main.ts",
+      "capabilities": [
+        "gui",
+        "gui-forms",
+        "gui-data",
+        "gui-content",
+        "theme",
+        "virtual-collections"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 115
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "gui-specialty-library",
+      "title": "GUI Library · Specialized Tools",
+      "entry": "gui-specialty-library/main.ts",
+      "capabilities": [
+        "gui",
+        "gui-pickers",
+        "gui-assets",
+        "gui-composition",
+        "gui-assistive",
+        "theme"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 116
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
     }
   ],
   "catalog": {

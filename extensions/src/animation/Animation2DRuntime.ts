@@ -281,15 +281,7 @@ export class Animation2DRuntime {
               this._visualCount++;
             }
           } catch (error) {
-            this._abortController.abort();
-            for (const handle of this._assetHandles) handle.release();
-            this._assetHandles.length = 0;
-            for (const createdNode of [...this._nodes, runtimeNode]) {
-              for (const audio of createdNode.audio) audio.destroy();
-              for (const instance of createdNode.extensions) instance.destroy?.();
-            }
-            this._root.destroy();
-            throw error;
+            this._cleanupRuntime([runtimeNode], {cause: error});
           }
           continue;
         }
@@ -413,28 +405,36 @@ export class Animation2DRuntime {
 
   destroy(): void {
     if (this._destroyed) return;
+    this._cleanupRuntime();
+  }
+
+  /** Retire the same owners for normal disposal and partially constructed nodes. */
+  private _cleanupRuntime(additional: readonly Animation2DRuntimeNode[] = [], failure?: {readonly cause: unknown}): void {
     this._destroyed = true;
-    this._abortController.abort();
-    for (const handle of this._assetHandles) handle.release();
-    this._assetHandles.length = 0;
-    if (this._fontFaces.length && typeof document !== 'undefined' && document.fonts) {
-      for (const face of this._fontFaces) document.fonts.delete(face);
-    }
-    this._fontFaces.length = 0;
-    this._fontLoads.clear();
-    this._expressionDataLoads.clear();
-    for (const node of this._nodes) {
-      for (const visual of node.visuals) visual.textRasterizer?.destroy();
-      for (const audio of node.audio) audio.destroy();
-      node.audio.length = 0;
-      for (const extension of node.extensions) extension.destroy?.();
-      node.extensions.length = 0;
-    }
-    this._root.destroy();
+    const nodes = [...this._nodes, ...additional], errors: unknown[] = [];
+    const release = (action: () => void): void => {try {action();} catch (error) {errors.push(error);}};
     this._nodes.length = 0;
     this._nodesById.clear();
     this._tracksByNode.clear();
     this._trackIndices.clear();
+    this._opacityMemo.clear();
+    release(() => this._abortController.abort());
+    for (const handle of this._assetHandles.splice(0)) release(() => handle.release());
+    for (const face of this._fontFaces.splice(0)) release(() => {
+      if (typeof document !== 'undefined' && document.fonts) document.fonts.delete(face);
+    });
+    this._fontLoads.clear();
+    this._expressionDataLoads.clear();
+    for (const node of nodes) {
+      for (const visual of node.visuals) if (visual.textRasterizer) release(() => visual.textRasterizer!.destroy());
+      for (const audio of node.audio.splice(0)) release(() => audio.destroy());
+      for (const extension of node.extensions.splice(0)) release(() => extension.destroy?.());
+    }
+    release(() => this._root.destroy());
+    // A constructor failure can precede attachment of its staged node hierarchy.
+    for (const node of nodes) release(() => node.entity.destroy());
+    if (errors.length) throw new AggregateError(failure ? [failure.cause, ...errors] : errors, 'Animation runtime cleanup failed.');
+    if (failure) throw failure.cause;
   }
 
   setPlaying(playing: boolean): void {

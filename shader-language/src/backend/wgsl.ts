@@ -3,6 +3,8 @@ import type {
   ShaderStage,
 } from '../contracts';
 import { shaderError } from '../diagnostics';
+import { floatLiteral } from './floatLiteral';
+import { wgslI32Literal } from './integerLiteral';
 import { compareStableText } from '../naming';
 import { reachableShaderIrNodes } from '../ir/canonical';
 import type {
@@ -309,9 +311,8 @@ function scalarLiteral(type: string, value: ShaderIrPayloadValue | undefined): s
   }
   if (typeof value !== 'number' || !Number.isFinite(value)) codegenError('@typed-ir', '@literal', `Expected numeric literal, got ${String(value)}.`);
   if (type === 'u32') return `${value}u`;
-  if (type === 'i32') return `${value}i`;
-  const literal = Number.isInteger(value) ? `${value}.0` : String(value);
-  return `${literal}f`;
+  if (type === 'i32') return wgslI32Literal(value);
+  return `${floatLiteral(value)}f`;
 }
 
 function payloadString(node: ShaderIrNode, key: string): string {

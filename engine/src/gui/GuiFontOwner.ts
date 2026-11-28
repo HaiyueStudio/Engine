@@ -20,22 +20,28 @@ export interface GuiAtlasOptions {
 }
 /** One atlas per active family. Removed/replaced families are retired by the GPU owner. */
 export class GuiFontOwner {
+  private readonly requests = new Map<string,{family:string;size:number;weight:number;precise:boolean}>();
   private readonly fonts = new Map<string, BitmapFontData>();
   private readonly roots = new Map<GuiRoot, InputGlyphs>();
   private readonly coverage = new WeakMap<BitmapFontData, ReadonlySet<string>>();
   private maxAtlasSize=4096;
+  private pixelRatio=1;
+  private lastRequest:{family:string;weight:number;size:number;scalable:boolean;key:string}|undefined;
   private readonly defaultFamily: string;
   constructor(private readonly options: GuiAtlasOptions, private readonly retire: (font: BitmapFontData) => void) {this.defaultFamily = options.fontFamily ?? 'sans-serif';}
+  setPixelRatio(ratio:number):void {const value=Number.isFinite(ratio)&&ratio>0?Math.min(3,Math.max(1,ratio)):1;if(value===this.pixelRatio)return;this.pixelRatio=value;for(const state of this.roots.values())state.dirty=true;}
+  hasVariants(root:GuiRoot):boolean{return (this.roots.get(root)?.families.size??0)>1;}
   private build(family: string): BitmapFontData {
+    const request=this.requests.get(family);
     const chars=this.options.chars ?? ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻';
-    const required=new Set(guiTextClusters(chars));
+    const required=new Set(guiTextClusters(chars));if(request?.precise)required.add('…');
     for(const state of this.roots.values())for(const glyph of state.families.get(family)??[])required.add(glyph);
     let size=this.options.atlasSize??512;
     if(!Number.isSafeInteger(size)||size<=0)throw new RangeError('GUI atlasSize must be a positive integer.');
     for(;;){
       const built=buildBitmapFontGlyphs({
         ...(this.options.canvasFactory ? {canvasFactory: this.options.canvasFactory} : {}),
-        fontSize:this.options.fontSize??32,fontFamily:family,padding:this.options.padding??4,atlasSize:size,
+        fontSize:request?.size??this.options.fontSize??32,fontFamily:request?.family??family,fontWeight:String(request?.weight??400),metrics:request?.precise?'font':'ink',padding:this.options.padding??4,atlasSize:size,
       },[...required]);
       if(built.glyphs.size===required.size || size>=this.maxAtlasSize){
         registerGuiTextGlyphs(built.data,built.glyphs,built.atlas);
@@ -61,12 +67,13 @@ export class GuiFontOwner {
   }
   forRoot(root: GuiRoot, element: GuiElement = root.root): BitmapFontData {
     this.prepare();
-    return this.forFamily(root,resolveGuiSkin(element).fontFamily??root.theme.fontFamily);
+    const skin=resolveGuiSkin(element);
+    return this.forFamily(root,skin.fontFamily??root.theme.fontFamily,{fontWeight:skin.fontWeight??root.theme.fontWeight,fontSize:this.elementSize(element,skin.fontSize??root.theme.fontSize)});
   }
   /** Reuse the collector's already-resolved stock skin, without a second tree lookup. */
-  forFamily(root:GuiRoot,requested:string):BitmapFontData {
+  forFamily(root:GuiRoot,requested:string,style:{fontWeight?:number|undefined;fontSize?:number|undefined}={}):BitmapFontData {
     this.prepare();
-    const family = requested === 'sans-serif' ? this.defaultFamily : requested;
+    const family = this.requestKey(requested,style.fontWeight??root.theme.fontWeight,style.fontSize??root.theme.fontSize,!!root.theme.density);
     let state=this.roots.get(root);
     if(!state){
       state={dirty:true,families:new Map(),checked:new Map(),off:()=>{}};
@@ -75,22 +82,23 @@ export class GuiFontOwner {
     if(!state.families.has(family))state.dirty=true;
     let changed = state.dirty;
     if(state.dirty){
-      const rootFamily=root.theme.fontFamily==='sans-serif'?this.defaultFamily:root.theme.fontFamily;
+      const rootFamily=this.requestKey(root.theme.fontFamily,root.theme.fontWeight,root.theme.fontSize,!!root.theme.density);
       const primitive=state.primitive;
-      if(!guiThemeTreeActive(root.root)&&primitive?.family===rootFamily&&primitive.coverage.update()){
+      const simple=!guiThemeTreeActive(root.root)&&family===rootFamily&&![...state.families.keys()].some(key=>key!==rootFamily);
+      if(simple&&primitive?.family===rootFamily&&primitive.coverage.update()){
         state.checked.clear();state.dirty=false;
       }else{
-      const coverage=!guiThemeTreeActive(root.root)?GuiGlyphCoverage.capture(root.root):null;
+      const coverage=simple?GuiGlyphCoverage.capture(root.root):null;
       if(coverage){state.families=new Map([[rootFamily,coverage.glyphs]]);state.primitive={family:rootFamily,coverage};state.checked.clear();state.dirty=false;}
       else{
       const families=new Map<string,Set<string>>();
       const visit=(element:GuiElement):void=>{
-        const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
-        const family = requested === 'sans-serif' ? this.defaultFamily : requested;
+        const skin=resolveGuiSkin(element);
+        const family=this.requestKey(skin.fontFamily??root.theme.fontFamily,skin.fontWeight??root.theme.fontWeight,this.elementSize(element,skin.fontSize??root.theme.fontSize),!!root.theme.density);
         let glyphs = families.get(family); if (!glyphs) {glyphs = new Set(); families.set(family, glyphs);}
-        const texts = isGuiControl<GuiInput>(element, 'GuiInput') ? [element.displayValue,element.placeholder,guiInputCounterText(element)??''] : [];
+        const texts = isGuiControl<GuiInput>(element, 'GuiInput') ? [element.displayValue,element.placeholder,element.prefix,element.suffix,element.helpText,guiInputCounterText(element)??''] : [];
         if (!(isGuiControl<GuiInput>(element, 'GuiInput'))) {
-          for (const key of ['text', 'label', 'content', 'displayText'] as const) {
+          for (const key of ['text', 'label', 'content', 'displayText', 'prefix', 'suffix', 'helpText'] as const) {
             if (key in element) {const text = (element as unknown as Record<string, unknown>)[key]; if (typeof text === 'string') texts.push(text);}
           }
           if ('visibleNodes' in element) for (const row of (element as unknown as {visibleNodes: readonly {node: {label: string}}[]}).visibleNodes) texts.push(row.node.label);
@@ -113,11 +121,20 @@ export class GuiFontOwner {
     state.checked.set(family,font);
     if (changed) this.prune();return font;
   }
+  private elementSize(element:GuiElement,fallback:number):number {const size=Object.getOwnPropertyDescriptor(element,'fontSize')?.value;return typeof size==='number'&&Number.isFinite(size)&&size>=0?size:fallback;}
+  private requestKey(requested:string,weight=400,fontSize=14,scalable=true):string {
+    const family=requested==='sans-serif'?this.defaultFamily:requested;
+    const dpr=this.pixelRatio;
+    const size=scalable?Math.min(128,Math.max(this.options.fontSize??32,Math.ceil(fontSize*dpr/16)*16)):this.options.fontSize??32;
+    if(!scalable&&weight===400&&size===(this.options.fontSize??32))return family;
+    const last=this.lastRequest;if(last&&last.family===family&&last.weight===weight&&last.size===size&&last.scalable===scalable&&this.requests.has(last.key))return last.key;
+    const key='@gui:'+family.length+':'+family+':'+weight+':'+size+':'+Number(scalable);if(!this.requests.has(key))this.requests.set(key,{family,weight,size,precise:scalable});this.lastRequest={family,weight,size,scalable,key};return key;
+  }
   forget(root: GuiRoot): void {this.roots.get(root)?.off();this.roots.delete(root);this.prune();}
   retain(roots: ReadonlySet<GuiRoot>): void {for(const root of this.roots.keys())if(!roots.has(root))this.forget(root);this.prune();}
   private prune(): void {
     const used = new Set([...this.roots.values()].flatMap(state=>[...state.families.keys()])); used.add(this.defaultFamily);
-    for (const [family, font] of this.fonts) if (!used.has(family)) {this.fonts.delete(family); this.retire(font);}
+    for (const [family, font] of this.fonts) if (!used.has(family)) {this.fonts.delete(family); this.requests.delete(family); this.retire(font);}
   }
   destroy(): void {for (const font of this.fonts.values()) this.retire(font); this.fonts.clear(); for(const state of this.roots.values())state.off();this.roots.clear();}
 }

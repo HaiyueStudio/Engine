@@ -5,7 +5,7 @@ import type { IEngine } from '../core/IEngine';
 import { BitmapText } from '../components/BitmapText';
 import { Transform3D } from '../components/Transform3D';
 import { Camera3D } from '../components/Camera3D';
-import { BitmapTextRenderer } from '../renderer/BitmapTextRenderer';
+import { BitmapTextRenderer, withBitmapTextRecording } from '../renderer/BitmapTextRenderer';
 import { mat4 } from 'wgpu-matrix';
 import type { ViewportRect, ScissorRect } from '../core/ViewportRect';
 import { updateEntityWorldMatrix } from './worldMatrix';
@@ -79,6 +79,10 @@ export class BitmapTextRenderSystem extends System {
   }
 
   record(world: World, context: RenderCommandContext): this {
+    return withBitmapTextRecording(this.renderer, context, () => this._record(world, context));
+  }
+
+  private _record(world: World, context: RenderCommandContext): this {
     if (this.disabled) return this;
     const { device } = context;
     if (!device) return this;

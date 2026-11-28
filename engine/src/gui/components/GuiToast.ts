@@ -19,7 +19,7 @@ export interface GuiToastOptions extends GuiElementOptions {
 
 /** A non-interactive, single-message popup. show() replaces and restarts the current message. */
 export class GuiToast extends GuiElement {
-  private static readonly __controlIdentityGuiToast = /* @__PURE__ */ (() => admitGuiControl(GuiToast.prototype, 'GuiToast', undefined, paintGuiToast))();
+  private static readonly __controlIdentityGuiToast = /* @__PURE__ */ (() => admitGuiControl(GuiToast.prototype, 'GuiToast', undefined, paintGuiToast, (_control,theme)=>({backgroundColor:theme.colors.elevated??theme.colors.surface,borderColor:theme.colors.border,radius:10,shadow:{color:theme.colors.shadow??theme.colors.overlay??'#0005',blur:14,y:4}})))();
   static override readonly themeControlType: string = 'GuiToast';
   text: string;
   icon: GuiImageSource;
@@ -98,8 +98,11 @@ function paintGuiToast(context:GuiPaint.GuiControlPaintContext, toast: GuiToast,
     const icon = iconSource ? Math.max(0, Math.min(skin.iconSize ?? toast.iconSize, r.height - padding, r.width - padding * 2)) : 0;
     const box = GuiPaint.guiContentBox(toast, 14, fontSize, r), custom = !!(skin.contentInsets || skin.nineSlice || skin.icon);
     if (skin.nineSlice) context.addSkinPatches(skin.nineSlice, r, opacity, context.currentPopupImageBatch);
+    if(theme.density)GuiPaint.paintGuiBox(context.currentPopupBatch,r,skin,GuiPaint.withAlpha(GuiPaint.colorToRgba(skin.backgroundColor,theme.colors.elevated??theme.colors.surface),opacity),GuiPaint.withAlpha(GuiPaint.colorToRgba(skin.borderColor,theme.colors.border),opacity),undefined,theme.radius,opacity);
+    else {
     context.currentPopupBatch.addShape({ ...r, radius: context.styleFor(toast).radius ?? theme.radius,
       color: GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(toast).backgroundColor, theme.colors.surface), opacity) });
+    }
     if (icon > 0) context.currentPopupImageBatch.addImage({ source: iconSource,
       ...(skin.icon ? box.icon ?? {x:r.x,y:r.y,width:0,height:0} : {x:r.x + padding,y:r.y + (r.height - icon) / 2,width:icon,height:icon}), uv: [0, 0, 1, 1],
       color: GuiPaint.withAlpha(GuiPaint.colorToRgba(skin.iconTint ?? skin.color, skin.icon ? '#ffffff' : theme.colors.text), opacity), clip: r });

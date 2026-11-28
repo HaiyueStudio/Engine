@@ -7,6 +7,7 @@ import type {
   ShaderUniformFieldReflection,
 } from '../contracts';
 import { shaderError } from '../diagnostics';
+import { floatLiteral } from './floatLiteral';
 import { sha256Hex } from '../hash';
 import { reachableShaderIrNodes } from '../ir/canonical';
 import type {
@@ -461,7 +462,7 @@ function scalarLiteral(type: string, value: ShaderIrPayloadValue | undefined): s
   if (typeof value !== 'number' || !Number.isFinite(value)) codegenError('@typed-ir', '@literal', `Expected numeric literal, got ${String(value)}.`);
   if (type === 'u32') return `${value}u`;
   if (type === 'i32') return String(value);
-  return Number.isInteger(value) ? `${value}.0` : String(value);
+  return floatLiteral(value);
 }
 
 function inputExpression(input: ShaderIrEntry['inputs'][number], moduleId: string, entryId: string): string {

@@ -1,3 +1,8 @@
+import {resolveGuiSkin,guiThemeState} from '../GuiThemeResolve';
+import {guiControlDefaultSkin,type GuiDefaultSkinCache} from '../GuiControlIdentity';
+import {paintGuiBox} from './GuiBoxPaint';
+import {rememberGuiVisualBounds} from '../GuiVisualBounds';
+import type {GuiClipRect} from './GuiPaintParameters';
 import {isGuiControl} from '../GuiControlIdentity';
 import {guiControlPrototype,guiControlPainter,guiControlPainterFor} from '../GuiControlIdentity';
 import {isGuiExternallyPainted} from '../GuiExternalPresentation';
@@ -29,7 +34,7 @@ import { parseGuiColor as colorToRgba, withGuiAlpha as withAlpha } from '../GuiC
 import {guiPasswordRevealed} from '../input/GuiInputAdornments';
 import { GuiBatch } from './GuiBatch';
 import { GuiShapeRenderer } from './GuiShapeRenderer';
-import { GuiTextBatch, measureGuiTextWidth } from './GuiTextBatch';
+import { GuiTextBatch, measureGuiTextWidth, createGuiTextMeasurer, type GuiTextMeasurer } from './GuiTextBatch';
 import { GuiTextRenderer } from './GuiTextRenderer';
 import { GuiImageBatch } from './GuiImageBatch';
 import { requiredItemAt } from '../../math/arrayAccess';
@@ -54,6 +59,14 @@ type GuiRendererFontOptions = GuiAtlasOptions;
 
 type GuiElementConstructor<T extends GuiElement = GuiElement> = new (...args: never[]) => T;
 type GuiElementRenderer<T extends GuiElement = GuiElement> = (element: T, theme: GuiTheme) => void;
+const inputTextFonts = new WeakMap<GuiRenderer, (root?: GuiRoot, element?: GuiElement) => BitmapFontData | null>();
+/** Internal adapter; custom renderer measurement retains its original behavior. */
+export function guiRendererTextMeasure(renderer: GuiRenderer, size: number, root?: GuiRoot, element?: GuiElement): GuiTextMeasurer {
+  if (renderer.measureTextWidth === stockMeasureTextWidth) {
+    const font = inputTextFonts.get(renderer); if (font) return createGuiTextMeasurer(() => font(root,element),size);
+  }
+  return text => renderer.measureTextWidth(text, size, root, element);
+}
 
 interface FontBatches {textBatch: GuiTextBatch; popupTextBatch: GuiTextBatch; modalTextBatch: GuiTextBatch;}
 interface GuiRootRenderCache extends FontBatches {
@@ -119,6 +132,7 @@ export class GuiRenderer {
     this.fontOptions = Object.freeze({ ...fontOptions });
     this.textRenderer = new GuiTextRenderer(fontOptions.readAtlasPixels);
     this.fontOwner = new GuiFontOwner(this.fontOptions, font => this.textRenderer.releaseFont(font));
+    inputTextFonts.set(this, (root, element) => root && this.prepared ? this.fontOwner.forRoot(root, element) : this.activeFont);
     registerGuiFontProvider(this, (root, element) => this.fontOwner.forRoot(root, element), root => this.fontOwner.forget(root));
   }
 
@@ -157,7 +171,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       clipRect:owner.clipRect.bind(owner),
       get currentBatch(){return owner.currentBatch;},
       get currentClip(){return owner.currentClip;},
-      set currentClip(value:GuiRect|undefined){owner.currentClip=value;},
+      set currentClip(value:GuiClipRect|undefined){owner.currentClip=value;},
       get currentImageBatch(){return owner.currentImageBatch;},
       get currentPopupBatch(){return owner.currentPopupBatch;},
       get currentPopupImageBatch(){return owner.currentPopupImageBatch;},
@@ -169,6 +183,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     };
   }
   prepare(engine: IEngine): void {
+    this.fontOwner.setPixelRatio(engine.width/engine.displayWidth);
     const refresh = consumeGuiFontReload(this);
     if (this.prepared && this.preparedDevice === engine.device) {
       if (refresh) {this.defaultFont = this.fontOwner.prepare(true,engine.device.limits?.maxTextureDimension2D); setGuiMeasureFont(this, this.defaultFont); this.needsRebuild = true;}
@@ -210,7 +225,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
 
   measureTextLineHeight(fontSize:number,root?:GuiRoot,element?:GuiElement):number {
     const font=root&&this.prepared?this.fontOwner.forRoot(root,element):this.activeFont;
-    return font?font.lineHeight/font.size*fontSize:fontSize*1.2;
+    return element?.getResolvedStyle().lineHeight??root?.theme.lineHeight??(font?font.lineHeight/font.size*fontSize:fontSize*1.2);
   }
 
   markDirty(): void {
@@ -310,24 +325,24 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     return cache;
   }
 
-  private rebuildRoot(root: GuiRoot, cache: GuiRootRenderCache): void {
-    this.resolvedStyles.clear();
+  private rebuildRoot(root: GuiRoot, cache: GuiRootRenderCache, forceOrdered=false): void {
+    this.resolvedStyles.clear();this.defaultSkins.clear();
     this.currentRoot = root; this.currentCache = cache; this.currentLayer = 0;
     try {
     let retained:GuiPaintCache|null=null;
     const dense=guiDirtyState(root.root)?.dense??false;
-    if(!dense&&!this.needsRebuild&&!this.elementRenderers.size&&!guiThemeTreeActive(root.root)&&cache.paint){
+    if(!dense&&!this.needsRebuild&&!this.elementRenderers.size&&cache.paint){
       this.currentFont=cache.font;
       const patched=cache.paint.patch(cache.font,cache.batch,cache.textBatch,(element,theme,shapes,texts)=>{
         this.currentCache=null;this.currentBatch=shapes;this.currentTextBatch=texts;
         try{this.collectElement(element,theme);}finally{this.currentCache=cache;}
       });
       if(patched==='dense')retained=cache.paint;
-      else if(patched){if(patched.shapes)cache.batch.rebuild();if(cache.font)cache.textBatch.rebuild(cache.font);return;}
+      else if(patched){if(patched.shapes)cache.batch.rebuild();if(cache.font)cache.textBatch.rebuild(cache.font);if(cache.ordered)cache.paint.rebuildOrderedPlan(cache.plan,cache.batch,cache.textBatch,cache.font);return;}
     }
     cache.paint=null;
-    this.capturePaint=retained??(!dense&&!this.elementRenderers.size&&!guiThemeTreeActive(root.root)?GuiPaintCache.capture(root,cache.font):null);
-    cache.ordered = guiThemeTreeActive(root.root); cache.plan.clear(); cache.usedFonts.clear();
+    this.capturePaint=retained??(!dense&&!this.elementRenderers.size?GuiPaintCache.capture(root,cache.font):null);
+    cache.ordered = forceOrdered||guiThemeTreeActive(root.root)||this.fontOwner.hasVariants(root); cache.plan.clear(); cache.usedFonts.clear();
     for (const batches of cache.extraFonts.values()) for (const batch of [batches.textBatch, batches.popupTextBatch, batches.modalTextBatch]) batch.clear();
     this.currentFont = cache.font;
     cache.batch.clear();
@@ -349,6 +364,9 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     this.currentModalTextBatch = cache.modalTextBatch;
     this.currentModalImageBatch = cache.modalImageBatch;
     this.collectElement(root.root, root.theme);
+    // An explicit large label can discover a second raster-size bucket on the first collection.
+    // Recollect once with the same painter-order plan; ordinary single-font trees retain their batching.
+    if(!cache.ordered&&cache.extraFonts.size){this.rebuildRoot(root,cache,true);return;}
     cache.batch.rebuild();
     cache.popupBatch.rebuild();
     cache.imageBatch.rebuild();
@@ -365,7 +383,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     }
     if (cache.ordered) cache.plan.compile();
     this.capturePaint?.complete();
-    cache.paint=this.capturePaint;
+    cache.paint=cache.extraFonts.size?null:this.capturePaint;
     } catch(error){cache.paint=null;throw error;
     } finally {
       this.capturePaint=null;this.currentClip=undefined;
@@ -412,20 +430,22 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     this.currentModalImageBatch = this.imageBatch;
   }
 
-  private currentClip: GuiRect | undefined;
+  private currentClip: GuiClipRect | undefined;
+  private paintStyle: GuiSkin = {};
+  private readonly defaultSkins:GuiDefaultSkinCache=new Map();
 
   private collectElement(element: GuiElement, theme: GuiTheme): void {
     if (!element.visible || isGuiLayoutHidden(element)) return;
     const skin = this.styleFor(element);
-    if(this.elementRenderers.size||element.getResolvedStyle!==GuiElement.prototype.getResolvedStyle||skin.fontFamily!==undefined||skin.fontSize!==undefined||skin.palette!==undefined||skin.color!==undefined)
-      theme = {...theme, fontFamily: skin.fontFamily ?? theme.fontFamily, fontSize: skin.fontSize ?? theme.fontSize,
+    if(this.elementRenderers.size||element.getResolvedStyle!==GuiElement.prototype.getResolvedStyle||skin.fontWeight!==undefined||skin.lineHeight!==undefined||skin.fontFamily!==undefined||skin.fontSize!==undefined||skin.palette!==undefined||skin.color!==undefined)
+      theme = {...theme, fontFamily: skin.fontFamily ?? theme.fontFamily, fontSize: skin.fontSize ?? theme.fontSize, ...(skin.fontWeight!==undefined?{fontWeight:skin.fontWeight}:{}), ...(skin.lineHeight!==undefined?{lineHeight:skin.lineHeight}:{}),
         colors: {...theme.colors, ...skin.palette, ...(skin.color !== undefined ? {text: skin.color} : {})}};
     const previousFont = this.currentFont, previousText = this.currentTextBatch, previousPopupText = this.currentPopupTextBatch, previousModalText = this.currentModalTextBatch;
     const prototype=Object.getPrototypeOf(element) as object;
     const noText=!this.elementRenderers.size&&element.getResolvedStyle===GuiElement.prototype.getResolvedStyle&&(prototype===GuiElement.prototype||guiControlPrototype(prototype)==='GuiProgress'&&Object.getOwnPropertyDescriptor(element,'showText')?.value===false);
     if (this.currentRoot && this.currentCache && this.prepared&&!noText) {
       const font = element.getResolvedStyle===GuiElement.prototype.getResolvedStyle
-        ? this.fontOwner.forFamily(this.currentRoot,skin.fontFamily??this.currentRoot.theme.fontFamily)
+        ? this.fontOwner.forFamily(this.currentRoot,skin.fontFamily??this.currentRoot.theme.fontFamily,{fontWeight:skin.fontWeight??theme.fontWeight,fontSize:typeof Object.getOwnPropertyDescriptor(element,'fontSize')?.value==='number'?(element as unknown as {fontSize:number}).fontSize:skin.fontSize??theme.fontSize})
         : this.fontOwner.forRoot(this.currentRoot,element), cache = this.currentCache;
       cache.usedFonts.add(font); this.currentFont = font;
       let batches: FontBatches = cache;
@@ -437,8 +457,10 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       this.currentTextBatch = this.currentLayer === 2 ? batches.modalTextBatch : batches.textBatch;
       this.currentPopupTextBatch = batches.popupTextBatch; this.currentModalTextBatch = batches.modalTextBatch;
     }
+    const oldClip=this.currentClip;
+    if(skin.clipRadius!==undefined){const rect=this.clipRect(element.rect),radius=skin.clipRadius;this.currentClip=radius>0?{...rect,rounded:{rect:{...element.rect},radii:skin.cornerRadii??[radius,radius,radius,radius],...(rect.rounded?{parent:rect.rounded}:{})}}:rect;}
     try {this.collectStyledElement(element, theme);}
-    finally {this.currentFont = previousFont; this.currentTextBatch = previousText; this.currentPopupTextBatch = previousPopupText; this.currentModalTextBatch = previousModalText;}
+    finally {this.currentClip=oldClip;this.currentFont = previousFont; this.currentTextBatch = previousText; this.currentPopupTextBatch = previousPopupText; this.currentModalTextBatch = previousModalText;}
   }
 
   private collectStyledElement(element: GuiElement, theme: GuiTheme): void {
@@ -469,7 +491,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     }
     this.addElementShapes(element, theme);
     const previousClip = this.currentClip;
-    if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) this.currentClip = this.clipRect(element.rect);
+    if(isGuiControl<GuiScrollView>(element,'GuiScrollView'))this.currentClip=this.clipRect(element.rect);
     for (const child of element.children) this.collectElement(child, theme);
     if (isGuiControl<GuiScrollView>(element, 'GuiScrollView') && element.showScrollbar && element.maxScrollOffset > 0) {
       const first = this.currentBatch.commands.length;
@@ -492,11 +514,12 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
   private paintElementShapes(element: GuiElement, theme: GuiTheme): void {
     if(isGuiExternallyPainted(element))return;
     if (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && (!element.active || !element.content)) return;
-    const skin = this.styleFor(element);
+    const skin = this.styleFor(element); this.paintStyle=skin;
+    rememberGuiVisualBounds(element,skin);
     if (isGuiControl<GuiModal>(element, 'GuiModal') && this.getElementRenderer(element) === this.modalRenderer) {
       const first = this.currentBatch.commands.length;
       this.addRect(element.rect.x, element.rect.y, element.rect.width, element.rect.height, 0,
-        withAlpha(colorToRgba(element.backdropColor, 'rgba(15,23,42,0.48)'), skin.opacity ?? 1));
+        withAlpha(colorToRgba(element.backdropColor||element.getPartStyle('backdrop').backgroundColor, theme.colors.overlay??'rgba(15,23,42,0.48)'), skin.opacity ?? 1));
       if (this.currentCache?.ordered) this.currentCache.plan.shapes(this.currentBatch, first, this.currentLayer);
     }
     if (skin.nineSlice && !(isGuiControl<GuiNineSlice>(element, 'GuiNineSlice'))) {
@@ -514,19 +537,22 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     const shape = this.currentBatch.commands.length, image = this.currentImageBatch.commands.length, text = this.currentTextBatch.commands.length;
     const popupShape = this.currentPopupBatch.commands.length, popupImage = this.currentPopupImageBatch.commands.length, popupText = this.currentPopupTextBatch.commands.length;
     const renderer = this.getElementRenderer(element);
+    if(element.focused&&!element.disabled&&!skin.nineSlice&&(skin.focusWidth??0)>0){const r=isGuiControl<GuiModal>(element,'GuiModal')?element.dialogRect:element.rect,w=skin.focusWidth!;paintGuiBox(this.currentBatch,{x:r.x-2-w,y:r.y-2-w,width:r.width+4+w*2,height:r.height+4+w*2},{radius:(skin.radius??theme.radius)+2+w,borderWidth:w,...(skin.cornerRadii?{cornerRadii:skin.cornerRadii.map(radius=>radius+2+w) as [number,number,number,number]}:{})},[0,0,0,0],colorToRgba(skin.focusColor,theme.colors.focus??theme.colors.primary),this.currentClip,theme.radius);}
     if (renderer) {
       renderer(element, theme);
     } else {
       const background = skin.backgroundColor;
-      if (background) this.addRect(element.rect.x, element.rect.y, element.rect.width, element.rect.height, skin.radius ?? theme.radius, colorToRgba(background, theme.colors.surface));
+      if (background || skin.gradient || skin.borderWidth) paintGuiBox(this.currentBatch,element.rect,{borderWidth:0,...skin},colorToRgba(background,'transparent'),colorToRgba(skin.borderColor,theme.colors.border),this.currentClip,theme.radius);
     }
     if (skin.icon && guiImageSourceReady(skin.icon) && !(isGuiControl<GuiToast>(element, 'GuiToast'))) {
+      const iconSkin=element.getPartStyle('icon');
       const padding = isGuiControl<GuiLabel>(element, 'GuiLabel') ? 0 : isGuiControl<GuiButton>(element, 'GuiButton') && element.variant === 'outline' ? 4 : 8;
       const fontSize = isGuiControl<GuiLabel>(element, 'GuiLabel') ? element.fontSize ?? theme.fontSize : theme.fontSize;
       const frame = isGuiControl<GuiTooltip>(element, 'GuiTooltip') ? element.popupRect : element.rect;
       const icon = guiContentBox(element, padding, fontSize, frame).icon;
+      if(icon&&isGuiControl<GuiButton>(element,'GuiButton')&&element.iconOnly)icon.x=frame.x+(frame.width-icon.width)/2;
       if (icon) (isGuiControl<GuiTooltip>(element, 'GuiTooltip') ? this.currentPopupImageBatch : this.currentImageBatch).addImage({source: skin.icon, ...icon, uv: [0,0,1,1],
-        color: withAlpha(colorToRgba(skin.iconTint, '#ffffff'), isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiModal>(element, 'GuiModal') || isGuiControl<GuiNineSlice>(element, 'GuiNineSlice') ? skin.opacity ?? 1 : 1), clip: this.clipRect(frame)});
+        ...((iconSkin.iconRotation??skin.iconRotation)!==undefined?{rotation:iconSkin.iconRotation??skin.iconRotation}:{}), color: withAlpha(colorToRgba(iconSkin.iconTint??iconSkin.color??skin.iconTint, '#ffffff'), isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiModal>(element, 'GuiModal') || isGuiControl<GuiNineSlice>(element, 'GuiNineSlice') ? skin.opacity ?? 1 : 1), clip: this.clipRect(frame)});
     }
     if (!(isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiModal>(element, 'GuiModal') || isGuiControl<GuiNineSlice>(element, 'GuiNineSlice'))) applyGuiOpacity([
       {commands: this.currentBatch.commands, first: shape}, {commands: this.currentImageBatch.commands, first: image}, {commands: this.currentTextBatch.commands, first: text},
@@ -554,7 +580,11 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
   private styleFor(element: GuiElement): GuiSkin {
     let skin = this.resolvedStyles.get(element);
     if (!skin) {
-      skin = element.getResolvedStyle();
+      skin = element.getResolvedStyle===GuiElement.prototype.getResolvedStyle&&this.currentRoot
+        ? !guiThemeTreeActive(this.currentRoot.root)&&Object.keys(element.style).length===0
+          ? guiControlDefaultSkin(element,this.currentRoot.theme,guiThemeState(element),this.defaultSkins)
+          : resolveGuiSkin(element,undefined,this.defaultSkins)
+        : element.getResolvedStyle();
       if (skin.nineSlice && guiImageSourceReady(skin.nineSlice.source)) skin = {...skin, backgroundColor: 'transparent', borderColor: 'transparent'};
       this.resolvedStyles.set(element, skin);
     }
@@ -612,11 +642,11 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
 
   
 
-  private clipRect(rect: GuiRect): GuiRect {
+  private clipRect(rect: GuiRect): GuiClipRect {
     const clip = this.currentClip;
     if (!clip) return rect;
     const x=Math.max(rect.x,clip.x),y=Math.max(rect.y,clip.y);
-    return {x,y,width:Math.max(0,Math.min(rect.x+rect.width,clip.x+clip.width)-x),height:Math.max(0,Math.min(rect.y+rect.height,clip.y+clip.height)-y)};
+    return {x,y,width:Math.max(0,Math.min(rect.x+rect.width,clip.x+clip.width)-x),height:Math.max(0,Math.min(rect.y+rect.height,clip.y+clip.height)-y),...(clip.rounded?{rounded:clip.rounded}:{})};
   }
 
   private addRect(x: number, y: number, width: number, height: number, radius: number, color: [number, number, number, number]): void {
@@ -647,7 +677,8 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       color,
       multiline: !singleLine,
       wrap: !singleLine,
-      lineHeight: fontSize * 1.2,
+      ...(this.paintStyle.lineHeight!==undefined?{lineHeightPixels:this.paintStyle.lineHeight}:this.currentRoot?.theme.lineHeight!==undefined?{lineHeightPixels:this.currentRoot.theme.lineHeight}:{}),
+      ...(this.paintStyle.textOverflow?{overflow:this.paintStyle.textOverflow}:{}),
       clip: this.clipRect({ x, y, width, height }),
     });
   }
@@ -673,7 +704,8 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       color,
       multiline: !singleLine,
       wrap: !singleLine,
-      lineHeight: fontSize * 1.2,
+      ...(this.paintStyle.lineHeight!==undefined?{lineHeightPixels:this.paintStyle.lineHeight}:this.currentRoot?.theme.lineHeight!==undefined?{lineHeightPixels:this.currentRoot.theme.lineHeight}:{}),
+      ...(this.paintStyle.textOverflow?{overflow:this.paintStyle.textOverflow}:{}),
       clip,
     });
   }
@@ -704,10 +736,13 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       color,
       multiline: false,
       wrap: false,
+      ...(this.paintStyle.lineHeight!==undefined?{lineHeightPixels:this.paintStyle.lineHeight}:{}),
+      ...(this.paintStyle.textOverflow?{overflow:this.paintStyle.textOverflow}:{}),
       clip: this.clipRect({ x, y, width, height }),
     });
   }
 }
 
 /** Runtime-private typed friend view; no renderer ownership crosses the public API. */
+const stockMeasureTextWidth = GuiRenderer.prototype.measureTextWidth;
 export type GuiControlPaintContext = GuiRenderer['controlPaint'];

@@ -14,6 +14,6 @@ export class GuiGlyphCoverage {
     for(const entry of this.tree.entries){const e=entry.element,text=this.text(e),before=this.texts.get(e)!;if(text!==before){this.add(before,-1);this.add(text,1);this.texts.set(e,text);}}
     return true;
   }
-  private text(e:GuiElement):string {return 'text'in e&&typeof e.text==='string'?e.text:'';}
+  private text(e:GuiElement):string {return 'text'in e&&typeof e.text==='string'?e.text:'displayText'in e&&typeof e.displayText==='string'?e.displayText:'';}
   private add(text:string,delta:number):void {for(const glyph of guiTextClusters(text)){if(/^[\r\n]+$/u.test(glyph))continue;const count=(this.counts.get(glyph)??0)+delta;if(count){this.counts.set(glyph,count);this.glyphs.add(glyph);}else{this.counts.delete(glyph);this.glyphs.delete(glyph);}}}
 }

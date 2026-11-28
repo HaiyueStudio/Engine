@@ -1,5 +1,6 @@
 /** Value snapshots: collectors may mutate or replace commands between frames. */
-type Command = { color: readonly number[]; clip?: { x: number; y: number; width: number; height: number } | undefined };
+import type {GuiClipRect} from './GuiPaintParameters';
+type Command = { color: readonly number[]; clip?: GuiClipRect | undefined; appearance?: unknown };
 export function sameGuiCommand<T extends Command>(a: T | undefined, b: T): boolean {
   if (!a) return false;
   const keys = Object.keys(a) as (keyof T)[];
@@ -13,5 +14,5 @@ export function sameGuiCommand<T extends Command>(a: T | undefined, b: T): boole
     a.clip.y === b.clip.y && a.clip.width === b.clip.width && a.clip.height === b.clip.height);
 }
 export function snapshotGuiCommand<T extends Command>(command: T): T {
-  return { ...command, color: [...command.color], ...(command.clip ? { clip: { ...command.clip } } : {}) };
+  return { ...command, color: [...command.color], ...(command.clip ? { clip: command.clip.rounded?structuredClone(command.clip):{...command.clip} } : {}), ...(command.appearance ? {appearance: structuredClone(command.appearance)} : {}) };
 }

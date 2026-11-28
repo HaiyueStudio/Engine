@@ -1,3 +1,4 @@
+import {guiHasActivity,advanceGuiActivity} from './GuiActivity';
 import {isGuiControl} from './GuiControlIdentity';
 import type {GuiElement} from './components/GuiElement';
 import {GuiDirtyFlags, type GuiRect} from './GuiTypes';
@@ -7,6 +8,7 @@ import {type GuiScrollView} from './components/GuiScrollView';
 import {type GuiModal} from './components/GuiModal';
 import type {GuiImageSource} from './components/GuiImage';
 import {GuiActivityState} from './GuiActivityState';
+import {guiVisualDamage} from './GuiVisualBounds';
 import {GuiDirtyState} from './GuiDirtyState';
 import {GUI_LAYOUT_STYLE_MUTATION,GUI_TEXT_LAYOUT_POLICY,guiLayoutStyleChange,guiTextContentChange,guiTextNeedsCoordinates,rememberGuiInvalidation} from './GuiInvalidationState';
 
@@ -79,6 +81,16 @@ class Bounds {
     return this.empty ? fallback : {x: this.left, y: this.top, width: this.right - this.left, height: this.bottom - this.top};
   }
 }
+function union(rects: readonly GuiRect[]): GuiRect {
+  const bounds = new Bounds();
+  for (const rect of rects) bounds.add(rect);
+  return bounds.rect({x: 0, y: 0, width: 0, height: 0});
+}
+function addDamage(before: Bounds, after: Bounds, element: GuiElement, rect: GuiRect): void {
+  const damage = guiVisualDamage(element);
+  before.add(rect); before.add(damage.before);
+  after.add(element.rect); after.add(damage.after);
+}
 function inputKey(element: GuiElement): string {
   return JSON.stringify([element.getLayoutOptions(), styleKey(element), element.visible, element.disabled, element.hovered, element.pressed, element.focused,
     'text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, isGuiControl<GuiModal>(element, 'GuiModal') ? element.dialogRect : undefined]);
@@ -124,14 +136,25 @@ export class GuiLayoutOwner {
   }
   private emit(reasons: readonly GuiInvalidationReason[], previousBounds: GuiRect, nextBounds?: GuiRect,source?:GuiElement,flags=GuiDirtyFlags.None,kind=0,generation=++this.generation,structure?:number): void {
     if (this.listeners.size === 0) {this.activity.reset();return;}
+    if(source){const damage=guiVisualDamage(source);
+      if(!sameCoordinates(previousBounds,damage.before))previousBounds=union([previousBounds,damage.before]);
+      if(nextBounds||!sameCoordinates(source.rect,damage.after))nextBounds=union([nextBounds??source.rect,damage.after]);}
     const change: GuiInvalidation = Object.freeze({generation, reasons: Object.freeze([...reasons]), previousBounds: Object.freeze({...previousBounds}), ...(nextBounds ? {nextBounds: Object.freeze({...nextBounds})} : {}), activeAnimation: this.activity.value(source,flags,structure)});
     rememberGuiInvalidation(change,kind);
     for (const listener of [...this.listeners]) listener(change);
   }
   private active(element: GuiElement): boolean {
-    return element.visible && !isGuiLayoutHidden(element) && !element.disabled && (('animating' in element && element.animating === true) || element.children.some(child => this.active(child)));
+    return element.visible && !isGuiLayoutHidden(element) && !element.disabled && (guiHasActivity(element)||('animating' in element && element.animating === true) || element.children.some(child => this.active(child)));
   }
   isDirty():boolean {return this.dirty.isDirty();}
+  layoutManual(apply:()=>void):void {
+    const previous=snapshot(this.root);apply();
+    const before=new Bounds(),after=new Bounds();let changed=false;
+    for(const [element,rect]of previous)if(!sameCoordinates(rect,element.rect)){
+      changed=true;addDamage(before,after,element,rect);
+    }
+    if(changed)this.emit(['paint'],before.rect(this.root.rect),after.rect(this.root.rect));
+  }
   clearDirty(fallback:()=>void):void {this.dirty.clear(fallback);}
   needsCoordinates(fallback:()=>boolean):boolean {return this.dirty.needsCoordinates(fallback);}
   subscribe(listener: (change: GuiInvalidation) => void): () => void {
@@ -211,7 +234,9 @@ export class GuiLayoutOwner {
       applying = true; withGuiAssignments(next, () => this.root.layout(viewport));
       this.needsLayout = false;
       const before = new Bounds(), after = new Bounds();
-      for (const [element, rect] of previous) if (!sameRect(rect, element.rect)) {before.add(rect); after.add(element.rect);}
+      for (const [element, rect] of previous) if (!sameRect(rect, element.rect)) {
+        addDamage(before, after, element, rect);
+      }
       this.emit(['paint'], before.rect(previous.get(this.root)!), after.rect(this.root.rect));
       return true;
     } catch (error) {

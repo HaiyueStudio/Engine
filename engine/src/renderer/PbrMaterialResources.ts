@@ -18,6 +18,7 @@ export interface MaterialGpuData {
   textures: Record<PbrTextureSlot, GPUTexture>;
   sources: Record<PbrTextureSlot, unknown>;
   handles: Partial<Record<PbrTextureSlot, AssetHandle<GPUTexture>>>;
+  requestGenerations: Partial<Record<PbrTextureSlot, number>>;
   loaded: Record<PbrTextureSlot, boolean>;
   uniformBuffer: ArrayBuffer;
   f32: Float32Array;
@@ -97,6 +98,7 @@ export class PbrMaterialResources {
         transmission: null, thickness: null,
       },
       handles: {},
+      requestGenerations: {},
       loaded: {
         baseColor: false, metallicRoughness: false, normal: false, occlusion: false, emissive: false,
         clearcoat: false, clearcoatRoughness: false, clearcoatNormal: false,
@@ -208,6 +210,8 @@ export class PbrMaterialResources {
 
   private _syncTexture(slot: PbrTextureSlot, source: MaterialTextureSource, data: MaterialGpuData): boolean {
     if (data.sources[slot] === source) return false;
+    const generation = (data.requestGenerations[slot] ?? 0) + 1;
+    data.requestGenerations[slot] = generation;
     if (data.handles[slot]) this.recorded.retire(data.handles[slot]!);
     delete data.handles[slot];
     data.sources[slot] = source;
@@ -226,7 +230,8 @@ export class PbrMaterialResources {
       source as string | ImageBitmap | HTMLCanvasElement | HTMLImageElement | CompressedTextureSourceDescriptor,
       { format, mipmaps: 'generate', signal: this.options.signal },
     ).then(handle => {
-      if ((this.disposed || this.options.signal.aborted) || data.disposed || data.sources[slot] !== source) {
+      if ((this.disposed || this.options.signal.aborted) || data.disposed || data.sources[slot] !== source
+        || data.requestGenerations[slot] !== generation) {
         handle.release();
         return;
       }

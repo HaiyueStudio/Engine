@@ -2,6 +2,7 @@ import { sha256Hex } from '../hash';
 import { compareStableText } from '../naming';
 import type { ShaderIrEntry, ShaderIrNode, ShaderIrProgram } from './contracts';
 import { optimizeShaderIrEntries } from './optimizer';
+import {shaderError} from '../diagnostics';
 
 export function computeShaderIrCanonicalHash(
   program: Omit<ShaderIrProgram, 'canonicalHash'> | ShaderIrProgram,
@@ -47,15 +48,19 @@ export function reachableShaderIrNodes(entry: ShaderIrEntry): readonly ShaderIrN
   const byId = new Map(entry.nodes.map(node => [node.id, node]));
   const visited = new Set<number>();
   const ordered: ShaderIrNode[] = [];
-  const visit = (id: number): void => {
-    if (visited.has(id)) return;
-    const node = byId.get(id);
-    if (!node) return;
-    for (const operand of node.operands) visit(operand);
-    visited.add(id);
-    ordered.push(node);
-  };
-  visit(entry.output.nodeId);
+  const root = byId.get(entry.output.nodeId), active = new Set<number>();
+  const pending: {node: ShaderIrNode; next: number}[] = root ? [{node: root, next: 0}] : [];
+  if (root) active.add(root.id);
+  while (pending.length) {
+    const frame = pending[pending.length - 1]!;
+    if (frame.next < frame.node.operands.length) {
+      const id = frame.node.operands[frame.next++]!;
+      if (active.has(id)) shaderError('E_SHADER_IR_INVALID', `IR node ${id} forms a cycle.`, {moduleId: entry.id, path: `${entry.id}.nodes.${id}.operands`});
+      if (visited.has(id)) continue;
+      const node = byId.get(id);
+      if (node) {active.add(id); pending.push({node, next: 0});}
+    } else {pending.pop(); active.delete(frame.node.id); visited.add(frame.node.id); ordered.push(frame.node);}
+  }
   return Object.freeze(ordered);
 }
 

@@ -2,6 +2,9 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "ADR 0144 admits exactly gui-pickers 4, gui-assets 9, gui-composition 15 and gui-assistive 13 focused symbols for the 14 P3 specialty components, zero reserve and no Engine/root symbols. File, QR, pointer and history capabilities are explicitly injected; existing input/layout/modal/activity owners and performance/resource/pixel budgets remain. Next-minor development only.",
+    "ADR 0143 admits exactly gui-forms 11, gui-data 11 and gui-content 24 focused symbols with zero new reserve. The existing editor, virtual collection, layout, focus, modal, pointer capture and activity owners remain authoritative; no Engine/root exports or performance/resource/pixel changes. These development additions target the next minor release.",
+    "ADR 0142 admits exactly gui-display 25 and gui-overlays 20 focused symbols, Expandable 2 on gui-controls (12→14) and readonly row-state 1 on gui-collections (9→10). Original GUI layout, focus, input, activity, renderer and GPU owners are reused; no root exports, symbol reserves or performance/resource/pixel budget growth. New stable APIs belong to the next minor, not the published patch.",
     "ADR 0140 admits the seven frozen symbols of extensions ./visual-novel, with zero symbol reserve and no root export changes.",
     "ADR 0139 / G01 admits exactly GuiIconPosition on Engine ./gui, GuiTabHeaderOptions on existing ./gui-layout and 12 ./gui-controls symbols for G10. Original GuiContent, GUI identity, layout, theme, modal/input and resource owners are reused. Root symbols, old reserves and all performance/resource budgets remain unchanged.",
     "ADR 0139 / G01 admits exactly 2 Tilemap atlas/transform types for G08 (8→10), preserving existing reserves. Same original component/system identities; existing production palette/textured 2D programs and frame/tracker owners are reused. No other symbols or performance/resource budget change.",
@@ -400,7 +403,7 @@
             "minimumSymbols": 0
           },
           "entrypoints": {
-            "./gui-collections": 9
+            "./gui-collections": 10
           }
         },
         {
@@ -422,7 +425,7 @@
             "minimumSymbols": 0
           },
           "entrypoints": {
-            "./gui-controls": 12
+            "./gui-controls": 14
           }
         },
         {
@@ -434,6 +437,105 @@
           },
           "entrypoints": {
             "./visual-novel": 7
+          }
+        },
+        {
+          "id": "gui-display",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-display": 25
+          }
+        },
+        {
+          "id": "gui-overlays",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-overlays": 20
+          }
+        },
+        {
+          "id": "gui-forms",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-forms": 11
+          }
+        },
+        {
+          "id": "gui-data",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-data": 11
+          }
+        },
+        {
+          "id": "gui-content",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-content": 24
+          }
+        },
+        {
+          "id": "gui-pickers",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-pickers": 4
+          }
+        },
+        {
+          "id": "gui-assets",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-assets": 9
+          }
+        },
+        {
+          "id": "gui-composition",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-composition": 15
+          }
+        },
+        {
+          "id": "gui-assistive",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-assistive": 13
           }
         }
       ]

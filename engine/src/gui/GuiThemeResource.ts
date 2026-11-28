@@ -1,4 +1,8 @@
 import type {GuiSkin, GuiThemeState, GuiThemeResourceBinding} from './GuiThemeTypes';
+import {registerGuiThemeResource} from './GuiThemeResolve';
+import {captureGuiStyle, guiStyleStateOrder, mergeGuiStyle} from './GuiStyleLayers';
+import {guiThemePreset} from './GuiThemePresets';
+import type {GuiTheme} from './GuiTypes';
 
 type Layers = Readonly<Partial<Record<'normal' | keyof GuiThemeState, GuiSkin>>>;
 interface Definition extends Layers {
@@ -13,7 +17,7 @@ interface State {
   parentOff: (() => void) | null;
 }
 const states = new WeakMap<GuiThemeResource, State>();
-const order = ['normal', 'hover', 'focus', 'pressed', 'disabled'] as const;
+const order = ['normal', ...guiStyleStateOrder] as const;
 const empty: GuiSkin = Object.freeze({});
 let revision = 0;
 
@@ -32,14 +36,14 @@ function skin(value: GuiSkin): GuiSkin {
   // Texture/font objects are borrowed. Only configuration containers are frozen.
   const nineSlice = value.nineSlice;
   if (value.palette) for (const [name, color] of Object.entries(value.palette)) {
-    if (!['text','textMuted','primary','danger','background','surface','border','hover','active','disabled'].includes(name) || typeof color !== 'string') throw new TypeError('Invalid GUI theme palette token.');
+    if (!['text','textMuted','primary','danger','background','surface','border','hover','active','disabled','elevated','input','onPrimary','disabledText','focus','thumb','success','warning','overlay','shadow'].includes(name) || typeof color !== 'string') throw new TypeError('Invalid GUI theme palette token.');
   }
   if (nineSlice && (!Number.isFinite(nineSlice.sourceWidth) || nineSlice.sourceWidth <= 0 || !Number.isFinite(nineSlice.sourceHeight) || nineSlice.sourceHeight <= 0 || nineSlice.cuts.length !== 4 || nineSlice.cuts.some(v => !Number.isFinite(v) || v < 0) || nineSlice.cuts[0] + nineSlice.cuts[2] > nineSlice.sourceWidth || nineSlice.cuts[1] + nineSlice.cuts[3] > nineSlice.sourceHeight)) throw new RangeError('Invalid theme nine-slice borders.');
   if (nineSlice?.pixelRatio !== undefined && (!Number.isFinite(nineSlice.pixelRatio) || nineSlice.pixelRatio <= 0)) throw new RangeError('Invalid theme nine-slice pixel ratio.');
   if (nineSlice?.uv && (nineSlice.uv.length !== 4 || nineSlice.uv.some(v => !Number.isFinite(v) || v < 0) || nineSlice.uv[0] + nineSlice.uv[2] > 1 || nineSlice.uv[1] + nineSlice.uv[3] > 1)) throw new RangeError('Invalid theme atlas UV rectangle.');
   const sliceInsets = nineSlice?.contentInsets;
   if (sliceInsets && ['top','right','bottom','left'].some(key => !Number.isFinite(sliceInsets[key as keyof typeof sliceInsets]) || sliceInsets[key as keyof typeof sliceInsets] < 0)) throw new RangeError('Invalid theme skin content insets.');
-  return Object.freeze({...Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)),
+  return captureGuiStyle({...Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)),
     ...(insets ? {contentInsets: insets} : {}),
     ...(value.palette ? {palette: Object.freeze({...value.palette})} : {}),
     ...(nineSlice ? {nineSlice: Object.freeze({...nineSlice, cuts: Object.freeze([...nineSlice.cuts]) as typeof nineSlice.cuts, ...(nineSlice.uv ? {uv: Object.freeze([...nineSlice.uv]) as typeof nineSlice.uv} : {}), ...(sliceInsets ? {contentInsets: Object.freeze({...sliceInsets})} : {})})} : {}),
@@ -76,9 +80,12 @@ function notify(state: State): void {
 
 /** Reusable borrowed resource; roots subscribe while attached and never dispose it. */
 export class GuiThemeResource implements GuiThemeResourceBinding {
+  /** Independent mutable theme data, suitable for GuiRoot's theme option. */
+  static createTheme(mode: 'dark' | 'light' | 'legacy' = 'dark', density: NonNullable<GuiTheme['density']> = 'comfortable'): GuiTheme {return guiThemePreset(mode, density);}
   constructor(definition: Definition = {}) {
     const captured = snapshot(this, definition);
     states.set(this, {definition: captured, version: ++revision, disposed: false, listeners: new Set(), parentOff: null});
+    registerGuiThemeResource(this, themeProof);
   }
 
   get version(): number {
@@ -96,8 +103,7 @@ export class GuiThemeResource implements GuiThemeResourceBinding {
     for (const key of order) if (key === 'normal' || active[key]) for (const definition of definitions) {
       const selected = controlType === '*' ? definition : definition.controls?.[controlType];
       const part = selected?.[key];
-      const palette = part?.palette ? {...result.palette, ...part.palette} : result.palette;
-      Object.assign(result, part, ...(palette ? [{palette}] : []));
+      mergeGuiStyle(result, part);
     }
     return Object.freeze(result);
   }
@@ -141,3 +147,5 @@ export class GuiThemeResource implements GuiThemeResourceBinding {
     }
   }
 }
+
+const themeProof=/* @__PURE__ */ (()=>({prototype:GuiThemeResource.prototype,resolve:GuiThemeResource.prototype.resolve,version:Object.getOwnPropertyDescriptor(GuiThemeResource.prototype,'version')?.get}))();

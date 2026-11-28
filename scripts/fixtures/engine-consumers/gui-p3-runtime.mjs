@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {GuiRoot,GuiFocusManager,GuiInput,GuiLabel,GuiScrollView} from '@haiyue/engine/gui';
+import {GuiDatePicker,GuiTimePicker} from '@haiyue/extensions/gui-pickers';
+import {GuiUpload,GuiQRCode} from '@haiyue/extensions/gui-assets';
+import {GuiAnchor,GuiAffix,GuiMasonry,GuiTour,GuiWatermark,GuiBorderBeam} from '@haiyue/extensions/gui-composition';
+import {GuiMentions,GuiVirtualKeyboard,GuiVirtualMouse,GuiHistoryControls} from '@haiyue/extensions/gui-assistive';
+const root=new GuiRoot(),focus=new GuiFocusManager();focus.setRoots([root.root]);const owned=[],own=x=>(owned.push(x),x),input=new GuiInput({value:'kept'}),viewport=new GuiScrollView();
+own(new GuiDatePicker({root,focusManager:focus,value:'2024-02-29',month:'2024-02'}));const time=own(new GuiTimePicker({value:'12:30'}));time.minutes.increment(1);assert.equal(time.value,'12:31');
+const upload=own(new GuiUpload({host:{pick:async()=>[{key:'a',name:'a.txt',size:1,type:'text/plain',data:new Uint8Array(1)}],upload:async()=> 'done'}}));await upload.pick();await upload.start();assert.equal(upload.items[0].result,'done');
+let releases=0;const qr=own(new GuiQRCode({encode:()=>({size:21,cells:new Uint8Array(441)}),rasterize:()=>({source:{width:100,height:100},dispose:()=>releases++})}));assert(await qr.setValue('test'));
+own(new GuiAnchor({viewport,items:[{key:'a',label:'A',target:new GuiLabel()}]}));own(new GuiAffix({viewport,content:new GuiLabel()}));const masonry=own(new GuiMasonry({columns:2,items:[{key:'a',height:100,content:new GuiLabel()}]}));assert.equal(masonry.columnHeights[0],100);own(new GuiTour({root,focusManager:focus,steps:[{key:'a',target:input,title:'A',description:'Help'}]}));own(new GuiWatermark({content:new GuiLabel(),text:'Private'}));own(new GuiBorderBeam({content:new GuiLabel(),paused:true}));
+const mentions=own(new GuiMentions({value:'Ask @mi',suggestions:()=>[{key:'m',label:'Mira',value:'Mira'}]}));mentions.input.setCaret(7);await mentions.search();mentions.autocomplete.select('m');assert.equal(mentions.input.value,'Ask @Mira ');const keyboard=own(new GuiVirtualKeyboard({target:()=>input}));keyboard.press('q');assert(input.value.includes('q'));
+const events=[],mouse=own(new GuiVirtualMouse({host:{bounds:()=>({x:0,y:0,width:100,height:100}),dispatch:e=>events.push(e.type)}}));mouse.click();assert.deepEqual(events,['down','up']);let unsubscribed=0;own(new GuiHistoryControls({history:{read:()=>({canUndo:false,canRedo:false,entries:[]}),subscribe:()=>()=>unsubscribed++,undo(){},redo(){}}}));
+for(const item of owned.reverse())item.dispose();assert.equal(releases,1);assert.equal(unsubscribed,1);focus.dispose();root.destroy();console.log('Packed P3: 14 controllers, explicit host completion, token editing and cleanup passed.');

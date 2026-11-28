@@ -39,6 +39,8 @@ export interface GuiTabContainerOptions {
   readonly focus?: GuiFocusManager;
   readonly tabWidth?: number;
   readonly tabHeight?: number;
+  readonly placement?:'top'|'bottom'|'left'|'right';
+  readonly variant?:'line'|'card'|'pill';
   readonly style?: GuiElementOptions['style'];
   readonly onActiveChange?: (id: string | null) => void;
   /** Return false to veto a user close request. Programmatic remove is unconditional. */

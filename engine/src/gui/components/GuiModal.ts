@@ -34,7 +34,7 @@ export interface GuiModalOptions extends Omit<GuiElementOptions, 'x' | 'y'> {
 }
 
 export class GuiModal extends GuiElement {
-  private static readonly __controlIdentityGuiModal = /* @__PURE__ */ (() => admitGuiControl(GuiModal.prototype, 'GuiModal', undefined, paintGuiModal))();
+  private static readonly __controlIdentityGuiModal = /* @__PURE__ */ (() => admitGuiControl(GuiModal.prototype, 'GuiModal', undefined, paintGuiModal, (_modal,theme)=>({radius:12,backgroundColor:theme.colors.elevated??theme.colors.surface,borderColor:theme.colors.border,shadow:{color:theme.colors.shadow??theme.colors.overlay??'#0006',blur:18,y:8},parts:{title:{fontSize:20,fontWeight:600},body:{fontSize:14,color:theme.colors.textMuted},close:{color:theme.colors.textMuted,padding:4,paddingY:4,fontSize:18},footer:{}}})))();
   static override readonly themeControlType: string = 'GuiModal';
   title: string;
   message: string;
@@ -68,13 +68,8 @@ export class GuiModal extends GuiElement {
       height: '100%',
       visible: options.visible ?? false,
       disabled: options.disabled,
-      style: {
-        backgroundColor: '#f8fafc',
-        borderColor: '#cbd5e1',
-        color: '#1f2937',
-        radius: 10,
-        ...options.style,
-      },
+      themeResource:options.themeResource??null,
+      style:options.style,
     });
     this.dialogWidth = options.width ?? 420;
     this.dialogHeight = options.height ?? 230;
@@ -86,31 +81,19 @@ export class GuiModal extends GuiElement {
     this.showConfirmButton = options.showConfirmButton ?? true;
     this.showCancelButton = options.showCancelButton ?? true;
     this.closeOnBackdrop = options.closeOnBackdrop ?? false;
-    this.backdropColor = options.backdropColor ?? 'rgba(15,23,42,0.48)';
+    this.backdropColor = options.backdropColor ?? '';
     this.onConfirm = options.onConfirm ?? null;
     this.onCancel = options.onCancel ?? null;
     this.onClose = options.onClose ?? null;
 
     this.titleLabel = this.add(new GuiLabel({
       text: this.title,
-      fontSize: 26,
-      style: { color: this.style.color ?? '#1f2937' },
     }));
     this.messageLabel = this.add(new GuiLabel({
       text: this.message,
-      fontSize: 17,
-      style: { color: this.style.color ?? '#475569' },
     }));
     this.closeButton = this.add(new GuiButton({
-      text: 'X',
-      style: {
-        backgroundColor: 'transparent',
-        hoverBackgroundColor: 'rgba(15,23,42,0.10)',
-        color: this.style.color ?? '#475569',
-        hoverColor: this.style.color ?? '#0f172a',
-        borderColor: 'transparent',
-        radius: 6,
-      },
+      text: '×',variant:'text',
       onClick: () => this.close('close'),
     }));
     this.confirmButton = this.add(new GuiButton({
@@ -122,6 +105,7 @@ export class GuiModal extends GuiElement {
       text: this.cancelText,
       onClick: () => this.close('cancel'),
     }));
+    this.bindPart('title',this.titleLabel);this.bindPart('body',this.messageLabel);this.bindPart('close',this.closeButton);this.bindPart('confirm',this.confirmButton);this.bindPart('cancel',this.cancelButton);
     this.syncButtonVisibility();
   }
 
@@ -199,17 +183,18 @@ export class GuiModal extends GuiElement {
     if (options.onClose !== undefined) this.onClose = options.onClose;
   }
 
+  /** Pure geometry used by the original layout delegate before committing any rectangles. */
+  getDialogRect(parentRect:GuiRect,_rectFor?:(element:GuiElement)=>GuiRect):GuiRect {
+    const width=Math.min(Math.max(1,parentRect.width-32),resolveGuiLength(this.dialogWidth,parentRect.width,420));
+    const height=Math.min(Math.max(1,parentRect.height-32),resolveGuiLength(this.dialogHeight,parentRect.height,230));
+    return {x:parentRect.x+(parentRect.width-width)/2,y:parentRect.y+(parentRect.height-height)/2,width,height};
+  }
+  getContentLayoutRect(_child:GuiElement,viewport:GuiRect,rectFor?:(element:GuiElement)=>GuiRect):GuiRect {return this.getDialogRect(viewport,rectFor);}
+
   override layout(parentRect: GuiRect): void {
     parentRect = assignedGuiRect(this) ?? parentRect;
     this.rect = { ...parentRect };
-    const availableWidth = Math.max(1, parentRect.width - 32);
-    const availableHeight = Math.max(1, parentRect.height - 32);
-    const width = Math.min(availableWidth, resolveGuiLength(this.dialogWidth, parentRect.width, 420));
-    const height = Math.min(availableHeight, resolveGuiLength(this.dialogHeight, parentRect.height, 230));
-    this.dialogRect.x = parentRect.x + (parentRect.width - width) * 0.5;
-    this.dialogRect.y = parentRect.y + (parentRect.height - height) * 0.5;
-    this.dialogRect.width = width;
-    this.dialogRect.height = height;
+    Object.assign(this.dialogRect,this.getDialogRect(parentRect));
 
     const left = this.dialogRect.x + 24;
     const right = this.dialogRect.x + this.dialogRect.width - 24;
@@ -259,6 +244,7 @@ export class GuiModal extends GuiElement {
 
 /** Original built-in painter; retained with this control, not every GUI owner. */
 function paintGuiModal(context:GuiPaint.GuiControlPaintContext, modal: GuiModal, theme: GuiPaint.GuiTheme): void {
+    if(theme.density){const skin=context.styleFor(modal);GuiPaint.paintGuiBox(context.currentBatch,modal.dialogRect,skin,GuiPaint.withAlpha(GuiPaint.colorToRgba(skin.backgroundColor,theme.colors.elevated??theme.colors.surface),skin.opacity??1),GuiPaint.withAlpha(GuiPaint.colorToRgba(skin.borderColor,theme.colors.border),skin.opacity??1),context.currentClip,12,skin.opacity??1);return;}
     const opacity = context.styleFor(modal).opacity ?? 1;
     const rect = modal.dialogRect;
     const radius = context.styleFor(modal).radius ?? theme.radius;

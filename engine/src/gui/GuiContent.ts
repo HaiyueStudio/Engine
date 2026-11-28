@@ -1,24 +1,27 @@
 import type {GuiElement} from './components/GuiElement';
 import type {GuiRect} from './GuiTypes';
+import {guiStyleLayer} from './GuiStyleLayers';
+import {guiThemeState} from './GuiThemeResolve';
 
 /** Shared intrinsic/paint geometry for theme padding, skin borders and optional icons. */
 export function guiContentMetrics(element: GuiElement, fallbackPadding: number, fontSize: number) {
   const skin = element.getResolvedStyle(), padding = skin.padding ?? fallbackPadding;
+  const iconSkin=skin.icon&&skin.parts?.icon?guiStyleLayer(skin.parts.icon,guiThemeState(element)):undefined;
   const slice = skin.nineSlice, ratio = slice?.pixelRatio ?? 1;
   const insets = skin.contentInsets ?? slice?.contentInsets ?? (slice ? {
     left: slice.cuts[0] / ratio, top: slice.cuts[1] / ratio, right: slice.cuts[2] / ratio, bottom: slice.cuts[3] / ratio,
-  } : {left: padding, top: padding, right: padding, bottom: padding});
+  } : {left: padding, top: skin.paddingY??padding, right: padding, bottom: skin.paddingY??padding});
   let iconWidth = 0, iconHeight = 0;
   if (skin.icon) {
     const source = 'texture' in skin.icon ? skin.icon.texture : skin.icon;
     const width = 'naturalWidth' in source ? source.naturalWidth : 'width' in source ? source.width : 0;
     const height = 'naturalHeight' in source ? source.naturalHeight : 'height' in source ? source.height : 0;
-    const size = skin.iconSize ?? fontSize;
+    const size = iconSkin?.iconSize??skin.iconSize ?? fontSize;
     const scale = width > 0 && height > 0 ? size / Math.max(width, height) : 0;
     iconWidth = scale ? width * scale : size; iconHeight = scale ? height * scale : size;
   }
-  const gap = iconWidth > 0 ? skin.iconGap ?? 6 : 0;
-  return {insets, iconWidth, iconHeight, gap, iconPosition:skin.iconPosition ?? 'left', horizontal: insets.left + insets.right + iconWidth + gap, vertical: insets.top + insets.bottom};
+  const gap = iconWidth > 0 ? iconSkin?.iconGap??skin.iconGap ?? 6 : 0;
+  return {insets, iconWidth, iconHeight, gap, iconPosition:iconSkin?.iconPosition??skin.iconPosition ?? 'left', horizontal: insets.left + insets.right + iconWidth + gap, vertical: insets.top + insets.bottom};
 }
 
 export function guiContentBox(element: GuiElement, fallbackPadding: number, fontSize: number, r = element.rect) {

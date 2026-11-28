@@ -1,0 +1,26 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/extensions/gui-pickers": [
+        "./src/gui-pickers.ts"
+      ],
+      "@haiyue/extensions/gui-assets": [
+        "./src/gui-assets.ts"
+      ],
+      "@haiyue/extensions/gui-composition": [
+        "./src/gui-composition.ts"
+      ],
+      "@haiyue/extensions/gui-assistive": [
+        "./src/gui-assistive.ts"
+      ]
+    },
+    "types": [
+      "@webgpu/types"
+    ]
+  },
+  "include": [
+    "type-tests/gui-p3-contract.type-test.ts"
+  ]
+}

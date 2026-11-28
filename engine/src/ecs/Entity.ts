@@ -1,4 +1,5 @@
 import { EcsIds } from "./Global";
+import { Cleanup } from "../core/Cleanup";
 import {
 	type AbstractComponentConstructor,
 	Component,
@@ -307,14 +308,16 @@ export class Entity implements IECSObject<World> {
 
 	public destroy(): this {
 		if (this.destroyed) return this;
+		const cleanup = new Cleanup();
 		if (this.children.length === 0) {
 			this.destroyed = true;
-			this.world?.removeEntity(this);
+			cleanup.run(() => this.world?.removeEntity(this));
 			const previousParent = this._parent;
 			previousParent?._removeChildReference(this);
 			this._parent = null;
 			this.hierarchyVersion++;
-			this._destroyComponents();
+			cleanup.run(() => this._destroyComponents());
+			cleanup.complete('Entity cleanup failed.');
 			return this;
 		}
 
@@ -336,7 +339,7 @@ export class Entity implements IECSObject<World> {
 		for (const entity of hierarchy) entity.destroyed = true;
 
 		// World removal keeps components alive long enough to emit remove-from-world callbacks.
-		for (const entity of hierarchy) entity.world?.removeEntity(entity);
+		for (const entity of hierarchy) cleanup.run(() => entity.world?.removeEntity(entity));
 
 		const previousParent = this._parent;
 		previousParent?._removeChildReference(this);
@@ -349,17 +352,19 @@ export class Entity implements IECSObject<World> {
 		// Children are finalized before their parents, matching tree resource ownership.
 		for (let i = hierarchy.length - 1; i >= 0; i--) {
 			const entity = hierarchy[i];
-			if (entity) entity._destroyComponents();
+			if (entity) cleanup.run(() => entity._destroyComponents());
 		}
+		cleanup.complete('Entity subtree cleanup failed.');
 
 		return this;
 	}
 
 	private _destroyComponents(): void {
+		const cleanup = new Cleanup();
 		if (this.components.size === 1) {
-			this.components.values().next().value?.destroy();
+			cleanup.run(() => this.components.values().next().value?.destroy());
 		} else {
-			for (const component of [...this.components.values()]) component.destroy();
+			for (const component of [...this.components.values()]) cleanup.run(() => component.destroy());
 		}
 		this._componentsByConstructor.clear();
 		this._componentsBySymbol.clear();
@@ -369,6 +374,7 @@ export class Entity implements IECSObject<World> {
 		this._componentLifecycleQueueCursor = 0;
 		this._flushingComponentLifecycleQueue = false;
 		if (this.components.size > 0) clear(this.components, this as Entity);
+		cleanup.complete('Entity component cleanup failed.');
 	}
 
 	public fitTag(tag: string, strict?: boolean) {

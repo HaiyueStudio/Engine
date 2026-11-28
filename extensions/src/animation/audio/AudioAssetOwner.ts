@@ -51,11 +51,15 @@ export class AudioAssetOwner {
     const slot = this.requireSlot(resourceId);
     if (slot.cacheDigest) return Promise.resolve(this.cache.get(slot.cacheDigest)!.handle);
     if (slot.pending) return slot.pending;
-    const reusable = this.cache.get(slot.descriptor.integrity.digest);
+    return this.loadCandidate(resourceId, slot, slot.descriptor, signal);
+  }
+
+  private loadCandidate(resourceId: string, slot: AudioResourceSlot, descriptor: RuntimeAudioResource, signal?: AbortSignal): Promise<DecodedAudioHandle> {
+    if (signal?.aborted) return Promise.reject(new AudioRuntimeError('E_AUDIO_RUNTIME_ABORTED', `resources.${resourceId}`, 'audio resource job was aborted'));
+    const reusable = this.cache.get(descriptor.integrity.digest);
     if (reusable) {
-      checkedDecodedBytes(reusable.handle, slot.descriptor, this.options);
-      reusable.references++;
-      slot.cacheDigest = slot.descriptor.integrity.digest;
+      checkedDecodedBytes(reusable.handle, descriptor, this.options);
+      this.commitCache(slot, descriptor);
       return Promise.resolve(reusable.handle);
     }
     if (this.activeDecodeJobs >= this.options.maxDecodeJobs) {
@@ -72,7 +76,7 @@ export class AudioAssetOwner {
     const unlink = forwardAbort(signal, controller);
     this.activeDecodeJobs++;
 
-    const job = this.resolveAndDecode(slot.descriptor, controller.signal)
+    const job = this.resolveAndDecode(descriptor, controller.signal)
       .then(handle => {
         if (this.disposed || controller.signal.aborted || slot.generation !== generation) {
           handle.release();
@@ -84,18 +88,17 @@ export class AudioAssetOwner {
         }
         let decodedBytes: number;
         try {
-          decodedBytes = checkedDecodedBytes(handle, slot.descriptor, this.options);
+          decodedBytes = checkedDecodedBytes(handle, descriptor, this.options);
         } catch (error) {
           handle.release();
           throw error;
         }
-        const digest = slot.descriptor.integrity.digest;
+        const digest = descriptor.integrity.digest;
         const cached = this.cache.get(digest);
         if (cached) {
           handle.release();
-          checkedDecodedBytes(cached.handle, slot.descriptor, this.options);
-          cached.references++;
-          slot.cacheDigest = digest;
+          checkedDecodedBytes(cached.handle, descriptor, this.options);
+          this.commitCache(slot, descriptor);
           return cached.handle;
         }
         if (this.decodedBytes + decodedBytes > this.options.maxDecodedBytes) {
@@ -106,9 +109,9 @@ export class AudioAssetOwner {
             'decoded audio byte budget exceeded',
           );
         }
-        this.cache.set(digest, { handle, decodedBytes, references: 1 });
+        this.cache.set(digest, { handle, decodedBytes, references: 0 });
         this.decodedBytes += decodedBytes;
-        slot.cacheDigest = digest;
+        this.commitCache(slot, descriptor);
         return handle;
       })
       .catch(error => {
@@ -140,25 +143,19 @@ export class AudioAssetOwner {
     this.assertLive();
     validateResourceDescriptor(resource);
     const slot = this.requireSlot(resource.id);
-    const previousDescriptor = slot.descriptor;
-    const previousDigest = slot.cacheDigest;
     slot.controller?.abort();
     slot.generation++;
-    const replacementGeneration = slot.generation;
-    slot.descriptor = resource;
-    delete slot.cacheDigest;
     delete slot.pending;
-    try {
-      const handle = await this.load(resource.id, signal);
-      if (previousDigest) this.releaseCacheReference(previousDigest);
-      return handle;
-    } catch (error) {
-      if (!this.disposed && slot.generation === replacementGeneration) {
-        slot.descriptor = previousDescriptor;
-        if (previousDigest) slot.cacheDigest = previousDigest;
-      }
-      throw error;
-    }
+    return this.loadCandidate(resource.id, slot, resource, signal);
+  }
+
+  /** The slot owns its committed lease throughout every overlapping replacement. */
+  private commitCache(slot: AudioResourceSlot, descriptor: RuntimeAudioResource): void {
+    const digest = descriptor.integrity.digest, previous = slot.cacheDigest;
+    this.cache.get(digest)!.references++;
+    slot.descriptor = descriptor;
+    slot.cacheDigest = digest;
+    if (previous) this.releaseCacheReference(previous);
   }
 
   abort(resourceId: string): void {

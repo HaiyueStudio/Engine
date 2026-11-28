@@ -13,6 +13,7 @@ import { clearCachedRenderPassDescriptors } from './renderPassDescriptor';
 import { FrameLoop } from './FrameLoop';
 import { EngineRegistryHub } from './EngineRegistryHub';
 import { EnginePluginHost } from './EnginePluginHost';
+import { Cleanup } from './Cleanup';
 import type { EnginePluginInstallTracker } from './EnginePlugin';
 import { resolveDepthFormat } from './DepthFormat';
 import { GPU_FEATURE_TIMESTAMP_QUERY, hasGpuFeature } from './GPUFeatures';
@@ -394,31 +395,33 @@ export class HaiyueEngine extends EventEmitter<HaiyueEngineEventMap> {
 
   destroy(): void {
     if (this._state === 'destroyed') return;
-    this._setState('destroyed');
-    this._recoveryController?.abort('engine-destroyed');
+    const cleanup = new Cleanup();
+    cleanup.run(() => this._setState('destroyed'));
+    cleanup.run(() => this._recoveryController?.abort('engine-destroyed'));
     this._recoveryController = null;
-    this.stop();
-    this._activeScene?.destroy();
+    cleanup.run(() => this.stop());
+    cleanup.run(() => this._activeScene?.destroy());
     this._activeScene = null;
-    this._renderTargets.destroy();
-    clearCachedRenderPassDescriptors(this);
+    cleanup.run(() => this._renderTargets.destroy());
+    cleanup.run(() => clearCachedRenderPassDescriptors(this));
     if (this._device) {
-      disposeSharedGeometry3DGPUCache(this._device);
-      disposeSceneFrameGpuArena(this._device);
-      RendererResourceCache.clear(this._device);
+      cleanup.run(() => disposeSharedGeometry3DGPUCache(this._device!));
+      cleanup.run(() => disposeSceneFrameGpuArena(this._device!));
+      cleanup.run(() => RendererResourceCache.clear(this._device!));
     }
-    this._pluginHost.clear();
-    this._assetManager?.dispose();
+    cleanup.run(() => this._pluginHost.clear());
+    cleanup.run(() => this._assetManager?.dispose());
     this._assetManager = null;
     const device = this._device;
     this._adapter = null;
     this._device = null;
     this._capabilities = null;
     this._canvas = null;
-    this._gpuResourceTracker.releaseAll();
+    cleanup.run(() => this._gpuResourceTracker.releaseAll());
     this._recoveryParticipants.clear();
-    device?.destroy();
+    cleanup.run(() => device?.destroy());
     this.removeAllListeners();
+    cleanup.complete('Engine cleanup failed.');
   }
 
   async waitForRecovery(): Promise<void> {

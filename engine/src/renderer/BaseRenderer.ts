@@ -33,6 +33,7 @@ export abstract class BaseRenderer {
   }
   protected maxPipelineCacheEntries = 128;
   protected readonly pipelineCache = new Map<string | number, GPURenderPipeline>();
+  private _pipelineGeneration = 0;
   private readonly _computePipelineKeys = new Set<string | number>();
   private readonly _pipelineWarmupId = ++pipelineWarmupRendererId;
   private readonly _pipelineDiagnostics = {
@@ -78,6 +79,7 @@ export abstract class BaseRenderer {
   }
 
   protected clearPipelineCache(): void {
+    this._pipelineGeneration++;
     this.indirectBatches.clear();
     this.pipelineCache.clear();
     this._computePipelineKeys.clear();
@@ -98,11 +100,13 @@ export abstract class BaseRenderer {
     descriptor: () => GPURenderPipelineDescriptor,
     device: GPUDevice,
   ): void {
+    const generation = this._pipelineGeneration;
     plan.add({
       id: `${this.constructor.name}#${this._pipelineWarmupId}:${String(key)}`,
       label,
       owner: this.constructor.name,
       compile: async () => {
+        if (generation !== this._pipelineGeneration) return;
         if (this.pipelineCache.has(key)) {
           this._pipelineDiagnostics.hits++;
           return;
@@ -116,7 +120,7 @@ export abstract class BaseRenderer {
             key,
             label,
           });
-          if (!this.pipelineCache.has(key)) {
+          if (generation === this._pipelineGeneration && !this.pipelineCache.has(key)) {
             this.pipelineCache.set(key, pipeline);
             this.trimPipelineCache();
           }
@@ -169,11 +173,13 @@ export abstract class BaseRenderer {
     cached: () => GPUComputePipeline | null,
     store: (pipeline: GPUComputePipeline) => void,
   ): void {
+    const generation = this._pipelineGeneration;
     plan.add({
       id: `${this.constructor.name}#${this._pipelineWarmupId}:compute:${String(key)}`,
       label,
       owner: this.constructor.name,
       compile: async () => {
+        if (generation !== this._pipelineGeneration) return;
         if (cached()) {
           this._pipelineDiagnostics.hits++;
           return;
@@ -187,8 +193,10 @@ export abstract class BaseRenderer {
             key,
             label,
           });
-          if (!cached()) store(pipeline);
-          this._computePipelineKeys.add(key);
+          if (generation === this._pipelineGeneration) {
+            if (!cached()) store(pipeline);
+            this._computePipelineKeys.add(key);
+          }
           this._pipelineDiagnostics.asynchronousCreates++;
         } catch (error) {
           this._pipelineDiagnostics.failures++;

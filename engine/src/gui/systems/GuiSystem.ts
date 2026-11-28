@@ -1,3 +1,4 @@
+import {guiHasActivity,advanceGuiActivity} from '../GuiActivity';
 import type {GuiTextServices} from '../input/GuiTextServices';
 import {collectionRetire,collectionFocus,collectionFocused,notifyGuiCollection} from '../GuiCollectionTypes';
 import {getGuiTextServiceFactory} from '../input/GuiTextServiceRegistry';
@@ -338,8 +339,9 @@ export class GuiSystem extends System {
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
+    if(this.disabled||this.disposed)return false;
     const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || isGuiControl<GuiTooltip>(element, 'GuiTooltip')) &&
-      (((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && guiTooltipPending(element)) || (isGuiControl<GuiButton>(element, 'GuiButton') && guiButtonHoverAnimating(element)) || element.children.some(active));
+      (guiHasActivity(element)||((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && guiTooltipPending(element)) || (isGuiControl<GuiButton>(element, 'GuiButton') && guiButtonHoverAnimating(element)) || element.children.some(active));
     for (const root of this.renderRoots()) if (active(root.root)) return true;
     return false;
   }
@@ -355,6 +357,7 @@ export class GuiSystem extends System {
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
       const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
+      if(active)advanceGuiActivity(element,delta);
       if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) {
         advanceGuiTooltip(element,parentActive&&element.visible&&!isGuiLayoutHidden(element));
       } else if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) {
@@ -710,7 +713,7 @@ export class GuiSystem extends System {
         else target.handlePointerUp(this.makeEvent('pointerup', target, pending, native));
         if (isGuiControl<GuiInput>(target, 'GuiInput')) this.ensureTextServices()?.synchronizeTextInput();
       }
-      if (pending.type === 'pointerup' && target && target === hit) {
+      if (pending.type === 'pointerup' && native.button === 0 && target && target === hit) {
         target.handleClick(this.makeEvent('click', target, pending, native));
       }
       this.releasePointerCapture(native.pointerId);
@@ -964,11 +967,10 @@ export class GuiSystem extends System {
   }
 
   private measureAutoWidthLabels(element: GuiElement, themeFontSize: number, root: GuiRoot): void {
-    const measured = isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog');
-    const version = measured ? guiMeasureFontVersion(root, element) : 0;
-    const configuredSize = measured ? element.getResolvedStyle().fontSize ?? themeFontSize : themeFontSize;
-    if (isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog')) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root,element), version);
+    if (isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog')) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root,element), guiMeasureFontVersion(root, element));
     if (isGuiControl<GuiLabel>(element, 'GuiLabel') && element.autoWidth && !isGuiLayoutManaged(element)) {
+      const version = guiMeasureFontVersion(root, element);
+      const configuredSize = element.getResolvedStyle().fontSize ?? themeFontSize;
       const key = JSON.stringify([version, element.text, element.fontSize ?? configuredSize]);
       if (this.autoWidthKeys.get(element) !== key) {
       setGuiLabelMeasuredTextWidth(

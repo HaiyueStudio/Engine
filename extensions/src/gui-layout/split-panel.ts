@@ -5,6 +5,7 @@ import {LayoutError} from '../layout.js';
 import {createGuiContainer, ownContentFrame, setContainerStyle} from './presets.js';
 import {finiteNonnegative, ratioValue, stateRecord} from './panel-state.js';
 import type {GuiSplitPanelOptions} from './panel-types.js';
+import {GuiCleanup} from './panel-cleanup.js';
 
 /** Composite geometry is expressed as Grid tracks, using the same core as ordinary GUI/HYA. */
 export class GuiSplitPanel {
@@ -22,6 +23,7 @@ export class GuiSplitPanel {
   private drag: {pointer: number; offset: number; initial: number; start: number; moved: boolean} | null = null;
   private readonly releaseFrames: readonly (() => void)[];
   private disposed = false;
+  private readonly partReleases:(()=>void)[]=[];
 
   constructor(options: GuiSplitPanelOptions) {
     if (!options || !['horizontal', 'vertical'].includes(options.axis)) throw new LayoutError('invalid-input', 'Invalid split axis.');
@@ -50,6 +52,8 @@ export class GuiSplitPanel {
         }
       }}));
     this.secondPane = this.element.add(createGuiContainer('grid', {id: `${this.element.id}:second`, style: {width: 'auto', height: 'auto', columns: [{fr: 1}], rows: [{fr: 1}]}}));
+    this.divider.setDefaultSkin((theme,state)=>({backgroundColor:state.pressed?theme.colors.primary:state.hover?theme.colors.hover:theme.colors.border,borderWidth:0,radius:3,color:theme.colors.textMuted,padding:0,paddingY:0,cursor:this.axis==='horizontal'?'col-resize':'row-resize'}));
+    this.partReleases.push(this.element.bindPart('divider',this.divider),this.element.bindPart('first',this.firstPane),this.element.bindPart('second',this.secondPane));
     const firstRelease = ownContentFrame(options.first);
     try {this.releaseFrames = [firstRelease, ownContentFrame(options.second)];}
     catch (error) {firstRelease(); throw error;}
@@ -82,10 +86,10 @@ export class GuiSplitPanel {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true; this.drag = null; this.callback = undefined;
-    this.element.parent?.remove(this.element);
-    this.divider.setDisabled(true);
-    for (const host of [this.firstPane, this.secondPane]) for (const child of [...host.children]) host.remove(child);
-    for (const release of this.releaseFrames) release();
+    const cleanup=new GuiCleanup();cleanup.run(()=>this.element.parent?.remove(this.element));for(const off of this.partReleases.splice(0))cleanup.run(off);
+    cleanup.run(()=>this.divider.setDisabled(true));
+    for (const host of [this.firstPane, this.secondPane]) for (const child of [...host.children]) cleanup.run(()=>host.remove(child));
+    for (const release of this.releaseFrames) cleanup.run(release);cleanup.complete('GUI split cleanup failed.');
   }
   private updateTracks(): void {
     // Every nonzero weight is at least one. Fractional CSS fr totals below one

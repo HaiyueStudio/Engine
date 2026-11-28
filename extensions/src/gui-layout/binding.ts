@@ -1,8 +1,8 @@
-import {GuiDirtyFlags, GuiElement, GuiLabel, GuiRoot, GuiScrollView, resolveGuiLength} from '@haiyue/engine/gui';
+import {GuiDirtyFlags, GuiElement, GuiLabel, GuiRoot, GuiScrollView,GuiModal, resolveGuiLength} from '@haiyue/engine/gui';
 import type {GuiRect} from '@haiyue/engine/gui';
 import {createLayoutSession, LayoutError} from '../layout.js';
 import type {LayoutConstraints, LayoutLength, LayoutMeasure, LayoutNode, LayoutResult, LayoutSession, LayoutStyle} from '../layout.js';
-import {frameStyle, presetStyle} from './presets.js';
+import {frameStyle, presetStyle,isContentContainer,isManualContentView} from './presets.js';
 import type {GuiLayoutBinding, GuiLayoutOptions, GuiLayoutStyle} from './types.js';
 import {registerGuiLayoutCounters} from './diagnostics.js';
 import {anchoredStyle, captureGuiLayoutStyle, coreStyle} from './style.js';
@@ -48,7 +48,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
     let current: GuiElement | null = element;
     while (current && current !== root.root) {
       const parent: GuiElement | null = current.parent;
-      if (parent && parent.constructor !== GuiElement && !(parent instanceof GuiScrollView)) throw new LayoutError('invalid-input', 'Composite control owns its internal child layout.', element.id);
+      if (parent && !isContentContainer(parent) && !(parent instanceof GuiScrollView)) throw new LayoutError('invalid-input', 'Composite control owns its internal child layout.', element.id);
       current = parent;
     }
     if (!current || disposed) throw new LayoutError('disposed', 'GUI binding is disposed or element belongs to another root.', element.id);
@@ -62,7 +62,14 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
     islands.clear(); overrides = new WeakMap();
     counters.sessions = 0;
   };
-  const measure: LayoutMeasure = (id, constraints) => {counters.measurements++; return options.measure(id, constraints);};
+  let measurementIndex: ReadonlyMap<string, GuiElement> | undefined;
+  const measure: LayoutMeasure = (id, constraints) => {
+    counters.measurements++;
+    if (!measurementIndex || !defaultMeasures.has(options.measure)) return options.measure(id, constraints);
+    const element = measurementIndex.get(id);
+    if (!element) throw new LayoutError('invalid-input', 'GUI measurement refers to a removed node.', id);
+    return root.measureElement(element, constraints.width, constraints.height);
+  };
   const styleMutations = new WeakSet<GuiElement>();
   const delegate:Parameters<GuiRoot['installLayoutDelegate']>[0] & {[geometryStyle]:(element:GuiElement)=>boolean}={
     [geometryStyle]: element => styleMutations.delete(element),
@@ -80,9 +87,16 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
         for (const child of element.children) index(child, depth + 1);
       };
       index(gui);
+      const previousIndex = measurementIndex;
+      measurementIndex = byId;
+      try {
       const contentMinimum = createContentMinimumMeasure(measure);
       const output = new Map<GuiElement, GuiRect>();
       const metadata = new Map<GuiElement, {display?: 'none'; contentHeight?: number}>();
+      // Retained Engine frames apply ancestor scroll offsets exactly once.
+      const scrollContent=(view:GuiScrollView,rect:GuiRect):GuiRect=>view.axis==='horizontal'
+        ?{...rect,width:view.contentWidth}
+        :{...rect,height:view.contentHeight};
       const collapse = (element: GuiElement, origin: GuiRect): void => {
         output.set(element, {x: origin.x, y: origin.y, width: 0, height: 0}); metadata.set(element, {display: 'none'});
         for (const child of element.children) collapse(child, origin);
@@ -94,12 +108,13 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
         if (!island) {island = {session: createLayoutSession(options.limits), fingerprint: ''}; islands.set(element, island);}
         countSessions();
         const nested: GuiElement[] = [];
+        const manualViews=new Set<GuiScrollView>();
         const build = (item: GuiElement, isRoot = false): LayoutNode => {
           const configured = styleFor(item), manual = item.getLayoutOptions();
           let style: LayoutStyle = {...(manual.width === undefined ? {} : {width: length(manual.width)!}), ...(manual.height === undefined ? {} : {height: length(manual.height)!}), ...(item instanceof GuiLabel && item.autoWidth ? {width: 'auto'} : {}), ...coreStyle(configured)};
           if (style.display === 'none') return {id: item.id, contentVersion: versions.get(item) ?? 0, style, children: []};
           resources.watch(item);
-          const managesChildren = item.constructor === GuiElement || item instanceof GuiScrollView;
+          const managesChildren = isContentContainer(item) || item instanceof GuiScrollView;
           // Leaf measurement already includes its own content insets. Containers
           // delegate that space to the shared solver unless layout overrides it.
           if (managesChildren && style.padding === undefined) {
@@ -111,6 +126,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
             if (padding !== undefined) style = {...style, padding: typeof padding === 'number' ? {top: padding, right: padding, bottom: padding, left: padding} : padding};
           }
           const ownsFlow = presetStyle(item) !== undefined || overrides.has(item);
+          if(item instanceof GuiScrollView&&!ownsFlow&&isManualContentView(item))manualViews.add(item);
           const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
           // A configured scroll flow needs the viewport allocated by its parent before
           // the original scroll solver measures unbounded content. Manual views stay manual.
@@ -137,7 +153,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
           origin = frame;
         }
         let scrollViewport: GuiRect | undefined;
-        if (element instanceof GuiScrollView) {
+        if (element instanceof GuiScrollView&&(!isManualContentView(element)||presetStyle(element)!==undefined||overrides.has(element))) {
           island.viewportSession ??= createLayoutSession(options.limits);
           countSessions();
           const viewportTree = {...tree, children: []}, viewportKey = JSON.stringify([viewportTree, constraints, metricsVersion]);
@@ -179,14 +195,20 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
         };
         collapsed(tree);
         for (const child of nested) if (result.rects.has(child.id)) solve(child, output.get(child)!);
+        // A manual/virtual viewport owns its logical offsets and content extent.
+        // Arrange its composite rows after the parent allocates the viewport;
+        // never feed its potentially huge logical height to a second flow.
+        for(const view of manualViews){const rect=output.get(view);if(rect)for(const child of view.children)visitManual(child,scrollContent(view,rect));}
       };
       const visitManual = (element: GuiElement, parent: GuiRect): void => {
         const manual = element.getLayoutOptions(), style = styleFor(element);
         const rect = {x: parent.x + resolveGuiLength(manual.x, parent.width, 0), y: parent.y + resolveGuiLength(manual.y, parent.height, 0), width: resolveGuiLength(manual.width, parent.width, element.rect.width), height: resolveGuiLength(manual.height, parent.height, element.rect.height)};
         if (style) {
           solve(element, rect, parent);
-        } else if (element.constructor === GuiElement || element instanceof GuiScrollView) {
-          const content = element instanceof GuiScrollView ? {...rect, height: element.contentHeight} : rect;
+        } else if(element instanceof GuiModal) {
+          for(const child of element.children)if(styleFor(child))visitManual(child,element.getContentLayoutRect(child,parent,node=>output.get(node)??node.rect));
+        } else if (isContentContainer(element) || element instanceof GuiScrollView) {
+          const content = element instanceof GuiScrollView ? scrollContent(element,rect) : rect;
           for (const child of element.children) visitManual(child, content);
         }
       };
@@ -195,6 +217,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
       resources.finish();
       for (const [element, island] of islands) if (!liveIslands.has(element)) {releaseIsland(island); islands.delete(element);}
       countSessions();
+      } finally {measurementIndex = previousIndex;}
     },
     suspend() {resources.suspend(); for (const island of islands.values()) releaseIsland(island); islands.clear(); counters.sessions = 0;},
     dispose,

@@ -1,3 +1,4 @@
+import {guiParameterGroup, type GuiParameterGroups} from './GuiPaintParameters';
 import type {RenderCommandContext} from '../../core/RenderCommandContext';
 import {GuiGpuResources} from './GuiGpuResources';
 import {guiLinearSurface,updateGuiViewport,type GuiRenderSurface} from './GuiRenderSurface';
@@ -19,9 +20,9 @@ export class GuiShapeRenderer extends BaseRenderer {
   private pipelineLayout!: GPUPipelineLayout;
   private resources!:GuiGpuResources;
   private readonly viewportKey={};
-  private viewportGroups=new WeakMap<GPUBuffer,GPUBindGroup>();
+  private viewportGroups: GuiParameterGroups = new WeakMap();
   private viewportVersion=0;
-  private readonly viewportData = new Float32Array(4);
+  private readonly viewportData = new Float32Array(24);
   private initialized = false;
   private viewportUploaded = false;
 
@@ -33,13 +34,12 @@ export class GuiShapeRenderer extends BaseRenderer {
     const { device } = engine;
     try {
       this.bindGroupLayout = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, {binding:1,visibility:GPUShaderStage.FRAGMENT,buffer:{type:'read-only-storage'}}],
     });
     const generated = getBuiltinGuiShader(device, 'gui-shape', [this.bindGroupLayout]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
-    const viewport=this.resources.reserve(this.viewportKey,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-shape:viewport');
-    this.viewportGroups.set(viewport,device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:viewport}}]}));
+    this.resources.reserve(this.viewportKey,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-shape:viewport');
       this.initialized = true;
     } catch (error) {
       this.resources.destroy();
@@ -58,8 +58,8 @@ export class GuiShapeRenderer extends BaseRenderer {
       this.viewportVersion++;
       this.viewportUploaded = true;
     }
-    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-shape:viewport',context);
-    let viewportGroup=this.viewportGroups.get(viewportBuffer);if(!viewportGroup){viewportGroup=this.engine.device.createBindGroup({layout:this.bindGroupLayout,entries:[{binding:0,resource:{buffer:viewportBuffer}}]});this.viewportGroups.set(viewportBuffer,viewportGroup);}
+    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-shape:viewport',context);
+    const viewportGroup = guiParameterGroup(this.resources,this.engine.device,this.bindGroupLayout,viewportBuffer,batch.parameters,context,this.viewportGroups);
 
     const vertexBuffer = this.uploadBatch(batch,context);
     if (!vertexBuffer) return;
@@ -75,7 +75,7 @@ export class GuiShapeRenderer extends BaseRenderer {
     this.addPipelineWarmup(plan, key, 'GUI shapes', () => this.pipelineDescriptor(), this.engine.device);
   }
 
-  releaseBatch(batch: GuiBatch): void {this.resources?.release(batch);}
+  releaseBatch(batch: GuiBatch): void {this.resources?.release(batch);this.resources?.release(batch.parameters);}
 
   private uploadBatch(batch: GuiBatch,context?:RenderCommandContext): GPUBuffer | null {
     const size=batch.vertexCount*GUI_SHAPE_FLOATS_PER_VERTEX*4;if(!size)return null;

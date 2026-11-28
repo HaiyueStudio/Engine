@@ -8,6 +8,9 @@ import {isGuiLayoutHidden} from '../GuiLayoutState';
 import {GuiBatch} from './GuiBatch';
 import {GuiTextBatch} from './GuiTextBatch';
 import {guiFontLayoutState} from './GuiTextGlyphs';
+import {guiThemeTreeActive} from '../GuiThemeResolve';
+import type {GuiPaintPlan} from './GuiPaintPlan';
+import {sameGuiInputs} from '../GuiInvalidationState';
 
 interface Span {shape:number;shapes:number;text:number;texts:number;theme:GuiTheme;}
 /** Own-command spans retain order without duplicating a flattened command list per subtree. */
@@ -22,14 +25,19 @@ export class GuiPaintCache {
   private readonly textWork:number;
   private readonly fontState:readonly unknown[]|undefined;
   private constructor(private readonly root:GuiRoot,private readonly tree:GuiPrimitiveTree,private readonly font:BitmapFontData|null){this.theme=root.theme;this.themeKey=JSON.stringify(root.theme);this.broad=guiDirtyState(root.root)?.broadVersion;this.textWork=tree.entries.reduce((n,e)=>n+('text'in e.element&&typeof e.element.text==='string'?e.element.text.length:0),0);this.fontState=font?guiFontLayoutState(font,this.textWork):[];}
-  static capture(root:GuiRoot,font:BitmapFontData|null):GuiPaintCache|null {const tree=GuiPrimitiveTree.capture(root.root);if(!tree)return null;const cache=new GuiPaintCache(root,tree,font);return cache.fontState?cache:null;}
+  static capture(root:GuiRoot,font:BitmapFontData|null):GuiPaintCache|null {const tree=GuiPrimitiveTree.capture(root.root,true,guiThemeTreeActive(root.root));if(!tree)return null;const cache=new GuiPaintCache(root,tree,font);return cache.fontState?cache:null;}
   record(element:GuiElement,shape:number,shapes:number,text:number,texts:number,theme:GuiTheme):void {this.spans.set(element,{shape,shapes,text,texts,theme});}
   complete():void {for(const entry of this.dense)this.tree.remember(entry);this.dense=[];}
+  rebuildOrderedPlan(plan:GuiPaintPlan,batch:GuiBatch,text:GuiTextBatch,font:BitmapFontData|null):void {
+    plan.clear();
+    for(const entry of this.tree.entries){const span=this.spans.get(entry.element);if(span){plan.shapes(batch,span.shape,0,span.shape+span.shapes);plan.text(text,font,span.text,0,span.text+span.texts);}}
+    plan.compile();
+  }
   patch(font:BitmapFontData|null,batch:GuiBatch,text:GuiTextBatch,paint:(element:GuiElement,theme:GuiTheme,shapes:GuiBatch,texts:GuiTextBatch)=>void):{shapes:boolean;text:boolean}|'dense'|null {
     if(font!==this.font||this.root.theme!==this.theme||JSON.stringify(this.root.theme)!==this.themeKey||guiDirtyState(this.root.root)?.broadVersion!==this.broad||!this.tree.valid())return null;
     // Centered/aligned painters measure text before geometry packing; mutable metrics invalidate both.
     const state=font?guiFontLayoutState(font,this.textWork):[];
-    if(!state||!this.fontState||state.length!==this.fontState.length||!state.every((v,i)=>Object.is(v,this.fontState![i])))return null;
+    if(!sameGuiInputs(state,this.fontState))return null;
     const changed:GuiPrimitiveEntry[]=[];
     for(const entry of this.tree.entries)if(this.tree.changed(entry)){
       // Parent paint can change inherited theme/context. Visibility can expose a previously skipped subtree.

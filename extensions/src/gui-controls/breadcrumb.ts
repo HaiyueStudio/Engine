@@ -53,18 +53,20 @@ export class GuiBreadcrumb{
  private createEntry(item:GuiBreadcrumbItem):Entry{
   const element=createGuiContainer('row',{style:{width:'auto',height:32,minWidth:0,maxWidth:{percent:100},alignItems:'center'}});element.pointerFilter='ignore';
   const button=element.add(new GuiButton({text:item.label,themeControlType:'GuiBreadcrumbItem'}));setContainerStyle(button,{width:'auto',height:32,minWidth:0,shrink:1});
+  button.setDefaultSkin((theme,state)=>({backgroundColor:'transparent',borderWidth:0,padding:4,paddingY:4,color:state.selected?theme.colors.text:state.disabled?theme.colors.disabledText??theme.colors.textMuted:state.hover?theme.colors.primary:theme.colors.textMuted,fontWeight:state.selected?600:400}));
   const menu=item.menu?.length?element.add(new GuiButton({text:'v',themeControlType:'GuiBreadcrumbMenuTrigger'})):null;if(menu)setContainerStyle(menu,{width:28,height:32,shrink:0});
   const separator=element.add(new GuiLabel({text:'',pointerFilter:'ignore',autoWidth:true,themeControlType:'GuiBreadcrumbSeparator'}));setContainerStyle(separator,{width:'auto',height:32,shrink:0,margin:{left:4,right:4}});
-  const e:Entry={item,element,button,menu,separator,off:[]};e.off=[onClick(button,()=>{if(!this.dead&&this.entries.includes(e)&&!e.item.disabled&&this.current!==e.item.key)this.navigate?.(e.item.key);}),...(menu?[onClick(menu,()=>this.openMenu(e))]:[])];return e;
+  separator.setDefaultSkin(theme=>({color:theme.colors.border,fontSize:12}));if(menu)menu.setDefaultSkin(theme=>({backgroundColor:'transparent',borderWidth:0,padding:2,paddingY:2,color:theme.colors.textMuted}));
+  const e:Entry={item,element,button,menu,separator,off:[]};e.off=[this.element.bindPart('item',button),this.element.bindPart('separator',separator),...(menu?[this.element.bindPart('menu',menu)]:[]),onClick(button,()=>{if(!this.dead&&this.entries.includes(e)&&!e.item.disabled&&this.current!==e.item.key)this.navigate?.(e.item.key);}),...(menu?[onClick(menu,()=>this.openMenu(e))]:[])];return e;
  }
  private synchronize():void{
-  for(const e of this.entries){const disabled=!!e.item.disabled||this.current===e.item.key;e.button.setDisabled(disabled);e.button.setStyle({cursor:disabled?'default':'pointer'});e.menu?.setDisabled(!!e.item.disabled);}
+  for(const e of this.entries){const disabled=!!e.item.disabled||this.current===e.item.key;e.button.setVisualState({selected:this.current===e.item.key});e.button.setDisabled(disabled);e.button.setStyle({cursor:disabled?'default':'pointer'});e.menu?.setDisabled(!!e.item.disabled);}
   if(this.focus&&within(this.focus.focused,this.element)&&this.focus.focused?.disabled)this.focus.focus(this.entries.find(e=>!e.button.disabled)?.button??null);
  }
  private openMenu(e:Entry):void{
   if(this.dead||!this.entries.includes(e)||e.item.disabled||!e.menu||!e.item.menu?.length)return;
   if(this.popup?.trigger===e.menu){this.closeMenu();return;}this.closeMenu();let root=this.element;while(root.parent)root=root.parent;
-  const trigger=e.menu,view=new BreadcrumbPopup(trigger,e.item.menu,key=>{this.closeMenu();if(!this.dead)this.navigate?.(key);},()=>this.closeMenu());this.popup={view,trigger};root.add(view);this.focus?.reconcile();this.focus?.focus(view.children.at(-1)?.children.find(c=>!c.disabled)??null);
+  const trigger=e.menu,view=new BreadcrumbPopup(trigger,e.item.menu,key=>{this.closeMenu();if(!this.dead)this.navigate?.(key);},()=>this.closeMenu());this.popup={view,trigger};root.add(view);this.focus?.reconcile();this.focus?.focus(view.firstButton);
  }
  private closeMenu():void{const p=this.popup;if(!p)return;this.popup=null;p.view.release();this.focus?.reconcile();this.focus?.focus(p.trigger);}
  private removeEntry(e:Entry):void{if(within(this.focus?.focused??null,e.element))this.focus?.blur();for(const off of e.off)off();e.button.setDisabled(true);e.menu?.setDisabled(true);e.element.parent?.remove(e.element);}

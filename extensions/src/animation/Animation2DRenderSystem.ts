@@ -32,6 +32,7 @@ import {planAnimationMasks} from './AnimationMaskPlan.js';
 import {AnimationMaskSources} from './AnimationMaskSources.js';
 import {writeAnimationVisualMatrix} from './AnimationVisualMatrix.js';
 import { animationBlendFragmentEntryPoint, animationBlendState } from './AnimationBlendMode';
+import {AnimationTargetLifetime} from './AnimationTargetLifetime';
 
 export interface Animation2DRenderSystemOptions extends RenderSystem2DBaseOptions {
   /** Bounds simultaneous view-sized alpha targets. Independent sources may reuse a target. */
@@ -81,19 +82,12 @@ interface GeometryGpu {
 
 interface MaskTarget {
   readonly key: string;
-  readonly device: GPUDevice;
-  recordings: number;
-  submitted: boolean;
-  retired: boolean;
-  destroyed: boolean;
   texture: GPUTexture;
   view: GPUTextureView;
   width: number;
   height: number;
   lastFrame: number;
 }
-const maskDeviceOwners = new WeakMap<GPUDevice, Set<(device: GPUDevice) => void>>();
-interface MaskRecording {readonly targets: Set<MaskTarget>; closed: boolean;}
 
 interface EffectTarget {
   textures: readonly [GPUTexture, GPUTexture];
@@ -327,13 +321,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private nextExplicitUvId = 1;
   private readonly textureBindGroups = new Map<GPUTexture, {samplers: Map<GPUSampler, GPUBindGroup>; lastFrame: number}>();
   private readonly maskTargets = new Map<string, MaskTarget>();
-  private readonly ownedMaskTargets = new Set<MaskTarget>();
-  private readonly retiredMaskTargets = new Set<MaskTarget>();
-  private readonly maskRecordings = new WeakMap<RenderCommandContext, MaskRecording>();
-  private readonly abandonMaskDevice = (device: GPUDevice): void => {
-    for (const target of [...this.ownedMaskTargets]) if (target.device === device) this.finishMaskTarget(target);
-  };
   private readonly effectTargets = new Map<string, EffectTarget>();
+  private readonly targetLifetime = new AnimationTargetLifetime<MaskTarget | EffectTarget>();
   private readonly items: AnimationRenderItem[] = [];
   private readonly sourceItems = new Map<string, AnimationRenderItem[]>();
   private readonly sourceGroupPool: AnimationRenderItem[][] = [];
@@ -589,7 +578,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     this.sweepGeometryGpu();
     this.sweepTextureBindGroups(context);
     this.sweepMaskTargets(frame, context);
-    this.sweepEffectTargets(frame, context);
+    this.sweepEffectTargets(frame);
     const prefix = animationMaskCompositeKey(viewKey, []);
     for (const [key, group] of this.compositeBindGroups) if (key.startsWith(prefix) && !this.usedCompositeKeys.has(key)) {this.compositeBindGroups.delete(key); this.retireOwnedBindGroups([group], context);}
     this._visualCount = visualCount;
@@ -611,15 +600,14 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   protected releaseGpuResourcesForRecovery(): void {
+    this.targetLifetime.retireAll();
+    this.maskTargets.clear();
+    this.effectTargets.clear();
     if (!this.rendererReady) return;
     destroyCamera2DGpu(this.cameraGpu);
     this.destroyEntityGpuEntries(this.entityGpu, gpu => this.destroyEntityGpu(gpu));
     for (const gpu of this.geometryGpu.values()) this.destroyGeometryGpu(gpu);
     this.geometryGpu.clear();
-    for (const target of this.maskTargets.values()) this.destroyMaskTarget(target);
-    this.maskTargets.clear();
-    for (const target of this.effectTargets.values()) this.destroyEffectTarget(target);
-    this.effectTargets.clear();
     this.activeMaskTargets.clear();
     this.compositeBindGroups.clear();
     this.textureBindGroups.clear();
@@ -1200,7 +1188,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     const width = context.view?.target.width ?? this.engine.width;
     const height = context.view?.target.height ?? this.engine.height;
     let target = this.maskTargets.get(key);
-    if (target && target.width === width && target.height === height) {target.lastFrame = frame; this.retainMaskTarget(target, context); return target;}
+    if (target && target.width === width && target.height === height && this.targetLifetime.has(target, context.device)) {target.lastFrame = frame; this.targetLifetime.retain(target, context); return target;}
     if (target) {
       this.maskTargets.delete(key);
       this.compositeBindGroups.clear();
@@ -1212,17 +1200,12 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       format: 'rgba8unorm',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
-    getExtensionGPUResourceTracker(this.engine)?.trackTexture(texture, 'Animation2D.maskTexture', estimateTextureBytes([width, height, 1], 'rgba8unorm'));
-    target = {key, device: context.device, recordings: 0, submitted: false, retired: false, destroyed: false, texture, view: texture.createView(), width, height, lastFrame: frame};
+    const tracker = getExtensionGPUResourceTracker(this.engine);
+    tracker?.trackTexture(texture, 'Animation2D.maskTexture', estimateTextureBytes([width, height, 1], 'rgba8unorm'));
+    target = {key, texture, view: texture.createView(), width, height, lastFrame: frame};
     this.maskTargets.set(key, target);
-    this.ownedMaskTargets.add(target);
-    let owners = maskDeviceOwners.get(context.device);
-    if (!owners) {
-      owners = new Set(); maskDeviceOwners.set(context.device, owners); const live = owners;
-      const device = context.device;
-      void device.lost.then(() => {for (const owner of [...live]) owner(device); live.clear();});
-    }
-    owners.add(this.abandonMaskDevice); this.retainMaskTarget(target, context);
+    this.targetLifetime.own(target, context.device, () => {tracker?.untrackTexture(texture); texture.destroy();});
+    this.targetLifetime.retain(target, context);
     return target;
   }
 
@@ -1230,12 +1213,10 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     const width = context.view?.target.width ?? this.engine.width;
     const height = context.view?.target.height ?? this.engine.height;
     let target = this.effectTargets.get(key);
-    if (target && target.width === width && target.height === height) { target.lastFrame = frame; return target; }
+    if (target && target.width === width && target.height === height && this.targetLifetime.has(target, context.device)) { target.lastFrame = frame; this.targetLifetime.retain(target, context); return target; }
     if (target) {
       this.effectTargets.delete(key);
-      const retired = target;
-      context.afterSubmit?.(queue => void queue.onSubmittedWorkDone().then(() => this.destroyEffectTarget(retired)).catch(() => this.destroyEffectTarget(retired)));
-      if (!context.afterSubmit) this.destroyEffectTarget(retired);
+      this.destroyEffectTarget(target);
     }
     const device = requireEngineDevice(this.engine);
     const makeTexture = (index: number): GPUTexture => device.createTexture({
@@ -1251,6 +1232,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     tracker?.trackTexture(textures[1], 'Animation2D.effectTexture', bytes);
     target = { textures, views: [textures[0].createView(), textures[1].createView()], width, height, lastFrame: frame };
     this.effectTargets.set(key, target);
+    this.targetLifetime.own(target, context.device, () => {for (const texture of textures) {tracker?.untrackTexture(texture); texture.destroy();}});
+    this.targetLifetime.retain(target, context);
     return target;
   }
 
@@ -1265,12 +1248,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     if (swept) {this.retireOwnedBindGroups(this.compositeBindGroups.values(), context); this.compositeBindGroups.clear();}
   }
 
-  private sweepEffectTargets(frame: number, context: RenderCommandContext): void {
+  private sweepEffectTargets(frame: number): void {
     for (const [key, target] of this.effectTargets) {
       if (target.lastFrame >= frame - 1) continue;
       this.effectTargets.delete(key);
-      context.afterSubmit?.(queue => void queue.onSubmittedWorkDone().then(() => this.destroyEffectTarget(target)).catch(() => this.destroyEffectTarget(target)));
-      if (!context.afterSubmit) this.destroyEffectTarget(target);
+      this.destroyEffectTarget(target);
     }
   }
 
@@ -1298,56 +1280,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   private destroyMaskTarget(target: MaskTarget): void {
-    if (target.retired || target.destroyed) return; target.retired = true; this.retiredMaskTargets.add(target); this.collectRetiredMaskTargets();
-  }
-
-  /** Retain through the public recording callbacks; no private Engine lifetime type crosses the workspace boundary. */
-  private retainMaskTarget(target: MaskTarget, context: RenderCommandContext): void {
-    if (!context.afterSubmit || !context.afterCancel) {
-      // Legacy direct hosts own unsubmitted encoders; keep their existing queue-fence contract.
-      target.submitted = true; return;
-    }
-    let recording = this.maskRecordings.get(context);
-    if (recording) {
-      if (recording.closed) throw new Error('Cannot record mask targets after submission or cancellation.');
-      if (!recording.targets.has(target)) {recording.targets.add(target); target.recordings++;} return;
-    }
-    recording = {targets: new Set([target]), closed: false}; this.maskRecordings.set(context, recording); target.recordings++;
-    const current = recording;
-    const close = (submitted: boolean): void => {
-      if (current.closed) return; current.closed = true;
-      for (const value of current.targets) {value.recordings--; value.submitted ||= submitted;}
-      current.targets.clear(); this.collectRetiredMaskTargets();
-    };
-    try {context.afterCancel(() => close(false)); context.afterSubmit(() => close(true));}
-    catch (error) {close(false); throw error;}
-  }
-
-  private collectRetiredMaskTargets(): void {
-    const queues = new Map<GPUQueue, MaskTarget[]>();
-    for (const target of this.retiredMaskTargets) {
-      if (target.recordings > 0) continue; this.retiredMaskTargets.delete(target);
-      if (!target.submitted) {this.finishMaskTarget(target); continue;}
-      const values = queues.get(target.device.queue) ?? []; values.push(target); queues.set(target.device.queue, values);
-    }
-    for (const [queue, targets] of queues) {
-      const finish = (): void => {for (const target of targets) this.finishMaskTarget(target);};
-      try {void queue.onSubmittedWorkDone().then(finish, finish);} catch {finish();}
-    }
-  }
-
-  private finishMaskTarget(target: MaskTarget): void {
-    if (target.destroyed) return; target.destroyed = true; this.ownedMaskTargets.delete(target); this.retiredMaskTargets.delete(target);
-    getExtensionGPUResourceTracker(this.engine)?.untrackTexture(target.texture); target.texture.destroy();
-    if (![...this.ownedMaskTargets].some(value => value.device === target.device)) maskDeviceOwners.get(target.device)?.delete(this.abandonMaskDevice);
+    this.targetLifetime.retire(target);
   }
 
   private destroyEffectTarget(target: EffectTarget): void {
-    const tracker = getExtensionGPUResourceTracker(this.engine);
-    for (const texture of target.textures) {
-      tracker?.untrackTexture(texture);
-      texture.destroy();
-    }
+    this.targetLifetime.retire(target);
   }
 }
 

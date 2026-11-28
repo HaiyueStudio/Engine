@@ -1,3 +1,4 @@
+import {registerGuiControlSize} from '../GuiControlSize';
 import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
 import {admitGuiControl} from '../GuiControlIdentity';
 import { containsPoint, GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiRect, GuiValueChangeHandler } from '../GuiTypes';
@@ -24,8 +25,11 @@ export class GuiSelect<T = string> extends GuiElement {
   static override readonly themeControlType: string = 'GuiSelect';
   override handlePointerCancel(event: GuiPointerEvent): void {
     this.pointerDownInPopup = false;
+    this.setOpen(false);
     super.handlePointerCancel(event);
   }
+  override handleBlur():void {this.setOpen(false);super.handleBlur();}
+  override setVisible(visible:boolean):void {if(!visible)this.setOpen(false);super.setVisible(visible);}
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (event.consumed) return;
@@ -60,6 +64,7 @@ export class GuiSelect<T = string> extends GuiElement {
 
   constructor(options: GuiSelectOptions<T> = {}) {
     super({ width: 180, height: 32, focus: {mode: 'all'}, ...options });
+    registerGuiControlSize(this,options,32);
     this.value = options.value ?? null;
     this.options = options.options ?? [];
     this.placeholder = options.placeholder ?? 'Select';
@@ -87,12 +92,7 @@ export class GuiSelect<T = string> extends GuiElement {
 
   get popupRect(): GuiRect {
     const visibleCount = Math.min(this.options.length, this.maxVisibleOptions);
-    return {
-      x: this.rect.x,
-      y: this.rect.y + this.rect.height + 4,
-      width: this.rect.width,
-      height: Math.max(0, visibleCount * this.optionHeight),
-    };
+    return this.getPopupRect({width:this.rect.width,height:Math.max(0,visibleCount*this.optionHeight)},{placement:'bottom',align:'start',gap:4});
   }
 
   get maxScrollY(): number {
@@ -100,8 +100,9 @@ export class GuiSelect<T = string> extends GuiElement {
   }
 
   setOpen(open: boolean): void {
+    if(open&&this.parent&&!this.isEffectivelyVisible())return;
     if (this.open === open) return;
-    this.open = open;
+    this.open = open;this.setVisualState({open});
     if (open) this.scrollSelectedOptionIntoView();
     this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
   }

@@ -63,6 +63,9 @@ interface EntityGPUData {
 }
 
 interface MatGPUData {
+  disposed: boolean;
+  textureGeneration: number;
+  emissiveTextureGeneration: number;
   colorBuf: GPUBuffer;
   gpuTexture: GPUTexture;
   emissiveGpuTexture: GPUTexture;
@@ -980,6 +983,9 @@ export class Mesh3DRenderer extends BaseRenderer {
     });
     this.recorded.own(bindGroup,()=>getInstrumentedGPUResourceTracker(device)?.untrackObject(bindGroup));
     return {
+      disposed: false,
+      textureGeneration: 0,
+      emissiveTextureGeneration: 0,
       colorBuf,
       gpuTexture: this.defaultTexture,
       emissiveGpuTexture: this.defaultTexture,
@@ -1135,10 +1141,15 @@ export class Mesh3DRenderer extends BaseRenderer {
     matData: MatGPUData,
     slot: 'base' | 'emissive',
   ): Promise<void> {
+    const generation = slot === 'base'
+      ? matData.textureGeneration = (matData.textureGeneration ?? 0) + 1
+      : matData.emissiveTextureGeneration = (matData.emissiveTextureGeneration ?? 0) + 1;
+    const current = (): boolean => !matData.disposed && generation === (slot === 'base'
+      ? matData.textureGeneration : matData.emissiveTextureGeneration);
     try {
       const handle = await this._loadTexture(sourceTexture);
       const gpuTexture = handle.value;
-      if (this.rendererCore.destroyed) {
+      if (this.rendererCore.destroyed || !current()) {
         handle.release();
         return;
       }
@@ -1166,7 +1177,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       this._rebuildMatBindGroup(matData);
       matData.uniformDirty = true;
     } catch (e) {
-      if (!this.rendererCore.destroyed) console.warn('Failed to load texture:', e);
+      if (!this.rendererCore.destroyed && current()) console.warn('Failed to load texture:', e);
     }
   }
 
@@ -1180,10 +1191,8 @@ export class Mesh3DRenderer extends BaseRenderer {
     if (!geo.hasMorphTargets) {
       const shared = this.sharedGeoCache.ensure(geo, this, this.submissionContext);
       const zeroMorphData = sharedZeroVectorCache.vec3(geo.vertexCount);
-      const morphPositionBufs: GPUBuffer[] = [];
-      for (let i = 0; i < 4; i++) {
-        morphPositionBufs.push(this._makeVertexBuffer(zeroMorphData));
-      }
+      const zeroMorphBuffer = this._makeVertexBuffer(zeroMorphData);
+      const morphPositionBufs = [zeroMorphBuffer, zeroMorphBuffer, zeroMorphBuffer, zeroMorphBuffer];
       const skinData = this._createSkinningGpuData(geo);
       return {
         geometryId: geo.id,
@@ -1216,8 +1225,10 @@ export class Mesh3DRenderer extends BaseRenderer {
     );
     const zeroMorphData = sharedZeroVectorCache.vec3(geo.vertexCount);
     const morphPositionBufs: GPUBuffer[] = [];
+    let zeroMorphBuffer: GPUBuffer | undefined;
     for (let i = 0; i < 4; i++) {
-      morphPositionBufs.push(this._makeVertexBuffer(geo.morphTargets[i]?.positions ?? zeroMorphData));
+      const positions = geo.morphTargets[i]?.positions;
+      morphPositionBufs.push(positions ? this._makeVertexBuffer(positions) : zeroMorphBuffer ??= this._makeVertexBuffer(zeroMorphData));
     }
     const skinData = this._createSkinningGpuData(geo);
 
@@ -1295,12 +1306,10 @@ export class Mesh3DRenderer extends BaseRenderer {
       if (data.morphPositionBufs.some(buffer => buffer.size < requiredMorphBytes)) {
         const previous = data.morphPositionBufs;
         const zeroMorphData = sharedZeroVectorCache.vec3(geo.vertexCount);
-        data.morphPositionBufs = previous.map((_, slot) => {
-          const buffer = this._makeVertexBuffer(zeroMorphData);
-          buffer.label = `Mesh3DRenderer.zeroMorph${slot}`;
-          return buffer;
-        });
-        const retire = () => { for (const buffer of previous) this.recorded.retire(buffer); };
+        const buffer = this._makeVertexBuffer(zeroMorphData);
+        buffer.label = 'Mesh3DRenderer.zeroMorph';
+        data.morphPositionBufs = [buffer, buffer, buffer, buffer];
+        const retire = () => { for (const buffer of new Set(previous)) this.recorded.retire(buffer); };
         if (this.submissionContext?.afterSubmit) retire();
         else void this.engine.device.queue.onSubmittedWorkDone().then(retire, retire);
       }
@@ -1422,9 +1431,9 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   private _localGeometryBuffers(data: GeoGPUData): GPUBuffer[] {
-    return [...(data.sharedStandard ? [] : [data.positionBuf, data.normalBuf, data.uvBuf, data.indexBuf]),
+    return [...new Set([...(data.sharedStandard ? [] : [data.positionBuf, data.normalBuf, data.uvBuf, data.indexBuf]),
       ...data.morphPositionBufs, data.skinJointBuf, data.skinWeightBuf, data.skinMatrixBuf]
-      .filter((buffer): buffer is GPUBuffer => !!buffer);
+      .filter((buffer): buffer is GPUBuffer => !!buffer))];
   }
 
   private _retainGeometry(geometry: Geometry3D, data: GeoGPUData): void {
@@ -1433,6 +1442,8 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   private _destroyMatData(data: MatGPUData): void {
+    if (data.disposed) return;
+    data.disposed = true;
     this.recorded.retire(data.colorBuf);this.recorded.retire(data.bindGroup);
     this._destroyOwnedTexture(data, 'base');
     this._destroyOwnedTexture(data, 'emissive');

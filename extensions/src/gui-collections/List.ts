@@ -2,7 +2,8 @@ import {EngineError,EngineErrorCode} from '@haiyue/engine/core';
 import {GuiElement,GuiScrollView,GuiDirtyFlags} from '@haiyue/engine/gui';
 import type {GuiActionEvent} from '@haiyue/engine/gui';
 import {collectionWindow} from '../collections/window.js';
-import type {GuiCollectionRow,GuiVirtualList,GuiVirtualListOptions} from './types.js';
+import {setContentContainerStyle,admitManualContentView} from '../gui-layout/presets.js';
+import type {GuiCollectionRow,GuiVirtualList,GuiVirtualListOptions,GuiCollectionRowState} from './types.js';
 
 export const invalid=(message:string)=>new EngineError(EngineErrorCode.GuiCollectionLimit,message,{docsPath:'errors/E_GUI_COLLECTION_LIMIT'});
 export function collectionNotify(element:GuiElement,event:string):void {
@@ -15,7 +16,7 @@ function focused(node:GuiElement):boolean {return focusedElement(node)!==null;}
 class RowHost extends GuiElement {
   place(index:number,rowHeight:number):void {const y=index*rowHeight;if(this.y!==y){this.y=y;this.markDirty(GuiDirtyFlags.Layout|GuiDirtyFlags.Visual);}}
 }
-type Slot<T>={row:GuiCollectionRow<T>;host:RowHost;key:string|null;item:T|undefined;index:number;unbind:(()=>void)|null};
+type Slot<T>={row:GuiCollectionRow<T>;host:RowHost;key:string|null;item:T|undefined;index:number;unbind:(()=>void)|null;releaseParts:()=>void;state:GuiCollectionRowState|undefined};
 
 /** A bounded set of original GUI subtrees; logical data never becomes GUI children. */
 export class VirtualList<T> implements GuiVirtualList<T> {
@@ -41,10 +42,12 @@ export class VirtualList<T> implements GuiVirtualList<T> {
       if(event.target===slot.host||event.target.focusOptions.mode==='none')this.focusKey(slot.key);
     }
   };
-  constructor(private readonly options:GuiVirtualListOptions<T>,private readonly enabled:(item:T)=>boolean=()=>true,private readonly extraAction?:(event:GuiActionEvent)=>void) {
+  constructor(private readonly options:GuiVirtualListOptions<T>,private readonly enabled:(item:T)=>boolean=()=>true,private readonly extraAction?:(event:GuiActionEvent)=>void,private readonly rowPresentation?:(item:T)=>Omit<GuiCollectionRowState,'selected'>) {
     this.maxItems=options.maxItems??100000;this.overscan=options.overscan??2;
     if(!Number.isInteger(this.maxItems)||this.maxItems<1||this.maxItems>1000000||!Number.isInteger(this.overscan)||this.overscan<0||this.overscan>32||!Number.isFinite(options.rowHeight)||options.rowHeight<=0||!Number.isFinite(options.height)||options.height<=0||Math.ceil(options.height/options.rowHeight)+1+this.overscan*2>256||typeof options.keyOf!=='function'||typeof options.createRow!=='function')throw invalid('Invalid collection geometry, callbacks or limits.');
     this.element=new GuiScrollView({width:'100%',height:options.height,...(options.style?{style:options.style}:{}),onAction:event=>this.action(event)});
+    admitManualContentView(this.element);
+    this.element.setDefaultSkin(theme=>({backgroundColor:theme.colors.surface,borderColor:theme.colors.border,borderWidth:1,radius:6,clipRadius:6}));
     // Give scroll clamping its declared viewport before first root layout.
     this.element.layout({x:0,y:0,width:0,height:options.height});
     this.element.on('gui:viewport',this.viewportChanged);
@@ -97,7 +100,14 @@ export class VirtualList<T> implements GuiVirtualList<T> {
   }
   setSelection(key:string|null):void {
     this.alive();if(key!==null&&!this.indices.has(key))throw invalid('Unknown collection selection.');
-    if(key===this.selection)return;this.selection=key;this.element.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Input);this.options.onSelection?.(key);
+    if(key===this.selection)return;this.selection=key;try{this.change(()=>this.syncStates());}catch(error){this.dispose();throw error;}this.element.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Input);this.options.onSelection?.(key);
+  }
+  private syncStates():void {
+    for(const slot of this.slots)if(slot.key!==null&&slot.index>=0){
+      const state=Object.freeze({selected:slot.key===this.selection,depth:0,expanded:false,leaf:true,...this.rowPresentation?.(slot.item as T)}),before=slot.state;
+      if(before&&before.selected===state.selected&&before.depth===state.depth&&before.expanded===state.expanded&&before.leaf===state.leaf)continue;
+      slot.state=state;slot.host.setVisualState({selected:state.selected,open:state.expanded});slot.row.element.setVisualState({selected:state.selected,open:state.expanded});slot.row.setState?.(state);
+    }
   }
   private focusKey(key:string):void {
     const slot=this.slots.find(slot=>slot.key===key);
@@ -125,7 +135,7 @@ export class VirtualList<T> implements GuiVirtualList<T> {
     const errors:unknown[]=[],run=(action:()=>void)=>{try{action();}catch(error){errors.push(error);}};
     run(()=>collectionNotify(slot.host,'gui:collection-retire'));
     if(hadFocus)run(()=>this.focusElement(this.element));
-    const unbind=slot.unbind;slot.unbind=null;slot.key=null;slot.item=undefined;slot.index=-1;
+    const unbind=slot.unbind;slot.unbind=null;slot.key=null;slot.item=undefined;slot.index=-1;slot.state=undefined;
     if(unbind)run(unbind);
     if(errors.length)throw new AggregateError(errors,'Collection row cleanup failed.');
   }
@@ -140,11 +150,18 @@ export class VirtualList<T> implements GuiVirtualList<T> {
         else if(slot.index!==index||slot.item!==this.items[index!]){this.retire(slot);slot.key=key;}
       }
       const count=window.last-window.first;
-      while(this.slots.length>count){const index=this.slots.findIndex(s=>s.key===null),slot=this.slots.splice(index,1)[0]!;this.element.remove(slot.host);slot.row.dispose();}
+      while(this.slots.length>count){const index=this.slots.findIndex(s=>s.key===null),slot=this.slots.splice(index,1)[0]!;this.element.remove(slot.host);try{slot.releaseParts();}finally{slot.row.dispose();}}
       while(this.slots.length<count){
         const row=this.options.createRow();
         if(!row||!(row.element instanceof GuiElement)||row.element.parent||typeof row.bind!=='function'||typeof row.dispose!=='function'||this.slots.some(s=>s.row===row||s.row.element===row.element))throw invalid('createRow must return a fresh original GUI row.');
-        const host=new RowHost({width:'100%',height:this.options.rowHeight,focus:{mode:'all',tabIndex:-1},pointerFilter:'pass'});host.add(row.element);this.element.add(host);this.slots.push({row,host,key:null,item:undefined,index:-1,unbind:null});
+        const host=new RowHost({width:'100%',height:this.options.rowHeight,focus:{mode:'all',tabIndex:-1},pointerFilter:'pass'}),parts:(()=>void)[]=[];
+        // The manual row offset remains collection-owned; its contents enter the
+        // same layout island as every other composite. Plain editors still work
+        // without an installed layout binding.
+        setContentContainerStyle(host,{direction:'column',width:{percent:100},height:this.options.rowHeight,minWidth:0,minHeight:0});
+        host.setDefaultSkin((theme,state)=>({backgroundColor:state.selected?theme.colors.hover:'transparent',radius:4,borderWidth:0}));
+        this.slots.push({row,host,key:null,item:undefined,index:-1,unbind:null,state:undefined,releaseParts:()=>{const errors:unknown[]=[];for(const off of parts.splice(0))try{off();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Row part cleanup failed.');}});
+        host.add(row.element);this.element.add(host);parts.push(this.element.bindPart('row',host),this.element.bindPart('content',row.element));
       }
       for(let index=window.first;index<window.last;index++){
         const key=this.keys[index]!,slot=this.slots.find(s=>s.key===key)??this.slots.find(s=>s.key===null)!;
@@ -154,6 +171,7 @@ export class VirtualList<T> implements GuiVirtualList<T> {
       this.slots.sort((a,b)=>a.index-b.index);
       for(let i=0;i<this.slots.length;i++)this.element.children[i]=this.slots[i]!.host;
       this.first=window.first;this.last=window.last;
+      this.syncStates();
       // Child geometry is bounded; no full logical layout tree or per-frame loop.
       const content={...this.element.rect,y:this.element.rect.y-this.element.scrollY,height:this.element.contentHeight};
       for(const slot of this.slots)slot.host.layout(content);
@@ -175,7 +193,7 @@ export class VirtualList<T> implements GuiVirtualList<T> {
     for(const unsubscribe of this.unsubscribers)run(unsubscribe);this.unsubscribers.length=0;
     run(()=>collectionNotify(this.element,'gui:collection-retire'));
     if(contains(this.element,this.options.focus?.focused??null))run(()=>this.options.focus?.blur());
-    for(const slot of this.slots){run(()=>this.retire(slot));this.element.remove(slot.host);run(()=>slot.row.dispose());}this.slots=[];this.items=[];this.keys=[];this.indices.clear();this.selection=null;this.first=this.last=0;
+    for(const slot of this.slots){run(()=>this.retire(slot));run(()=>this.element.remove(slot.host));run(slot.releaseParts);run(()=>slot.row.dispose());}this.slots=[];this.items=[];this.keys=[];this.indices.clear();this.selection=null;this.first=this.last=0;
     run(()=>this.element.setContentHeight(0));run(()=>this.element.setDisabled(true));run(()=>this.element.setVisible(false));run(()=>{this.element.parent?.remove(this.element);});
     if(errors.length)throw new AggregateError(errors,'Collection disposal failed.');
   }

@@ -1,0 +1,1 @@
+{"extends":"../tsconfig.base.json","compilerOptions":{"noEmit":true,"paths":{"@haiyue/extensions/gui-forms":["./src/gui-forms.ts"],"@haiyue/extensions/gui-data":["./src/gui-data.ts"],"@haiyue/extensions/gui-content":["./src/gui-content.ts"]},"types":["@webgpu/types"]},"include":["type-tests/gui-p2-contract.type-test.ts"]}

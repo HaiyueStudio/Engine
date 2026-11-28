@@ -9,7 +9,7 @@
   "fullG11Complete": true,
   "releaseQualified": true,
   "publishingIncluded": false,
-  "publicationPerformed": false,
+  "publicationPerformed": true,
   "baselinePromoted": false,
   "finalQualification": {
     "status": "qualified-frozen-candidate",
@@ -3429,5 +3429,25 @@
       }
     },
     "browserSetupGpuResourcesAfter": 0
+  },
+  "publication": {
+    "status": "published-and-verified",
+    "version": "0.2.3",
+    "tag": "v0.2.3",
+    "releaseRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+    "githubRelease": "https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.3",
+    "checksumManifest": {
+      "url": "https://github.com/HaiyueStudio/Engine/releases/download/v0.2.3/SHA256SUMS",
+      "bytes": 645,
+      "sha256": "c32dcd45567905445dd873eff3306819442e3c6ddec7b52dca0082892ab30af0"
+    },
+    "pagesRevision": "28e402fca80c7f29bf42a84606a9e608cf2ea4d2",
+    "pages": "https://haiyuestudio.github.io/Engine/releases/0.2.3/examples/",
+    "verifiedAt": "2026-11-16T01:07:35.885Z",
+    "receipt": {
+      "path": "artifacts/engine-0.2.3/g11/release-preparation-20261116/execution/publication-result.json",
+      "bytes": 5039,
+      "sha256": "5e6c7e5950250c0143e619dec016a8ada66814f7a8bbd4ab2cb7e415c63b402a"
+    }
   }
 }

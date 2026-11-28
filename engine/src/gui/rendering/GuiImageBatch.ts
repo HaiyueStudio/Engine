@@ -1,3 +1,4 @@
+import {GuiPaintParameters, type GuiClipRect} from './GuiPaintParameters';
 import type { GuiImageSource } from '../components/GuiImage';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
 
@@ -5,6 +6,7 @@ const VERTICES_PER_IMAGE = 6;
 export const GUI_IMAGE_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex)();
 
 export interface GuiImageCommand {
+  rotation?: number;
   source: GuiImageSource;
   x: number;
   y: number;
@@ -12,7 +14,7 @@ export interface GuiImageCommand {
   height: number;
   uv: [number, number, number, number];
   color: [number, number, number, number];
-  clip?: { x: number; y: number; width: number; height: number };
+  clip?: GuiClipRect;
 }
 
 export interface GuiImageGroup {
@@ -23,6 +25,7 @@ export interface GuiImageGroup {
 }
 
 export class GuiImageBatch {
+  readonly parameters = new GuiPaintParameters();
   readonly commands: GuiImageCommand[] = [];
   readonly groups: GuiImageGroup[] = [];
   readonly commandRanges: {group: GuiImageGroup; first: number; count: number}[] = [];
@@ -40,12 +43,14 @@ export class GuiImageBatch {
   }
 
   addImage(command: GuiImageCommand): void {
+    if(command.rotation!==undefined&&!Number.isFinite(command.rotation))throw new RangeError('Invalid GUI image rotation.');
     if (!command.source || command.width <= 0 || command.height <= 0 || command.color[3] <= 0) return;
     this.commands.push(command);
     this.dirty = true;
   }
 
   rebuild(): void {
+    this.parameters.begin();
     // Only adjacent sources may merge; A/B/A must keep painter order.
     const grouped: {source: NonNullable<GuiImageSource>; commands: GuiImageCommand[]}[] = [];
     for (const command of this.commands) {
@@ -72,7 +77,7 @@ export class GuiImageBatch {
       }
       const vertexData = cached.scratch;
       let offset = 0;
-      for (const command of commands) offset = appendImage(vertexData, offset, command);
+      for (const command of commands) offset = appendImage(vertexData, offset, command, this.parameters.clip(command.clip));
       const group = cached.group;
       group.source = source;
       slot++;
@@ -87,11 +92,12 @@ export class GuiImageBatch {
       this.groups.push(group);
       for (let index = 0; index < commands.length; index++) this.commandRanges.push({group, first: index * VERTICES_PER_IMAGE, count: VERTICES_PER_IMAGE});
     }
+    this.parameters.finish();
     this.dirty = false;
   }
 }
 
-function appendImage(data: Float32Array, offset: number, command: GuiImageCommand): number {
+function appendImage(data: Float32Array, offset: number, command: GuiImageCommand, clipIndex: number): number {
   const x0 = command.x;
   const y0 = command.y;
   const x1 = command.x + command.width;
@@ -105,13 +111,14 @@ function appendImage(data: Float32Array, offset: number, command: GuiImageComman
   const clipX0 = clip.x;
   const clipY0 = clip.y;
   const clipX1 = clip.x + clip.width;
-  const clipY1 = clip.y + clip.height;
+  const clipY1 = clipIndex ? -clipIndex : clip.y + clip.height;
   offset = writeVertex(data, offset, x0, y0, u0, v0, command.color, clipX0, clipY0, clipX1, clipY1);
   offset = writeVertex(data, offset, x1, y0, u1, v0, command.color, clipX0, clipY0, clipX1, clipY1);
   offset = writeVertex(data, offset, x0, y1, u0, v1, command.color, clipX0, clipY0, clipX1, clipY1);
   offset = writeVertex(data, offset, x1, y0, u1, v0, command.color, clipX0, clipY0, clipX1, clipY1);
   offset = writeVertex(data, offset, x1, y1, u1, v1, command.color, clipX0, clipY0, clipX1, clipY1);
   offset = writeVertex(data, offset, x0, y1, u0, v1, command.color, clipX0, clipY0, clipX1, clipY1);
+  if(command.rotation){const a=command.rotation*Math.PI/180,cs=Math.cos(a),sn=Math.sin(a),cx=(x0+x1)/2,cy=(y0+y1)/2,stride=GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;for(let i=offset-6*stride;i<offset;i+=stride){const dx=data[i]!-cx,dy=data[i+1]!-cy;data[i]=cx+dx*cs-dy*sn;data[i+1]=cy+dx*sn+dy*cs;}}
   return offset;
 }
 

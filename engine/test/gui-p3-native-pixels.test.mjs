@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validateGuiSpecialtyPixels} from './gui-p3-native-pixels.mjs';
+function image(color=[12,16,41,255]){const data=new Uint8Array(1200*1600*4);for(let i=0;i<data.length;i+=4)data.set(color,i);for(let y=120;y<280;y++)for(let x=420;x<580;x++)data.set((x+y)%4===0?[0,0,0,255]:[255,255,255,255],(y*1200+x)*4);return{width:1200,height:1600,data};}
+test('P3 pixel contract rejects a missing background, closed-popup ghosts and absent QR contrast',()=>{
+ assert.deepEqual(validateGuiSpecialtyPixels(image(),{theme:'dark',mode:'base'}),[]);assert(validateGuiSpecialtyPixels(image([0,0,0,255]),{theme:'dark',mode:'base'}).some(e=>e.includes('background')));const ghost=image();ghost.data.set([128,120,240,255],(340*1200+160)*4);assert(validateGuiSpecialtyPixels(ghost,{theme:'dark',mode:'base'}).some(e=>e.includes('Closed calendar')));const blank=image();for(let y=120;y<280;y++)for(let x=420;x<580;x++)blank.data.set([255,255,255,255],(y*1200+x)*4);assert(validateGuiSpecialtyPixels(blank,{theme:'dark',mode:'base'}).some(e=>e.includes('contrast')));
+ assert.deepEqual(validateGuiSpecialtyPixels(image([237,248,255,255]),{theme:'light',mode:'calendar'}),[]);
+ const misplaced=image();misplaced.data.set([128,120,240,255],(1*1200+120)*4);assert(validateGuiSpecialtyPixels(misplaced,{theme:'dark',mode:'tour'}).some(e=>e.includes('page origin')));
+});

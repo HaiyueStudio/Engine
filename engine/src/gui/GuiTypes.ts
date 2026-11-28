@@ -23,6 +23,20 @@ export interface GuiRect {
 }
 
 export interface GuiStyle {
+  /** Logical-pixel typography and box values; textures remain borrowed. */
+  fontWeight?: number;
+  lineHeight?: number;
+  textOverflow?: 'clip' | 'ellipsis';
+  borderWidth?: number;
+  cornerRadii?: readonly [number, number, number, number];
+  shadow?: Readonly<{color: string; blur: number; x?: number; y?: number; spread?: number}>;
+  gradient?: Readonly<{from: string; to: string; angle?: number}>;
+  focusColor?: string;
+  focusWidth?: number;
+  clipRadius?: number;
+  iconRotation?: number;
+  states?: Readonly<Partial<Record<'hover' | 'focus' | 'pressed' | 'disabled' | 'checked' | 'selected' | 'invalid' | 'loading' | 'readOnly' | 'open', GuiStyle>>>;
+  parts?: Readonly<Record<string, GuiStyle>>;
   /** Browser pointer cursor override; omitted values use the control's default. */
   cursor?: string;
   palette?: Partial<GuiTheme['colors']>;
@@ -34,6 +48,7 @@ export interface GuiStyle {
   opacity?: number;
   radius?: number;
   padding?: number;
+  paddingY?: number;
   fontFamily?: string;
   fontSize?: number;
   icon?: GuiImageSource;
@@ -49,6 +64,11 @@ export interface GuiTheme {
   fontFamily: string;
   fontSize: number;
   radius: number;
+  density?: 'compact' | 'comfortable' | 'touch';
+  fontWeight?: number;
+  lineHeight?: number;
+  spacing?: number;
+  motionScale?: number;
   colors: {
     text: string;
     textMuted: string;
@@ -60,6 +80,16 @@ export interface GuiTheme {
     hover: string;
     active: string;
     disabled: string;
+    elevated?: string;
+    input?: string;
+    onPrimary?: string;
+    disabledText?: string;
+    focus?: string;
+    thumb?: string;
+    success?: string;
+    warning?: string;
+    overlay?: string;
+    shadow?: string;
   };
 }
 
@@ -119,6 +149,8 @@ export interface GuiActionEvent {
 }
 
 export interface GuiElementOptions {
+  /** Override the root's control density; explicit dimensions always win. */
+  density?: GuiTheme['density'];
   dragSource?: GuiDragSource | null;
   dropTarget?: GuiDropTarget | null;
   id?: string | undefined;

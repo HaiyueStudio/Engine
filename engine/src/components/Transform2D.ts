@@ -37,6 +37,7 @@ export class Transform2D extends Component {
   private _localVersion = 0;
   private _worldVersion = 0;
   private _lastParentWorldVersion = Number.NaN;
+  private _lastParentWorldMatrix: Float32Array | undefined;
 
   constructor(options: Transform2DOptions = {}) {
     super('Transform2D');
@@ -126,7 +127,8 @@ export class Transform2D extends Component {
   /** Recompute worldMatrix from this transform's properties, optionally
    *  concatenated with a parent world matrix. */
   updateWorldMatrix(parentMatrix?: Float32Array, parentWorldVersion = Number.NaN): void {
-    const parentChanged = !sameParentVersion(this._lastParentWorldVersion, parentWorldVersion);
+    const parentChanged = this._lastParentWorldMatrix !== parentMatrix
+      || !sameParentVersion(this._lastParentWorldVersion, parentWorldVersion);
     if (!this.worldMatrixDirty && !parentChanged) return;
 
     this._updateLocalMatrix();
@@ -142,6 +144,7 @@ export class Transform2D extends Component {
       worldMatrix.set(m);
     }
     this._lastParentWorldVersion = parentWorldVersion;
+    this._lastParentWorldMatrix = parentMatrix;
     this._worldVersion++;
     this.worldMatrixDirty = false;
   }

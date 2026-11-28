@@ -8,6 +8,7 @@ import type {RuntimeChannel, StateMachinePose} from '../../hya-state-machine/v2/
 import {ProductionFrameError, type ProductionFrameRequest} from './FrameTransaction.js';
 import type {ProductionDrawPlan} from '../layout/production/ProductionDrawPlan.js';
 import {compileProductionCoreDrawPlan, type ProductionCoreDrawOptions} from './ProductionCoreDrawPlan.js';
+import {CoreGeometrySnapshotCache} from './CoreGeometrySnapshotCache.js';
 import type {ProductionCoreStateVisualRuntime} from './ProductionCoreStateVisualRuntime.js';
 
 export interface PreparedCompositionCore {readonly revision: string; compile(): ProductionDrawPlan;}
@@ -21,9 +22,12 @@ export type ProductionCompositionCoreFactory = (animation: ParsedAnimation, chan
 /** A working original core evaluator behind the immutable committed draw generation. No additional clock or draw owner. */
 export class ProductionCoreCompositionVisual implements ProductionCompositionCore {
   private disposed = false;
+  private readonly geometrySnapshots: CoreGeometrySnapshotCache;
   constructor(private readonly runtime: ProductionCoreStateVisualRuntime, private readonly world: World, private readonly camera: Entity,
     private readonly engine: IEngine, private readonly options: Omit<ProductionCoreDrawOptions, 'viewport' | 'dpr'>,
-    private readonly release: () => void) {}
+    private readonly release: () => void) {
+    this.geometrySnapshots = new CoreGeometrySnapshotCache(Math.min(options.maxGeometryBytes, 8 * 1024 * 1024));
+  }
   prepare(time: number, channels: StateMachinePose['channels'], request: ProductionFrameRequest): PreparedCompositionCore {
     this.live(); this.runtime.assertCoreResourcesReady();
     this.runtime.applyAuthoredMixedChannels(channels, time); this.runtime.assertCoreResourcesReady();
@@ -36,8 +40,8 @@ export class ProductionCoreCompositionVisual implements ProductionCompositionCor
       return [entity.id, entity.disabled, [...this.world.frameData.getWorldMatrix2D(entity)], visual ? [visual.revision, visual.geometry.id, visual.geometry.version, visual.textMaterial?.textureVersion] : null];
     })]);
     // The callback is private and only valid during this synchronous draw preparation.
-    return Object.freeze({revision, compile: () => {this.live(); return compileProductionCoreDrawPlan(this.world, this.camera, this.engine, {...this.options, viewport: request.viewport, dpr: request.dpr});}});
+    return Object.freeze({revision, compile: () => {this.live(); return compileProductionCoreDrawPlan(this.world, this.camera, this.engine, {...this.options, geometrySnapshots: this.geometrySnapshots, viewport: request.viewport, dpr: request.dpr});}});
   }
-  dispose(): void {if (this.disposed) return; this.disposed = true; this.release();}
+  dispose(): void {if (this.disposed) return; this.disposed = true; try {this.release();} finally {this.geometrySnapshots.clear();}}
   private live(): void {if (this.disposed) throw new ProductionFrameError('E_HYA_RUNTIME_DISPOSED', '$.core', 'core composition visual is disposed');}
 }

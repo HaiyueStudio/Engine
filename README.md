@@ -83,7 +83,7 @@ window.addEventListener('beforeunload', () => engine.destroy(), { once: true });
 
 ## 在线 Examples
 
-GitHub Pages catalog 会展示当前发布版本中可公开运行的示例，支持按能力分组、iframe 预览和源码查看。可以从这些入口开始：
+GitHub Pages catalog 展示 master 分支构建的可公开运行示例，支持按能力分组、iframe 预览和源码查看。可以从这些入口开始：
 
 - [基础 Consumer Walkthrough](https://haiyuestudio.github.io/Engine/examples/#consumer-walkthrough)
 - [PBR Showcase](https://haiyuestudio.github.io/Engine/examples/#pbr-showcase)
@@ -91,7 +91,7 @@ GitHub Pages catalog 会展示当前发布版本中可公开运行的示例，�
 - [Lottie → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#lottie-hya-compare)
 - [Live2D → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#live2d-hya-compare)
 
-在线站点由 [GitHub Pages 工作流](./.github/workflows/deploy-pages.yml)从人工选择并验证签名的 release tag 构建；它不会提交 `dist/` 或 examples bundle 到源码分支。仓库管理员首次使用时需在 GitHub 的 **Settings → Pages → Build and deployment** 中选择 **GitHub Actions**，然后运行 `Deploy GitHub Pages` 工作流。
+在线站点有两个入口：[手动部署](./.github/workflows/deploy-pages.yml)读取运行时的 master 分支，[自动部署](./.github/workflows/deploy-pages-ci.yml)由 master push 触发并检出该次推送的 `github.sha`。两者将构建产物上传到 GitHub Pages，不向源码分支提交 `dist/` 或 examples bundle。站点来源独立于签名 release tag 和 npm 发布，可能包含尚未发布的示例变更。仓库管理员首次使用时需在 GitHub 的 **Settings → Pages → Build and deployment** 中选择 **GitHub Actions**。
 
 ## 仓库结构
 

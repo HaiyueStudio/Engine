@@ -6,8 +6,9 @@ import {GuiLayoutOwner} from '../GuiLayoutOwner';
 import {measureGuiElement, releaseGuiMeasureOwner} from '../GuiMeasure';
 import {GuiThemeOwner} from '../GuiThemeOwner';
 import type {GuiThemeResourceBinding} from '../GuiThemeTypes';
-import {disposeGuiRootObservers} from '../GuiLayoutState';
+import {disposeGuiRootObservers,observeGuiRootDisposal} from '../GuiLayoutState';
 import {guiTextNeedsCoordinates} from '../GuiInvalidationState';
+import {guiThemePreset} from '../GuiThemePresets';
 
 export interface GuiRootOptions extends GuiElementOptions {
   theme?: Partial<GuiTheme> | undefined;
@@ -23,6 +24,7 @@ export class GuiRoot extends Component {
   viewport: GuiRect = { x: 0, y: 0, width: 1, height: 1 };
   private readonly layoutOwner: GuiLayoutOwner;
   private readonly themeOwner: GuiThemeOwner;
+  private disposing=false;
 
   constructor(options: GuiRootOptions = {}) {
     super('GuiRoot');
@@ -38,11 +40,12 @@ export class GuiRoot extends Component {
       disabled: options.disabled,
       style: options.style,
     });
+    const defaults = options.theme?.density === undefined && options.theme ? DEFAULT_GUI_THEME : guiThemePreset('dark', options.theme?.density);
     this.theme = {
-      ...DEFAULT_GUI_THEME,
+      ...defaults,
       ...options.theme,
       colors: {
-        ...DEFAULT_GUI_THEME.colors,
+        ...defaults.colors,
         ...(options.theme?.colors ?? {}),
       },
     };
@@ -60,7 +63,8 @@ export class GuiRoot extends Component {
   }
 
   setThemeResource(resource: GuiThemeResourceBinding | null): void {this.root.setThemeResource(resource);}
-  override destroy(): void {try {try {disposeGuiRootObservers(this.root);} finally {try {this.themeOwner.destroy();} finally {this.layoutOwner.destroy();}}} finally {releaseGuiMeasureOwner(this); super.destroy();}}
+  onDispose(listener:()=>void):()=>void {if(typeof listener!=='function')throw new TypeError('Invalid GUI disposal observer.');if(this.destroyed||this.disposing){listener();return()=>{};}return observeGuiRootDisposal(this.root,listener);}
+  override destroy(): void {if(this.destroyed||this.disposing)return;this.disposing=true;try {try {disposeGuiRootObservers(this.root);} finally {try {this.themeOwner.destroy();} finally {this.layoutOwner.destroy();}}} finally {releaseGuiMeasureOwner(this); super.destroy();}}
 
   get dirty(): boolean {
     return this.layoutOwner.isDirty();
@@ -87,7 +91,7 @@ export class GuiRoot extends Component {
       this.viewport.height !== height;
     this.viewport = next;
     if (changed) this.root.markDirty(GuiDirtyFlags.Layout);
-    try {if (!this.layoutOwner.layout(this.viewport) && this.layoutOwner.needsCoordinates(()=>needsCoordinateLayout(this.root))) this.root.layout(this.viewport);}
+    try {if (!this.layoutOwner.layout(this.viewport) && this.layoutOwner.needsCoordinates(()=>needsCoordinateLayout(this.root))) this.layoutOwner.layoutManual(()=>this.root.layout(this.viewport));}
     catch (error) {this.viewport = previous; throw error;}
   }
 

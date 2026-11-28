@@ -1,3 +1,4 @@
+import guiPaint from './stdlib/2d-ui/gui-paint.wgsl';
 import type {
   PrecompiledShaderBindingV2,
   PrecompiledShaderBindGroupV2,
@@ -158,12 +159,12 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
     'canvas-text-2d': definition(canvasText2d, [
       group('frame', 0, [camera()]), group('object', 1, [object64()]), textureGroup(),
     ], cameraObjectBlocks(), [quad2d], [uvVarying], ['texture-sample'], ['alpha-blend']),
-    'gui-image': definition(guiImage, [
-      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16)]),
+    'gui-image': definition([guiPaint,guiImage].join('\n'), [
+      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16), storage('frame.guiPaint', 1, FRAGMENT)]),
       group('material', 1, [texture('material.imageTexture', 0), sampler('material.imageSampler', 1)]),
-    ], [viewportBlock()], [guiBuffer()], guiVaryings(true), ['texture-sample', 'discard'], ['screen-space-clip']),
-    'gui-shape': definition(guiShape, [
-      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16)]),
+    ], [viewportBlock()], [guiBuffer()], guiVaryings(true), ['texture-sample', 'discard', 'storage-buffer'], ['screen-space-clip']),
+    'gui-shape': definition([guiPaint,guiShape].join('\n'), [
+      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16), storage('frame.guiPaint', 1, FRAGMENT)]),
     ], [viewportBlock()], [vertexBuffer(60, 'vertex', [
       attribute('POSITION', 0, 0, 'float32x2'),
       attribute('COLOR_0', 1, 8, 'float32x4'),
@@ -174,9 +175,9 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
       varying('SCREEN_POSITION', 0, 'vec2<f32>'), varying('COLOR_0', 1, 'vec4<f32>'),
       varying('RECT', 2, 'vec4<f32>'), varying('RADIUS', 3, 'f32'),
       varying('CLIP_RECT', 4, 'vec4<f32>'),
-    ], ['discard', 'signed-distance-field'], ['screen-space-clip']),
-    'gui-text': definition(guiText, [
-      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16)]),
+    ], ['discard', 'signed-distance-field', 'storage-buffer'], ['screen-space-clip']),
+    'gui-text': definition([guiPaint,guiText].join('\n'), [
+      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16), storage('frame.guiPaint', 1, FRAGMENT)]),
       group('material', 1, [texture('material.fontTexture', 0), sampler('material.fontSampler', 1)]),
     ], [viewportBlock()], [guiBuffer()], guiVaryings(true), ['texture-sample', 'discard'], ['screen-space-clip']),
     'indexed-sprite': definition(indexedSprite, [

@@ -34,9 +34,19 @@
     "maxProductionGenerationRuns": 1
   },
   "productionBundles": {
-    "engine2dUiArtifactGzipBytes": 4800,
+    "engine2dUiArtifactGzipBytes": 5600,
+    "engineArtifactGzipBytes": 12800,
     "simple3dArtifactGzipBytes": 7100,
     "componentsEvidenceArtifactGzipBytes": 2850,
     "deformationArtifactGzipBytes": 9600
+  },
+  "productionBundleReviews": {
+    "guiP0": {
+      "decision": "docs/for-ai/adr/0141-gui-visual-foundation.md",
+      "previous": {"engine2dUiArtifactGzipBytes": 4800, "engineArtifactGzipBytes": 12000},
+      "observed": {"engine2dUiArtifactGzipBytes": 5511, "engineArtifactGzipBytes": 12611},
+      "reserve": {"engine2dUiArtifactGzipBytes": 89, "engineArtifactGzipBytes": 189},
+      "basis": "P0 analytic boxes, per-corner radii, border, shadow, gradient, arc and shared shape/text/image rounded clipping. One authoring helper and the existing three GUI passes; no new variant, pipeline, compiler, layout or input owner. Historical stage9 contract, 570000 WGSL bytes, 76 files, 68 variants/pipelines and all performance/resource/pixel budgets remain unchanged. Capacity growth follows the user's existing ADR 0135 authorization."
+    }
   }
 }

@@ -125,10 +125,13 @@ class Controller implements SceneFlow {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    this.stopPending(aborted('flow-disposed'), false);
-    if (this.engine.activeScene && this.owned.has(this.engine.activeScene)) this.engine.switchScene(null);
-    try { for (const scene of [...this.owned.keys()]) this.release(scene); }
-    finally { this.snapshot = Object.freeze({ ...this.snapshot, phase: 'disposed', activeId: null }); this.notify(); }
+    const errors: unknown[] = [], run = (action: () => unknown): void => {try {action();} catch(error) {errors.push(error);}};
+    run(() => this.stopPending(aborted('flow-disposed'), false));
+    if (this.engine.activeScene && this.owned.has(this.engine.activeScene)) run(() => this.engine.switchScene(null));
+    for (const scene of [...this.owned.keys()]) run(() => this.release(scene));
+    this.snapshot = Object.freeze({ ...this.snapshot, phase: 'disposed', activeId: null }); this.notify();
+    if (errors.length === 1) throw errors[0];
+    if (errors.length) throw new AggregateError(errors, 'Scene flow cleanup failed.');
   }
 
   private adopt(preparation: Preparation, scene: Scene): Scene {

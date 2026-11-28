@@ -6,6 +6,8 @@ import type {
 import { shaderError } from './diagnostics';
 import { validateSpecializationValue } from './module';
 import { compareStableText } from './naming';
+import { floatLiteral } from './backend/floatLiteral';
+import { wgslI32Literal } from './backend/integerLiteral';
 
 export interface ResolvedSpecialization {
   readonly definition: ShaderSpecializationDefinition;
@@ -73,6 +75,6 @@ export function formatSpecializationValue(
   if (type === 'bool') return value ? 'true' : 'false';
   const numeric = value as number;
   if (type === 'u32') return `${numeric}u`;
-  if (type === 'i32') return `${numeric}i`;
-  return Number.isInteger(numeric) ? `${numeric}.0` : String(numeric);
+  if (type === 'i32') return wgslI32Literal(numeric);
+  return floatLiteral(numeric);
 }

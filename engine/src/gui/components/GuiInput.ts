@@ -1,3 +1,5 @@
+import {registerGuiControlSize} from '../GuiControlSize';
+import {guiInputClearHit} from '../input/GuiInputAdornments';
 import {GuiTextServices} from '../input/GuiTextServices';
 import {admitGuiTextServices} from '../input/GuiTextServiceRegistry';
 import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
@@ -14,6 +16,11 @@ import {beginGuiInputClick,moveGuiInputClick,finishGuiInputClick,cancelGuiInputC
 
 export interface GuiInputOptions extends GuiElementOptions {
   value?: string;
+  prefix?:string;
+  suffix?:string;
+  clearable?:boolean;
+  invalid?:boolean;
+  helpText?:string;
   placeholder?: string;
   readOnly?: boolean;
   /** UTF-16 ceiling; truncation never divides an extended grapheme. */
@@ -25,10 +32,10 @@ export interface GuiInputOptions extends GuiElementOptions {
 }
 
 export class GuiInput extends GuiElement {
-  private static readonly __controlIdentityGuiInput = /* @__PURE__ */ (() => {admitGuiTextServices((context,options,document)=>new GuiTextServices(context,options,document));return admitGuiControl(GuiInput.prototype, 'GuiInput', undefined, paintGuiInput);})();
+  private static readonly __controlIdentityGuiInput = /* @__PURE__ */ (() => {admitGuiTextServices((context,options,document)=>new GuiTextServices(context,options,document));return admitGuiControl(GuiInput.prototype, 'GuiInput', undefined, paintGuiInput, (_input,theme,state)=>({radius:theme.radius,borderWidth:1,focusWidth:2,focusColor:theme.colors.focus??theme.colors.primary,backgroundColor:state.disabled?theme.colors.disabled:theme.colors.input??theme.colors.surface,borderColor:state.invalid?theme.colors.danger:state.focus?theme.colors.focus??theme.colors.primary:state.hover?theme.colors.primary:theme.colors.border,...(state.disabled?{color:theme.colors.disabledText??theme.colors.textMuted}:{})}));})();
   static override readonly themeControlType: string = 'GuiInput';
   override handlePointerCancel(event: GuiPointerEvent): void {
-    this.selecting = false;guiPasswordCancel(this);cancelGuiInputClick(this);
+    this.clearPressed=false;this.selecting = false;guiPasswordCancel(this);cancelGuiInputClick(this);
     super.handlePointerCancel(event);
   }
   override handleAction(event: GuiActionEvent): void {
@@ -43,6 +50,11 @@ export class GuiInput extends GuiElement {
   private editDeltas:GuiTextBufferEdit[]|undefined;
   get value():string{return this.buffer.value;}
   set value(value:string){this.setValue(value);}
+  prefix:string;
+  suffix:string;
+  clearable:boolean;
+  helpText:string;
+  private clearPressed=false;
   placeholder: string;
   readOnly: boolean;
   get caretIndex():number{return this.buffer.caret;}
@@ -77,6 +89,8 @@ export class GuiInput extends GuiElement {
 
   constructor(options: GuiInputOptions = {}) {
     super({ width: 180, height: 32, focus: {mode: 'all'}, ...options });
+    registerGuiControlSize(this,options,32);
+    this.prefix=options.prefix??'';this.suffix=options.suffix??'';this.clearable=options.clearable??false;this.helpText=options.helpText??'';this.setVisualState({invalid:options.invalid??false,readOnly:options.readOnly??false});
     this.buffer = new GuiTextBuffer(options.value??'',options.maxLength??Infinity,edit=>this.editDeltas?.push(edit));
     this.placeholder = options.placeholder ?? '';
     this.readOnly = options.readOnly ?? false;
@@ -160,7 +174,8 @@ export class GuiInput extends GuiElement {
 
   override handlePointerDown(event: GuiPointerEvent): void {
     super.handlePointerDown(event);
-    this.selecting = !guiPasswordPress(this,event.x,event.y);
+    this.clearPressed=guiInputClearHit(this,event.x,event.y);
+    this.selecting = !this.clearPressed&&!guiPasswordPress(this,event.x,event.y);
     if(this.selecting)beginGuiInputClick(this,event);else cancelGuiInputClick(this);
   }
 
@@ -173,6 +188,7 @@ export class GuiInput extends GuiElement {
 
   override handlePointerUp(event: GuiPointerEvent): void {
     super.handlePointerUp(event);
+    if(this.clearPressed&&guiInputClearHit(this,event.x,event.y)){this.cancelComposition();this.setValue('',true);}this.clearPressed=false;
     if(guiPasswordRelease(this,event.x,event.y)){resetGuiInputCaret(this);this.markDirty(GuiDirtyFlags.Text|GuiDirtyFlags.Visual|GuiDirtyFlags.Input);}
     if(finishGuiInputClick(this,event))this.selectAll();
     this.selecting = false;
@@ -223,8 +239,11 @@ function paintGuiInput(context:GuiPaint.GuiControlPaintContext, input: GuiInput,
     const font = context.activeFont;
     const radius = context.styleFor(input).radius ?? theme.radius;
     const border = GuiPaint.colorToRgba(context.styleFor(input).borderColor, input.focused ? theme.colors.primary : theme.colors.border);
+    if(theme.density)GuiPaint.paintGuiBox(context.currentBatch,input.rect,context.styleFor(input),GuiPaint.colorToRgba(context.styleFor(input).backgroundColor,theme.colors.input??theme.colors.surface),border,context.currentClip,theme.radius);
+    else {
     context.addRect(input.rect.x, input.rect.y, input.rect.width, input.rect.height, radius, border);
     context.addRect(input.rect.x + 1, input.rect.y + 1, input.rect.width - 2, input.rect.height - 2, Math.max(0, radius - 1), GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(input).backgroundColor, theme.colors.surface), input.disabled ? 0.45 : 1));
+    }
 
     const presentation=GuiPaint.guiInputPresentation(input,text=>context.measureTextWidth(text,theme.fontSize),theme.fontSize,context.measureTextLineHeight(theme.fontSize));
     const previousClip=context.currentClip;context.currentClip=context.clipRect(presentation.clip);
@@ -249,7 +268,9 @@ function paintGuiInput(context:GuiPaint.GuiControlPaintContext, input: GuiInput,
       const rect=presentation.caret;context.addRect(rect.x,rect.y,rect.width,rect.height,0.75,GuiPaint.colorToRgba(theme.colors.text,theme.colors.text));
     }
     context.currentClip=previousClip;context.currentClip=context.clipRect(input.rect);
-    const {counter,eye}=presentation.adornments;
+    const {counter,eye,clear,prefix,suffix}=presentation.adornments;
+    for(const part of [prefix,suffix])if(part)context.currentTextBatch.addText({text:part.text,...part.rect,fontSize:theme.fontSize,color:GuiPaint.colorToRgba(theme.colors.textMuted,theme.colors.textMuted),clip:context.currentClip,verticalAlign:'center',overflow:'ellipsis'});
+    if(clear){const cx=clear.x+clear.width/2,cy=clear.y+clear.height/2,ink=GuiPaint.colorToRgba(theme.colors.textMuted,theme.colors.textMuted);GuiPaint.paintGuiLine(context.currentBatch,cx-3,cy-3,cx+3,cy+3,1.5,ink,context.currentClip);GuiPaint.paintGuiLine(context.currentBatch,cx-3,cy+3,cx+3,cy-3,1.5,ink,context.currentClip);}
     if(counter)context.currentTextBatch.addText({text:counter.text,...counter.rect,fontSize:counter.fontSize,color:GuiPaint.colorToRgba(input.value.length>=input.maxLength?theme.colors.primary:theme.colors.textMuted,theme.colors.textMuted),clip:context.currentClip,verticalAlign:'top'});
     if(eye&&eye.width>0){
       const cx=eye.x+eye.width/2,cy=eye.y+eye.height/2,ink=GuiPaint.colorToRgba(theme.colors.textMuted,theme.colors.textMuted),surface=GuiPaint.colorToRgba(context.styleFor(input).backgroundColor,theme.colors.surface);
@@ -260,4 +281,5 @@ function paintGuiInput(context:GuiPaint.GuiControlPaintContext, input: GuiInput,
       if(!GuiPaint.guiPasswordRevealed(input))for(let i=-7;i<=7;i++)context.addRect(cx+i*scale-1,cy+i*.65*scale-1,2,2,1,ink);
     }
     context.currentClip=previousClip;
+    if(input.helpText){const help=GuiPaint.guiPartStyle(context,input,'help');context.currentTextBatch.addText({text:input.helpText,x:input.rect.x,y:input.rect.y+input.rect.height+4,width:input.rect.width,height:18,fontSize:help.fontSize??12,color:GuiPaint.colorToRgba(help.color,theme.colors.textMuted),clip:context.clipRect({x:input.rect.x,y:input.rect.y+input.rect.height+4,width:input.rect.width,height:18}),overflow:'ellipsis'});}
   }

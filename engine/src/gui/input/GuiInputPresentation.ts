@@ -4,6 +4,7 @@ import type {GuiRect} from '../GuiTypes';
 import {guiInputAdornments,guiPasswordMasked} from './GuiInputAdornments';
 import {guiGraphemeBoundaries} from './GuiGraphemes';
 import {guiContentBox} from '../GuiContent';
+import type {GuiTextMeasurer} from '../rendering/GuiTextBatch';
 
 interface InputView {x:number;y:number;caretVisible:boolean;revision:number;}
 const views=new WeakMap<GuiInput,InputView>();
@@ -21,18 +22,44 @@ export function guiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
  return{...p,caretVisible:input.focused&&!input.disabled&&!input.readOnly&&(input.isComposing||!input.hasSelection&&state(input).caretVisible),compositionRanges:input.focused&&range?p.ranges(...range):[]};
 }
 function defaultGuiInputPresentation(input:GuiInput,measure:(text:string)=>number,fontSize:number,lineHeight=fontSize*1.2){
+  const prefixWidths=(measure as GuiTextMeasurer).prefixWidths;
   const skin=input.getResolvedStyle(),view=state(input),padding=Math.max(0,skin.padding??8),r=input.rect;
   const box=guiContentBox(input,8,fontSize),customContent=!!(skin.contentInsets||skin.nineSlice||skin.icon);
   const adornments=guiInputAdornments(input,measure,fontSize);
   const clip=customContent?{...box.text,width:Math.max(0,box.text.width-adornments.right),height:Math.max(0,box.text.height-adornments.bottom)}:{x:r.x+padding,y:r.y+Math.min(padding,r.height/2),width:Math.max(0,r.width-2*padding-adornments.right),height:Math.max(0,r.height-2*padding-adornments.bottom)};
+  clip.x+=adornments.left??0;clip.width=Math.max(0,clip.width-(adornments.left??0));
+  lineHeight=skin.lineHeight??lineHeight;
   const textY=customContent?clip.y:r.y,textHeight=customContent?clip.height:r.height;
   const text=input.displayValue,lines:string[]=[],starts:number[]=[];
   const oneLine=(value:string)=>value.replace(/\r\n|\r|\n/gu,' ');
   if(input.multiline){let start=0;for(const match of text.matchAll(/\r\n|\r|\n/gu)){starts.push(start);lines.push(text.slice(start,match.index));start=match.index+match[0].length;}starts.push(start);lines.push(text.slice(start));}
   else {starts.push(0);lines.push(oneLine(text));}
+  const metricRows=new Map<number,{boundaries:readonly number[];normalized:string;offsets:readonly number[];widths?:Readonly<Float64Array>;monotone:boolean}>();
+  const metrics=(row:number)=>{
+    let run=metricRows.get(row);
+    if(!run){
+      const raw=input.multiline?lines[row]!:text,boundaries=guiGraphemeBoundaries(raw),offsets:number[]=[];
+      let cursor=0,normalizedOffset=0;
+      for(const end of boundaries){while(cursor<end){cursor+=raw[cursor]==='\r'&&raw[cursor+1]==='\n'?2:1;normalizedOffset++;}offsets.push(normalizedOffset);}
+      run={boundaries,normalized:input.multiline?raw:oneLine(raw),offsets,monotone:true};metricRows.set(row,run);
+    }
+    const widths=prefixWidths!(run.normalized,run.offsets);
+    if(widths!==run.widths){
+      run.widths=widths;run.monotone=widths.every((value,i)=>i===0||value>=widths[i-1]!);
+    }
+    return run;
+  };
+  const lineWidth=(row:number,index:number):number=>{
+    if(prefixWidths){
+      const run=metrics(row),at=lowerBound(run.boundaries.length,i=>run.boundaries[i]!<index);
+      if(run.boundaries[at]===index)return run.widths![at]!;
+    }
+    // IME may expose a UTF-16 caret inside a cluster; preserve its exact old projection.
+    return measure(input.multiline?lines[row]!.slice(0,index):oneLine(text.slice(0,index)));
+  };
   const position=(index:number)=>{
     let row=0;while(row+1<starts.length&&starts[row+1]!<=index)row++;
-    return {row,x:measure(input.multiline?lines[row]!.slice(0,Math.max(0,index-starts[row]!)):oneLine(text.slice(0,index)))};
+    return {row,x:lineWidth(row,Math.max(0,index-starts[row]!))};
   };
   const caret=position(input.displayCaretIndex),width=lines.reduce((max,line)=>Math.max(max,measure(line)),0);
   const visibleHeight=input.multiline?clip.height:textHeight;
@@ -51,20 +78,33 @@ function defaultGuiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
     for(let row=0;row<lines.length;row++){
       const line=lines[row]!,offset=starts[row]!,a=Math.max(0,from-offset),b=Math.min(line.length,to-offset);
       if(b<a||to<=offset||from>offset+line.length)continue;
-      const x=measure(line.slice(0,a)),end=measure(line.slice(0,b));
+      const x=lineWidth(row,a),end=lineWidth(row,b);
       rects.push({x:origin.x+x,y:input.multiline?origin.y+row*lineHeight:r.y+5,width:Math.max(1,end-x),height:input.multiline?lineHeight:Math.max(10,r.height-10)});
     }
     return rects;
   };
   const indexAt=(x:number,y:number):number=>{
     const row=input.multiline?Math.max(0,Math.min(lines.length-1,Math.floor((y-origin.y)/lineHeight))):0;
-    const local=x-origin.x,line=input.multiline?lines[row]!:text,boundaries=guiGraphemeBoundaries(line);
+    const local=x-origin.x,line=input.multiline?lines[row]!:text;
+    let boundaries:readonly number[],boundaryIndex:number;
+    if(prefixWidths){
+      const run=metrics(row);boundaries=run.boundaries;
+      const widths=run.widths!,midpoint=(i:number)=>(widths[i]!+widths[i+1]!)/2;
+      boundaryIndex=run.monotone?lowerBound(boundaries.length-1,i=>local>=midpoint(i)):boundaries.findIndex((_,i)=>i===boundaries.length-1||local<midpoint(i));
+      const displayOffset=starts[row]!+boundaries[boundaryIndex]!;
+      return guiPasswordMasked(input)?guiGraphemeBoundaries(input.value)[displayOffset]??input.value.length:displayOffset;
+    }
+    boundaries=guiGraphemeBoundaries(line);
     let offset=line.length;
     for(let i=1;i<boundaries.length;i++)if(local<(measure(input.multiline?line.slice(0,boundaries[i-1]):oneLine(line.slice(0,boundaries[i-1])))+measure(input.multiline?line.slice(0,boundaries[i]):oneLine(line.slice(0,boundaries[i]))))/2){offset=boundaries[i-1]!;break;}
     const displayOffset=starts[row]!+offset;
     return guiPasswordMasked(input)?guiGraphemeBoundaries(input.value)[displayOffset]??input.value.length:displayOffset;
   };
   return {adornments,clip,origin,textHeight,caret:caretRect,lines,lineHeight,ranges,indexAt,contentWidth:width,contentHeight,scrollX:view.x,scrollY:view.y};
+}
+
+function lowerBound(count:number,before:(index:number)=>boolean):number {
+  let lo=0,hi=count;while(lo<hi){const mid=(lo+hi)>>>1;if(before(mid))lo=mid+1;else hi=mid;}return lo;
 }
 
 /** Source-neutral metrics from the externally painted glyph owner, in GUI logical coordinates. */

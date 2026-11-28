@@ -120,6 +120,9 @@ export class AnimationTextRasterizer {
   private readonly bitmapSnapshots = new Map<ImageBitmap, RetainedBitmap>();
   private updateToken = 0;
   private readonly animated: boolean;
+  private readonly timeDependent: boolean;
+  private rasterKey: string | undefined;
+  private fontRevision = 0;
   private stateDocument: AnimationStateTextDocument = Object.freeze({});
   private stateDocumentKey = '{}';
   private textureFailure: unknown;
@@ -130,10 +133,10 @@ export class AnimationTextRasterizer {
 
   constructor(readonly component: Readonly<AnimationText2DComponent>, options: Readonly<{rasterize?: boolean}> = {}) {
     this.canvas = options.rasterize === false || typeof document === 'undefined' ? null : document.createElement('canvas');
-    this.animated = component.expression !== undefined || (component.documents?.length ?? 0) > 1
-      || component.paragraphSpacingTrack !== undefined
+    this.timeDependent = component.paragraphSpacingTrack !== undefined
       || (component.styleRuns ?? []).some(run => run.fontSizeTrack || run.lineHeightTrack || run.trackingTrack)
       || (component.animators ?? []).some(animator => hasAnimatedAnimator(animator));
+    this.animated = component.expression !== undefined || (component.documents?.length ?? 0) > 1 || this.timeDependent;
     void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
 
@@ -188,6 +191,8 @@ export class AnimationTextRasterizer {
   }
 
   invalidateFont(): void {
+    this.fontRevision++;
+    this.rasterKey = undefined;
     this.dirty = true;
     void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
@@ -232,18 +237,24 @@ export class AnimationTextRasterizer {
     this.dirty = false;
     this.updating = true;
     try {
-      this.draw(this.canvas, Number.isFinite(this.time) ? this.time : 0);
+      const time = Number.isFinite(this.time) ? this.time : 0, document = this.evaluateDocument(time);
+      // Authored keyframes and expressions are inputs to document resolution, not pixel identity.
+      // Preserve time for continuous glyph/style animation, even when the text itself is stable.
+      const key = JSON.stringify([document, {...this.component, documents: undefined, expression: undefined}, this.timeDependent ? time : null, this.fontRevision]);
+      if (key === this.rasterKey) return;
+      this.draw(this.canvas, time, document);
       const previous = this.texture;
       this.texture = this.canvas;
       this.retireTexture(previous);
       this.textureVersion++;
-      if (typeof createImageBitmap !== 'function') return;
+      if (typeof createImageBitmap !== 'function') {this.rasterKey = key; return;}
       const bitmap = await createImageBitmap(this.canvas, { colorSpaceConversion: 'none' });
       if (token !== this.updateToken) { bitmap.close(); return; }
       const retired = this.texture;
       this.texture = bitmap;
       this.textureVersion++;
       this.retireTexture(retired);
+      this.rasterKey = key;
     } catch (error) {
       this.textureFailure = error; this.textureFailed = true; this.dirty = false; this.settleReady(error, true); throw error;
     } finally {
@@ -272,9 +283,8 @@ export class AnimationTextRasterizer {
   /** Internal CPU glyph layout; the real draw path consumes the same plain/styled plan. */
   evaluateGlyphLayout(time:number,measure:AnimationTextMeasure):unknown {return snapshotCoreTextLayout(this.component,this.evaluateDocument(time),time,measure);}
 
-  private draw(canvas: HTMLCanvasElement, time: number): void {
+  private draw(canvas: HTMLCanvasElement, time: number, document = this.evaluateDocument(time)): void {
     const component = this.component;
-    const document = this.evaluateDocument(time);
     const width = Math.max(1, Math.ceil(component.size[0]));
     const height = Math.max(1, Math.ceil(component.size[1]));
     const dpr = Math.max(1, Math.min(4, component.resolutionScale ?? 2));

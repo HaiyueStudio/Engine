@@ -25,6 +25,7 @@ import { normalizeSceneOptions } from './internal/ScenePresetFactory';
 import { SceneRuntime } from './internal/SceneRuntime';
 import { SceneSystems } from './internal/SceneSystems';
 import { bindSceneRenderOwner } from './internal/SceneRenderAccess';
+import { Cleanup } from '../core/Cleanup';
 
 export type {
   SceneAssetRequest,
@@ -135,10 +136,12 @@ export class Scene implements ScenePluginScene {
 
   destroy(): void {
     if (!this._runtime.beginDestroy()) return;
-    this._plugins.destroy();
-    this._assets.destroy();
-    this.renderView.destroy();
-    this._runtime.finishDestroy();
+    const cleanup = new Cleanup();
+    cleanup.run(() => this._plugins.destroy());
+    cleanup.run(() => this._assets.destroy());
+    cleanup.run(() => this.renderView.destroy());
+    cleanup.run(() => this._runtime.finishDestroy());
+    cleanup.complete('Scene cleanup failed.');
   }
 
   activate(): this { this._runtime.activate(); return this; }

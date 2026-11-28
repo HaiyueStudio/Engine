@@ -6,6 +6,7 @@ import {compute2DViewProjection} from '../../utils/camera2d.js';
 import type {StateMachinePose} from '../../hya-state-machine/v2/runtime-types.js';
 import type {ProductionCoreStateVisualRuntime} from './ProductionCoreStateVisualRuntime.js';
 import {compileProductionCoreDrawPlan, type ProductionCoreDrawOptions} from './ProductionCoreDrawPlan.js';
+import {CoreGeometrySnapshotCache} from './CoreGeometrySnapshotCache.js';
 import type {ProductionDrawOwner} from '../layout/production/ProductionDrawOwner.js';
 import {ProductionFrameError, type PreparedProductionFrameStep, type ProductionFrameContext, type ProductionFrameStage} from './FrameTransaction.js';
 
@@ -27,11 +28,13 @@ export class ProductionCoreFrameStage implements ProductionFrameStage {
   private preparing = false;
   private disposed = false;
   private committedTime: number | undefined;
+  private readonly geometrySnapshots: CoreGeometrySnapshotCache;
   constructor(readonly id: string, private readonly runtime: ProductionCoreStateVisualRuntime, private readonly world: World,
     private readonly camera: Entity, private readonly engine: IEngine, private readonly draw: ProductionDrawOwner, options: ProductionCoreFrameStageOptions) {
     if (!id || new Set(options.stateStages).size !== options.stateStages.length || options.stateStages.some(id => typeof id !== 'string' || !id)
       || typeof options.time !== 'function') throw new ProductionFrameError('E_HYA_RUNTIME_STAGE', id, 'core stage needs its explicit clock and unique upstream state stages');
     this.options = Object.freeze({...options, stateStages: Object.freeze([...options.stateStages])});
+    this.geometrySnapshots = new CoreGeometrySnapshotCache(Math.min(options.maxGeometryBytes, 8 * 1024 * 1024));
   }
   prepare(context: ProductionFrameContext): PreparedProductionFrameStep {
     this.live(); if (this.preparing || this.pending) throw new ProductionFrameError('E_HYA_RUNTIME_REENTRANT', this.id, 'core stage already has a preparation');
@@ -59,7 +62,7 @@ export class ProductionCoreFrameStage implements ProductionFrameStage {
         return [entity.id, entity.disabled, [...this.world.frameData.getWorldMatrix2D(entity)], visual ? [visual.revision, visual.geometry.id, visual.geometry.version, visual.textMaterial?.textureVersion] : null];
       })]);
       step = this.draw.preparePlan(this.identity, revision, () => compileProductionCoreDrawPlan(this.world, this.camera, this.engine,
-        {...this.options, viewport: context.request.viewport, dpr: context.request.dpr}));
+        {...this.options, geometrySnapshots: this.geometrySnapshots, viewport: context.request.viewport, dpr: context.request.dpr}));
       this.live(); let closed = false;
       const prepared = Object.freeze({value: Object.freeze({time, generation: step.value}), commit: () => {
         if (closed) return; closed = true; this.pending = undefined; step!.commit(); this.committedTime = time;
@@ -76,6 +79,6 @@ export class ProductionCoreFrameStage implements ProductionFrameStage {
     if (this.runtime.stats.failedResourceCount) throw new ProductionFrameError('E_HYA_RUNTIME_RESOURCE', '$.core.resources', 'original core resource preparation failed');
     if (this.runtime.stats.pendingResourceCount) throw new ProductionFrameError('E_HYA_RUNTIME_HOST_PORT', '$.core.resources', 'a core resource readiness port must await original pending resources');
   }
-  dispose(): void {if (this.disposed) return; this.disposed = true; const step = this.pending; this.pending = undefined; step?.rollback();}
+  dispose(): void {if (this.disposed) return; this.disposed = true; const step = this.pending; this.pending = undefined; try {step?.rollback();} finally {this.geometrySnapshots.clear();}}
   private live(): void {if (this.disposed) throw new ProductionFrameError('E_HYA_RUNTIME_DISPOSED', this.id, 'core frame stage is disposed');}
 }

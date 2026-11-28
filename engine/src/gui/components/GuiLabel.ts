@@ -84,6 +84,9 @@ function paintGuiLabel(context:GuiPaint.GuiControlPaintContext, label: GuiLabel,
     const border = context.styleFor(label).borderColor;
     const background = context.styleFor(label).backgroundColor;
     const inset = border ? 1 : 0;
+    const skin=context.styleFor(label);
+    if(skin.gradient||skin.shadow||skin.cornerRadii||skin.borderWidth!==undefined)GuiPaint.paintGuiBox(context.currentBatch,label.rect,{borderWidth:border?1:0,...skin},GuiPaint.withAlpha(GuiPaint.colorToRgba(background,'transparent'),opacity),GuiPaint.withAlpha(GuiPaint.colorToRgba(border,'transparent'),opacity),context.currentClip,theme.radius,opacity);
+    else {
     if (border) {
       context.addRect(
         label.rect.x,
@@ -105,8 +108,10 @@ function paintGuiLabel(context:GuiPaint.GuiControlPaintContext, label: GuiLabel,
       );
     }
 
+    }
+
     const padding = context.styleFor(label).padding ?? 0;
-    const fontSize = label.fontSize ?? theme.fontSize;
+    const fontSize = label.fontSize ?? skin.fontSize ?? theme.fontSize;
     const style = context.styleFor(label), box = GuiPaint.guiContentBox(label, 0, fontSize);
     const customContent = !!(style.contentInsets || style.nineSlice || style.icon);
     const x = customContent ? box.text.x : label.rect.x + padding;
@@ -122,7 +127,7 @@ function paintGuiLabel(context:GuiPaint.GuiControlPaintContext, label: GuiLabel,
       centeredSingleLine = label.autoWidth && label.textAlign === 'center'
         && textWidth <= width && !/[\r\n]/u.test(label.text);
     }
-    const multiline = layoutManaged && !centeredSingleLine;
+    const multiline = (layoutManaged||/[\r\n]/u.test(label.text)) && !centeredSingleLine;
     context.currentTextBatch.addText({
       text: label.text,
       x: textX,
@@ -130,6 +135,8 @@ function paintGuiLabel(context:GuiPaint.GuiControlPaintContext, label: GuiLabel,
       width: Math.max(0, x + width - textX),
       height: customContent ? box.text.height : Math.max(0, label.rect.height - (multiline ? padding * 2 : 0)),
       fontSize,
+      ...(style.lineHeight!==undefined?{lineHeightPixels:style.lineHeight}:theme.lineHeight!==undefined?{lineHeightPixels:theme.lineHeight}:{}),
+      ...(style.textOverflow?{overflow:style.textOverflow}:{}),
       color: GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(label).color, theme.colors.text), opacity),
       multiline,
       wrap: multiline,

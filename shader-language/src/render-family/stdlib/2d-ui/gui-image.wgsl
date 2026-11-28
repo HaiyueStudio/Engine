@@ -1,6 +1,4 @@
-override GUI_LINEAR_OUTPUT: bool = false;
 override GUI_LINEAR_TEXTURE: bool = false;
-fn gui_to_linear(c:vec3<f32>)->vec3<f32>{return select(c/12.92,pow((c+0.055)/1.055,vec3<f32>(2.4)),c>vec3<f32>(0.04045));}
 fn gui_to_srgb(c:vec3<f32>)->vec3<f32>{return select(1.055*pow(max(c,vec3<f32>(0.0)),vec3<f32>(1.0/2.4))-0.055,c*12.92,c<=vec3<f32>(0.0031308));}
 struct Viewport {
   size : vec2<f32>,
@@ -41,14 +39,9 @@ fn vs_main(input : VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
-  if (
-    input.screenPos.x < input.clip.x ||
-    input.screenPos.y < input.clip.y ||
-    input.screenPos.x > input.clip.z ||
-    input.screenPos.y > input.clip.w
-  ) {
-    discard;
-  }
+  let aa=max(0.5,length(fwidth(input.screenPos))*0.5);
+  let clipAlpha=gui_clip(input.screenPos,input.clip,aa);
+  if(clipAlpha<=0.001){discard;}
   let texel = textureSample(imageTex, imageSampler, input.uv);
   var rgb = texel.rgb;
   if (GUI_LINEAR_OUTPUT && !GUI_LINEAR_TEXTURE) {rgb = gui_to_linear(rgb);}
@@ -57,5 +50,6 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   if (sample.a <= 0.01) {
     discard;
   }
-  return sample;
+  let result=sample;
+  return vec4<f32>(result.rgb,result.a*clipAlpha);
 }

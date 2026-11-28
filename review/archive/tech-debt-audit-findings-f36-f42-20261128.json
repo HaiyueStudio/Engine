@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "archive": "tech-debt-audit-findings-f36-f42-20261128.zip",
+  "createdAt": "2026-11-28T08:23:21.398Z",
+  "description": "Exact repeat-audit report before repairing F33 and F36-F42; findings and original failures remain historical evidence.",
+  "sha256": "bcbbcb5eb1fdadb51cde03f04c17ecd048c2df6dbea44ec4f6dda777512f158d",
+  "archiveBytes": 9192,
+  "originalBytes": 20315,
+  "files": [
+    {
+      "path": "Engine/TECH_DEBT_AUDIT.md",
+      "bytes": 20315,
+      "sha256": "2a25093f40bc4ccccd5dd13b63872ae186bd14d90f2229ce18a2cfb571042b4c"
+    }
+  ]
+}

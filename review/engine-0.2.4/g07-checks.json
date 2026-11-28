@@ -225,7 +225,9 @@
     "rehearsal": "passed",
     "independentArtifactAudit": "passed",
     "cloudFast": "passed",
-    "cloudFull": "failed-approved-named-software-investigation"
+    "cloudFull": "failed-approved-named-software-investigation",
+    "masterFast": "passed",
+    "masterSlow": "passed"
   },
   "frozenCandidate": {
     "revision": "8e0507d0da70aeed72d759ec54f1b8ac896386bb",
@@ -648,7 +650,7 @@
     "sha256": "057ffcf3fc40ee41a0416cedac5e11edb54b2497243eb6374b25a8e26b5928b0"
   },
   "releaseReadiness": {
-    "status": "npm-and-github-verified",
+    "status": "published-and-verified",
     "finding": {
       "path": "D:/HaiyueStudio/Engine-rc-024-20261119/artifacts/engine-0.2.4/g07/changelog-reuse/release-alignment-20261119/alignment-finding.json",
       "sha256": "adfaf7dc8ca0d03635ccc70e6251bf472f4249b8f5ec6f59b262647fdfa071f6"
@@ -825,6 +827,14 @@
     "transportAdapter": {
       "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/resume-release-assets-curl-file-20261124.mjs",
       "sha256": "88dfd7d5281813b2112a621d9fcdb9b9bfc3f6c24b1e959ca78f7bc6830fe9b0"
+    },
+    "pages": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/pages-verified-20261124.json",
+      "sha256": "a238dc3b4e60301d58604316ffb044e0e9893d2187730cfb68aeaa2c481c1382"
+    },
+    "documentation": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/post-release-docs-20261124.json",
+      "sha256": "aca4a206c269ef8613e4a0203062e0c71cd5a286911834140cb8f699724dd374"
     }
   },
   "historicalQualifiedCandidate": {
@@ -842,7 +852,7 @@
     "baselinePromoted": false
   },
   "captureRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
-  "lastVerifiedAt": "2026-11-24T14:21:09.950Z",
+  "lastVerifiedAt": "2026-11-24T15:56:39.194Z",
   "historicalQualificationCompletedAt": "2026-11-19T13:36:46.084Z",
   "completedAt": "2026-11-24T14:21:09.950Z",
   "historicalPublicationPlan": {
@@ -859,7 +869,7 @@
   "npmPublished": true,
   "published": true,
   "publication": {
-    "status": "npm-and-github-verified",
+    "status": "all-channels-verified",
     "version": "0.2.4",
     "runtimeRevision": "c744e8323b2848178ad8f487e36968ac5fe263b2",
     "signatureVerified": true,
@@ -875,8 +885,27 @@
     "assetCount": 8,
     "pages": {
       "url": "https://haiyuestudio.github.io/Engine/releases/0.2.4/examples/",
-      "workflow": "https://github.com/HaiyueStudio/Engine/actions/workflows/deploy-pages-ci.yml"
+      "workflow": "https://github.com/HaiyueStudio/Engine/actions/workflows/deploy-pages-ci.yml",
+      "status": "passed",
+      "workflowRun": 45425109284,
+      "verification": {
+        "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/pages-verified-20261124.json",
+        "sha256": "a238dc3b4e60301d58604316ffb044e0e9893d2187730cfb68aeaa2c481c1382"
+      }
     },
-    "baselinePromoted": false
+    "baselinePromoted": false,
+    "allChannelsComplete": true,
+    "npmLatest": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/npm-latest-verified-20261124.json",
+      "sha256": "4018902e839637f1018f89493f6728a2b138ded1054a083aa0e627079b4b3c98"
+    },
+    "result": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/publication-result-20261124.json",
+      "sha256": "8a9aa162d79a95d6419c9dd749474a189a34e016b3fee0f03da3dcd1b050f4a3"
+    },
+    "postPublicationCI": {
+      "path": "D:/HaiyueStudio/Engine-release-024-20261119/artifacts/engine-0.2.4/g07/published-history-alignment/master-ci-verified-20261124.json",
+      "sha256": "fa549d44bdc7a356541d545d3937e7c54696ea70a8677c15025bd8562b2c22ac"
+    }
   }
 }

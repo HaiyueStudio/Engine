@@ -227,6 +227,7 @@ export class GuiInputDomain {
 
   private listen(): void {
     if (this.listening || !this.surface) return;
+    this.surface.addEventListener('contextmenu',this.onContextMenu);
     this.surface.addEventListener('keydown',this.onKeyDown);this.surface.addEventListener('keyup',this.onKeyUp);this.surface.addEventListener('blur',this.onBlur);
     this.surface.ownerDocument?.defaultView?.addEventListener('blur',this.onBlur);
     this.surface.ownerDocument?.defaultView?.addEventListener('pointerup',this.onOutsideTerminal);
@@ -240,6 +241,7 @@ export class GuiInputDomain {
   }
   private releaseListeners(): void {
     if (this.participants.size || this.unhandled.size || !this.listening) return;
+    this.surface?.removeEventListener('contextmenu',this.onContextMenu);
     this.surface?.removeEventListener('keydown',this.onKeyDown);this.surface?.removeEventListener('keyup',this.onKeyUp);this.surface?.removeEventListener('blur',this.onBlur);
     this.surface?.ownerDocument?.defaultView?.removeEventListener('blur',this.onBlur);
     this.surface?.ownerDocument?.defaultView?.removeEventListener('pointerup',this.onOutsideTerminal);
@@ -328,6 +330,10 @@ export class GuiInputDomain {
     state.participant?.cancelPointer(id);state.participant=null;state.target=null;
     if(!state.consumed)this.emitUnhandled(createGuiSyntheticPointer('pointercancel',id));
     state.consumed=true;
+  };
+  private onContextMenu=(raw:Event):void=>{
+    const event=raw as MouseEvent;this.refresh();const target=[...this.ordered()].reverse().map(p=>p.pick(event)).find(Boolean);
+    if(this.focus.modal||this.blocked(target??null)){consumeInputEvent(event);event.preventDefault();}
   };
   private onWheel = (raw: Event): void => {
     const event=raw as WheelEvent;this.refresh();const active=this.ordered(),modal=this.focus.modal;

@@ -16,6 +16,8 @@ registerHooks({
       if (existsSync(new URL(`${url.href}.ts`))) {
         return { url: `${url.href}.ts`, shortCircuit: true };
       }
+      const index = new URL(`${url.href}/index.ts`);
+      if (existsSync(index)) return { url: index.href, shortCircuit: true };
     }
     return next(specifier, context);
   },

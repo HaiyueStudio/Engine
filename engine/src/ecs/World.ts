@@ -13,6 +13,7 @@ import type { WorldFrameToken } from "../frame/FrameData";
 import { EngineError, EngineErrorCode } from "../core/EngineError";
 import { bumpWorldStructureVersion, getWorldStructureVersion } from "./WorldStructure";
 import { destroyWorldResources } from "./WorldResourceCleanup";
+import { Cleanup } from "../core/Cleanup";
 
 const sort = (a: System, b: System) => a.priority - b.priority;
 type UpdatableComponent = Component & ComponentUpdateLifecycle;
@@ -43,7 +44,13 @@ interface ComponentTypeChangeJournal {
 	revision: number;
 	maxConsumedRevision: number;
 	readonly changes: WorldComponentChange[];
-	readonly pendingByComponentId: Map<number, WorldComponentChange>;
+	// Most components have one owner; promote only shared components to an owner map.
+	readonly pendingByComponentId: Map<number, WorldComponentChange | Map<number, WorldComponentChange>>;
+}
+
+interface EntityComponentIndex {
+	readonly entities: Set<Entity>;
+	readonly matches: Map<Entity, number>;
 }
 
 export interface WorldRuntimeIntegration {
@@ -66,8 +73,8 @@ export class World {
 	private _rootEntitiesDirty = true;
 	private readonly _runtimeIntegrations = new Set<WorldRuntimeIntegration>();
 	private readonly _updatableComponents = new Map<UpdatableComponent, Set<Entity>>();
-	private readonly _entitiesByComponentConstructor = new Map<Function, Set<Entity>>();
-	private readonly _entitiesByComponentSymbol = new Map<symbol, Set<Entity>>();
+	private readonly _entitiesByComponentConstructor = new Map<Function, EntityComponentIndex>();
+	private readonly _entitiesByComponentSymbol = new Map<symbol, EntityComponentIndex>();
 	private readonly _queryUnionScratch = new Set<Entity>();
 	private readonly _emptyQueryCandidates = new Set<Entity>();
 	private readonly _frameData = new FrameData();
@@ -304,8 +311,9 @@ export class World {
 	}
 
 	public clearEntities(): this {
-		for (const entity of [...this.entities.values()]) this._removeEntityRecord(entity);
-		destroyWorldResources(this);
+		const cleanup = new Cleanup();
+		for (const entity of [...this.entities.values()]) cleanup.run(() => this._removeEntityRecord(entity));
+		cleanup.run(() => destroyWorldResources(this));
 		this._updatableComponents.clear();
 		this._entitiesByComponentConstructor.clear();
 		this._entitiesByComponentSymbol.clear();
@@ -313,6 +321,7 @@ export class World {
 		this._rootEntities.clear();
 		this._rootEntitiesCache.length = 0;
 		this._rootEntitiesDirty = false;
+		cleanup.complete('World entity cleanup failed.');
 
 		return this;
 	}
@@ -334,21 +343,22 @@ export class World {
 	public destroy(): this {
 		if (this.destroyed) return this;
 		this.destroyed = true;
+		const cleanup = new Cleanup();
 		const arr1 = Array.from(this.systems);
 		for (let item of arr1) {
 			if (item[1].usedBy.length === 1) {
-				item[1].destroy();
-			} else {
-				this.removeSystem(item[1]);
+				cleanup.run(() => item[1].destroy());
 			}
+			cleanup.run(() => this.removeSystem(item[1]));
 		}
-		for (const entity of [...this.rootEntityList]) entity.destroy();
+		for (const entity of [...this.rootEntityList]) cleanup.run(() => entity.destroy());
 		// Also clean malformed/orphaned records rather than leaking their components.
-		for (const entity of [...this.entities.values()]) entity.destroy();
-		destroyWorldResources(this);
+		for (const entity of [...this.entities.values()]) cleanup.run(() => entity.destroy());
+		cleanup.run(() => this.clearEntities());
 
 		this.disabled = true;
-		this.clearRuntimeIntegrations();
+		cleanup.run(() => this.clearRuntimeIntegrations());
+		cleanup.complete('World cleanup failed.');
 
 		return this;
 	}
@@ -425,10 +435,13 @@ export class World {
 		}
 
 		if (systemTmp) {
-			for (const integration of this._runtimeIntegrations) integration.onSystemRemoved?.(systemTmp, this);
+			const cleanup = new Cleanup(), removed = systemTmp;
 			systemTmp.entitySet.delete(this);
 			unsortedRemoveValue(systemTmp.usedBy, this);
 			remove(this.systems, systemTmp, this as World);
+			for (const integration of [...this._runtimeIntegrations]) cleanup.run(() => integration.onSystemRemoved?.(removed, this));
+			this.updateOrder();
+			cleanup.complete('System detach failed.');
 		}
 
 		return this.updateOrder();
@@ -448,8 +461,10 @@ export class World {
 	}
 
 	public clearRuntimeIntegrations(): this {
-		for (const integration of this._runtimeIntegrations) integration.onDetach?.(this);
+		const integrations = [...this._runtimeIntegrations], cleanup = new Cleanup();
 		this._runtimeIntegrations.clear();
+		for (const integration of integrations) cleanup.run(() => integration.onDetach?.(this));
+		cleanup.complete('World integration cleanup failed.');
 		return this;
 	}
 
@@ -627,7 +642,8 @@ export class World {
 
 	private _removeEntityRecord(entity: Entity): void {
 		if (this.entities.get(entity.id) !== entity) return;
-		this._notifyEntityRemovedFromWorld(entity);
+		const cleanup = new Cleanup();
+		cleanup.run(() => this._notifyEntityRemovedFromWorld(entity));
 		this._unindexEntityComponents(entity);
 		this._removeRootEntity(entity);
 		getEntitiesCache(this).delete(entity);
@@ -636,6 +652,7 @@ export class World {
 		this.systems.forEach((system: System) => {
 			system.entitySet.get(this)?.delete(entity);
 		});
+		cleanup.complete('Entity world detach failed.');
 	}
 
 	private _ownershipConflict(entity: Entity, owner: World | null): EngineError {
@@ -704,11 +721,13 @@ export class World {
 	}
 
 	private _notifyEntityRemovedFromWorld(entity: Entity): void {
+		const cleanup = new Cleanup();
 		entity.components.forEach((component) => {
 			this._recordComponentChange("remove", entity, component);
 			this._unregisterUpdatableComponent(entity, component);
-			this._callWorldLifecycleHandler(component, "onEntityRemoveFromWorld", entity);
+			cleanup.run(() => this._callWorldLifecycleHandler(component, "onEntityRemoveFromWorld", entity));
 		});
+		cleanup.complete('Entity world callbacks failed.');
 	}
 
 	public notifyEntityComponentAdded(entity: Entity, component: Component): void {
@@ -760,7 +779,8 @@ export class World {
 		entity: Entity,
 		component: Component,
 	): void {
-		const pending = journal.pendingByComponentId.get(component.id);
+		const owners = journal.pendingByComponentId.get(component.id);
+		const pending = owners instanceof Map ? owners.get(entity.id) : owners?.entity === entity ? owners : undefined;
 		if (
 			kind === "update"
 			&& pending
@@ -778,14 +798,16 @@ export class World {
 			change = { revision: journal.revision, kind, entity, component };
 			journal.changes[slot] = change;
 		} else {
-			const previousPending = journal.pendingByComponentId.get(change.component.id);
-			if (previousPending === change) journal.pendingByComponentId.delete(change.component.id);
+			removePendingComponentChange(journal, change);
 			change.revision = journal.revision;
 			change.kind = kind;
 			change.entity = entity;
 			change.component = component;
 		}
-		journal.pendingByComponentId.set(component.id, change);
+		const remaining = journal.pendingByComponentId.get(component.id);
+		if (remaining instanceof Map) remaining.set(entity.id, change);
+		else if (!remaining || remaining.entity === entity) journal.pendingByComponentId.set(component.id, change);
+		else journal.pendingByComponentId.set(component.id, new Map([[remaining.entity.id, remaining], [entity.id, change]]));
 	}
 
 	private _getOrCreateComponentTypeJournal(componentType: Function): ComponentTypeChangeJournal {
@@ -834,8 +856,8 @@ export class World {
 	}
 
 	private _getIndexedEntitiesForQueryToken(token: ComponentQueryToken): Set<Entity> | null {
-		if (typeof token === "function") return this._entitiesByComponentConstructor.get(token) ?? null;
-		if (typeof token === "symbol") return this._entitiesByComponentSymbol.get(token) ?? null;
+		if (typeof token === "function") return this._entitiesByComponentConstructor.get(token)?.entities ?? null;
+		if (typeof token === "symbol") return this._entitiesByComponentSymbol.get(token)?.entities ?? null;
 		return null;
 	}
 
@@ -871,20 +893,36 @@ export class World {
 	}
 }
 
-function addEntityIndex(map: Map<Function | symbol, Set<Entity>>, key: Function | symbol, entity: Entity): void {
-	let set = map.get(key);
-	if (!set) {
-		set = new Set();
-		map.set(key, set);
+function addEntityIndex<K extends Function | symbol>(map: Map<K, EntityComponentIndex>, key: K, entity: Entity): void {
+	let index = map.get(key);
+	if (!index) {
+		index = {entities: new Set(), matches: new Map()};
+		map.set(key, index);
 	}
-	set.add(entity);
+	index.matches.set(entity, (index.matches.get(entity) ?? 0) + 1);
+	index.entities.add(entity);
 }
 
-function removeEntityIndex(map: Map<Function | symbol, Set<Entity>>, key: Function | symbol, entity: Entity): void {
-	const set = map.get(key);
-	if (!set) return;
-	set.delete(entity);
-	if (set.size === 0) map.delete(key);
+function removeEntityIndex<K extends Function | symbol>(map: Map<K, EntityComponentIndex>, key: K, entity: Entity): void {
+	const index = map.get(key), matches = index?.matches.get(entity);
+	if (!index || matches === undefined) return;
+	if (matches > 1) {
+		index.matches.set(entity, matches - 1);
+		return;
+	}
+	index.matches.delete(entity);
+	index.entities.delete(entity);
+	if (index.entities.size === 0) map.delete(key);
+}
+
+function removePendingComponentChange(journal: ComponentTypeChangeJournal, change: WorldComponentChange): void {
+	const owners = journal.pendingByComponentId.get(change.component.id);
+	if (owners instanceof Map) {
+		if (owners.get(change.entity.id) !== change) return;
+		owners.delete(change.entity.id);
+		if (owners.size === 0) journal.pendingByComponentId.delete(change.component.id);
+		else if (owners.size === 1) journal.pendingByComponentId.set(change.component.id, owners.values().next().value!);
+	} else if (owners === change) journal.pendingByComponentId.delete(change.component.id);
 }
 
 function isUpdatableComponent(component: Component): component is UpdatableComponent {

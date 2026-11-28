@@ -13,7 +13,7 @@ export interface GuiTooltipOptions extends GuiElementOptions {
 }
 
 export class GuiTooltip extends GuiElement {
-  private static readonly __controlIdentityGuiTooltip = /* @__PURE__ */ (() => admitGuiControl(GuiTooltip.prototype, 'GuiTooltip', undefined, paintGuiTooltip))();
+  private static readonly __controlIdentityGuiTooltip = /* @__PURE__ */ (() => admitGuiControl(GuiTooltip.prototype, 'GuiTooltip', undefined, paintGuiTooltip, (_control,theme)=>({backgroundColor:theme.colors.elevated??theme.colors.surface,borderColor:theme.colors.border,radius:6,shadow:{color:theme.colors.shadow??theme.colors.overlay??'#0005',blur:10,y:3}})))();
   static override readonly themeControlType: string = 'GuiTooltip';
   target: GuiElement;
   content: string;
@@ -38,7 +38,7 @@ export class GuiTooltip extends GuiElement {
   }
 
   get active(): boolean {
-    const targetActive = this.visible && (this.target.hovered || this.target.focused);
+    const targetActive = this.visible && this.target.isEffectivelyVisible() && (this.target.hovered || this.target.focused);
     if (!targetActive) {
       this.activeSince = 0;
       return false;
@@ -53,20 +53,7 @@ export class GuiTooltip extends GuiElement {
   }
 
   get popupRect(): GuiRect {
-    const gap = 8;
-    const target = this.target.rect;
-    const width = this.rect.width;
-    const height = this.rect.height;
-    if (this.placement === 'right') {
-      return { x: target.x + target.width + gap, y: target.y + (target.height - height) * 0.5, width, height };
-    }
-    if (this.placement === 'bottom') {
-      return { x: target.x + (target.width - width) * 0.5, y: target.y + target.height + gap, width, height };
-    }
-    if (this.placement === 'left') {
-      return { x: target.x - width - gap, y: target.y + (target.height - height) * 0.5, width, height };
-    }
-    return { x: target.x + (target.width - width) * 0.5, y: target.y - height - gap, width, height };
+    return this.target.getPopupRect({width:this.rect.width,height:this.rect.height},{placement:this.placement});
   }
 
   override hitTest(): GuiElement | null {
@@ -81,7 +68,8 @@ function paintGuiTooltip(context:GuiPaint.GuiControlPaintContext, tooltip: GuiTo
     const radius = context.styleFor(tooltip).radius ?? theme.radius;
     const style = context.styleFor(tooltip), box = GuiPaint.guiContentBox(tooltip, 8, theme.fontSize, rect);
     const textRect = style.contentInsets || style.nineSlice || style.icon ? box.text : {x:rect.x + 8,y:rect.y,width:rect.width - 16,height:rect.height};
-    context.addPopupRect(rect.x, rect.y, rect.width, rect.height, radius, GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(tooltip).backgroundColor, theme.colors.background), 0.96));
+    if(theme.density)GuiPaint.paintGuiBox(context.currentPopupBatch,rect,style,GuiPaint.colorToRgba(style.backgroundColor,theme.colors.elevated??theme.colors.surface),GuiPaint.colorToRgba(style.borderColor,theme.colors.border),undefined,theme.radius);
+    else context.addPopupRect(rect.x, rect.y, rect.width, rect.height, radius, GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(tooltip).backgroundColor, theme.colors.background), 0.96));
     context.currentPopupTextBatch.addText({
       text: tooltip.content,
       ...textRect,

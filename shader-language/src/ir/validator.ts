@@ -2,7 +2,8 @@ import { SHADER_STAGES } from '../contracts';
 import { shaderError } from '../diagnostics';
 import { computeShaderIrCanonicalHash } from './canonical';
 import type { ShaderIrEntry, ShaderIrProgram } from './contracts';
-import { shaderIrValueTypesEqual } from './types';
+import { shaderIrValueTypesEqual, parseShaderIrDataType } from './types';
+import { validateShaderIrLiteral } from './rules';
 
 export function validateShaderIrProgram(program: ShaderIrProgram): void {
   if (program.format !== 'haiyue-typed-shader-ir' || program.version !== 1) {
@@ -29,6 +30,11 @@ function validateEntry(moduleId: string, entry: ShaderIrEntry): void {
   const byId = new Map(entry.nodes.map(node => [node.id, node]));
   for (const [index, node] of entry.nodes.entries()) {
     if (node.id !== index) invalid(moduleId, `${entry.id}.nodes.${index}.id`, 'IR node ids must be dense and topological.');
+    if (node.operation === 'literal') {
+      const info = parseShaderIrDataType(node.type.dataType, moduleId, `${entry.id}.nodes.${index}.type`);
+      const value = info.kind === 'scalar' ? node.payload.value : node.payload.values;
+      validateShaderIrLiteral(node.type.dataType, value as boolean | number | readonly number[], moduleId, `${entry.id}.nodes.${index}.payload`);
+    }
     if (node.allowedStages.length === 0 || !node.allowedStages.includes(entry.stage)) {
       shaderError('E_SHADER_STAGE_VIOLATION', `Node ${node.id} does not allow ${entry.stage}.`, {
         moduleId,

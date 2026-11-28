@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "package": "@loaders.gl/textures",
+    "version": "4.4.4",
+    "tarball": "https://registry.npmjs.org/@loaders.gl/textures/-/textures-4.4.4.tgz",
+    "integrity": "sha512-O0CMKZpOY0kH/s6oSPfzVkUeGgiJnlPFpPL2KJFo1NBkJihfnzAisfPrU4FEVFYm6XfbclkB5BC+6mI2DXgRLQ==",
+    "paths": [
+      "dist/libs/basis_encoder.js",
+      "dist/libs/basis_encoder.wasm"
+    ]
+  },
+  "licenses": [
+    "BASIS-UNIVERSAL-LICENSE.txt",
+    "LOADERS-GL-LICENSE.txt"
+  ],
+  "files": {
+    "basis_encoder.js": {
+      "bytes": 126945,
+      "sha256": "d204cc62dfdf910f92bce616872a6d6057b6d2b45bbaffbc0ef047375351e4a6"
+    },
+    "basis_encoder.wasm": {
+      "bytes": 1460592,
+      "sha256": "62ce0364ea8f4969e1e4277ce275213dcce5b234c8c96586da06e3879010341c"
+    }
+  }
+}

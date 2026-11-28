@@ -88,8 +88,15 @@ export class Animation3DMixerRuntime implements Animation3DActionOwner {
       );
     }
     const action = new Animation3DActionRuntime(this, clip, id, options);
-    for (let index = 0; index < action.runtimeTracks.length; index++) {
-      this._retainBinding(action.runtimeTracks[index]!.track.binding);
+    let retained = 0;
+    try {
+      for (; retained < action.runtimeTracks.length; retained++) {
+        this._retainBinding(action.runtimeTracks[retained]!.track.binding);
+      }
+    } catch (error) {
+      while (retained > 0) this._releaseBinding(action.runtimeTracks[--retained]!.track.binding);
+      action.invalidate();
+      throw error;
     }
     this._actions.push(action);
     this._actionsById.set(id, action);

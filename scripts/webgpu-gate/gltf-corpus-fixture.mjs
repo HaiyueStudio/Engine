@@ -1,3 +1,4 @@
+import {verifiedBasisEncoderUrls} from './basis-encoder-assets.mjs';
 import { Mesh3D } from '/engine/dist/index.js';
 import { AssetManager, createKtx2TextureLoader } from '/engine/dist/assets.js';
 import { Transform3D } from '/engine/dist/components.js';
@@ -70,8 +71,7 @@ async function runCorpus() {
   const ktxPhaseEvents = [];
   assetManager.registerLoader(createKtx2TextureLoader({
     textureWorker: ktx2Worker,
-    basisEncoderScriptUrl: new URL('/node_modules/@loaders.gl/textures/dist/libs/basis_encoder.js', location.href).href,
-    basisEncoderWasmUrl: new URL('/node_modules/@loaders.gl/textures/dist/libs/basis_encoder.wasm', location.href).href,
+    ...await verifiedBasisEncoderUrls(),
     diagnostics: { onPhase: event => ktxPhaseEvents.push(event) },
   }));
   const gltfWorker = useWorkers

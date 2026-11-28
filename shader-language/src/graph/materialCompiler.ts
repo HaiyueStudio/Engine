@@ -198,67 +198,80 @@ function lowerGraphFragment(
   const nodeCache = new Map<string, ShaderIrValue>();
   const nodeSharedCache = new Map<string, ShaderIrValue>();
   const active = new Set<string>();
+  const nodeIndices = new Map(graph.nodes.map((node, index) => [node.id, index]));
+  type Destination = Record<string, LoweredShaderGraphValue>;
+  type Work = {kind: 'value'; value: ShaderGraphValueV1; path: string; target: Destination; key: string}
+    | {kind: 'complete'; node: ShaderGraphNodeV1; source: ShaderIrSource; inputs: Destination;
+      output: string; cacheKey: string; target: Destination; key: string};
   const resolve = (value: ShaderGraphValueV1, path: string): LoweredShaderGraphValue => {
-    const source: ShaderIrSource = Object.freeze({ sourceId: `graph.${path}`, sourceName: graph.sourceName, path });
-    if (value.kind === 'literal') {
-      return Object.freeze({ kind: 'value' as const, value: builder.literal(shaderGraphValueType(value.type, {
-        path: `${path}.literal.type`,
-        ...(value.space === undefined ? {} : { space: value.space }),
-        ...(value.colorSpace === undefined ? {} : { colorSpace: value.colorSpace }),
-      }), value.value, source) });
-    }
-    if (value.kind === 'semantic') {
-      const semantic = semanticValues.get(value.semantic);
-      if (!semantic) referenceError(`Semantic ${value.semantic} is not available to this material.`, path);
-      return Object.freeze({ kind: 'value' as const, value: semantic });
-    }
-    if (value.kind === 'resource') {
-      const resource = resourceById.get(value.resource);
-      if (!resource) referenceError(`Unknown graph resource ${value.resource}.`, path);
-      if (resource.kind === 'uniform') {
-        return Object.freeze({
-          kind: 'value' as const,
-          value: builder.uniformField(MATERIAL_PARAMETERS, uniformFieldByResource.get(resource.id)!, source),
-        });
+    const result: Destination = {}, pending: Work[] = [{kind: 'value', value, path, target: result, key: 'value'}];
+    while (pending.length) {
+      const work = pending.pop()!;
+      if (work.kind === 'complete') {
+        const {node} = work;
+        const lowered = lowerBuiltinShaderGraphNode({
+          builder, node, source: work.source, inputs: Object.freeze(work.inputs),
+          memoize: (key, factory) => {
+            const sharedKey = `${node.id}\0${key}`, shared = nodeSharedCache.get(sharedKey);
+            if (shared) return shared;
+            const created = factory(); nodeSharedCache.set(sharedKey, created); return created;
+          },
+        }, work.output);
+        active.delete(node.id); nodeCache.set(work.cacheKey, lowered);
+        work.target[work.key] = Object.freeze({kind: 'value' as const, value: lowered});
+        continue;
       }
-      return Object.freeze({ kind: 'resource' as const, resource });
+      const {value, path, target, key} = work;
+      const source: ShaderIrSource = Object.freeze({ sourceId: `graph.${path}`, sourceName: graph.sourceName, path });
+      if (value.kind === 'literal') {
+        target[key] = Object.freeze({ kind: 'value' as const, value: builder.literal(shaderGraphValueType(value.type, {
+          path: `${path}.literal.type`,
+          ...(value.space === undefined ? {} : { space: value.space }),
+          ...(value.colorSpace === undefined ? {} : { colorSpace: value.colorSpace }),
+        }), value.value, source) });
+        continue;
+      }
+      if (value.kind === 'semantic') {
+        const semantic = semanticValues.get(value.semantic);
+        if (!semantic) referenceError(`Semantic ${value.semantic} is not available to this material.`, path);
+        target[key] = Object.freeze({ kind: 'value' as const, value: semantic }); continue;
+      }
+      if (value.kind === 'resource') {
+        const resource = resourceById.get(value.resource);
+        if (!resource) referenceError(`Unknown graph resource ${value.resource}.`, path);
+        if (resource.kind === 'uniform') {
+          target[key] = Object.freeze({
+            kind: 'value' as const,
+            value: builder.uniformField(MATERIAL_PARAMETERS, uniformFieldByResource.get(resource.id)!, source),
+          });
+          continue;
+        }
+        target[key] = Object.freeze({ kind: 'resource' as const, resource }); continue;
+      }
+      const cacheKey = `${value.node}\0${value.output}`;
+      const cached = nodeCache.get(cacheKey);
+      if (cached) {target[key] = Object.freeze({ kind: 'value' as const, value: cached }); continue;}
+      if (active.has(value.node)) referenceError(`Shader Graph contains a cycle through node ${value.node}.`, path);
+      const node = nodeById.get(value.node);
+      if (!node) referenceError(`Unknown graph node ${value.node}.`, path);
+      active.add(value.node);
+      const nodeIndex = nodeIndices.get(node.id)!;
+      const location = graph.nodeLocations[node.id];
+      const nodeSource: ShaderIrSource = Object.freeze({
+        sourceId: `graph.${node.id}`,
+        sourceName: graph.sourceName,
+        path: `nodes.${nodeIndex}`,
+        ...(location === undefined ? {} : { line: location.line, column: location.column }),
+      });
+      const inputs: Destination = {};
+      pending.push({kind: 'complete', node, source: nodeSource, inputs, output: value.output, cacheKey, target, key});
+      const entries = Object.entries(node.inputs);
+      for (let index = entries.length - 1; index >= 0; index--) {
+        const [name, input] = entries[index]!;
+        pending.push({kind: 'value', value: input, path: `nodes.${nodeIndex}.inputs.${name}`, target: inputs, key: name});
+      }
     }
-    const cacheKey = `${value.node}\0${value.output}`;
-    const cached = nodeCache.get(cacheKey);
-    if (cached) return Object.freeze({ kind: 'value' as const, value: cached });
-    if (active.has(value.node)) referenceError(`Shader Graph contains a cycle through node ${value.node}.`, path);
-    const node = nodeById.get(value.node);
-    if (!node) referenceError(`Unknown graph node ${value.node}.`, path);
-    active.add(value.node);
-    const nodeIndex = graph.nodes.indexOf(node);
-    const location = graph.nodeLocations[node.id];
-    const nodeSource: ShaderIrSource = Object.freeze({
-      sourceId: `graph.${node.id}`,
-      sourceName: graph.sourceName,
-      path: `nodes.${nodeIndex}`,
-      ...(location === undefined ? {} : { line: location.line, column: location.column }),
-    });
-    const inputs = Object.freeze(Object.fromEntries(Object.entries(node.inputs).map(([name, input]) => [
-      name,
-      resolve(input, `nodes.${nodeIndex}.inputs.${name}`),
-    ])));
-    const lowered = lowerBuiltinShaderGraphNode({
-      builder,
-      node,
-      source: nodeSource,
-      inputs,
-      memoize: (key, factory) => {
-        const sharedKey = `${node.id}\0${key}`;
-        const shared = nodeSharedCache.get(sharedKey);
-        if (shared) return shared;
-        const created = factory();
-        nodeSharedCache.set(sharedKey, created);
-        return created;
-      },
-    }, value.output);
-    active.delete(value.node);
-    nodeCache.set(cacheKey, lowered);
-    return Object.freeze({ kind: 'value' as const, value: lowered });
+    return result.value!;
   };
 
   const authored = {} as Partial<Record<MaterialSurfaceV1Slot, ShaderIrValue>>;
@@ -353,19 +366,27 @@ function collectRequiredSemantics(graph: ShaderGraphV1, nodes: ReadonlyMap<strin
   const semantics = new Set<string>();
   const visited = new Set<string>();
   const active = new Set<string>();
-  const visit = (value: ShaderGraphValueV1, path: string): void => {
-    if (value.kind === 'semantic') { semantics.add(value.semantic); return; }
-    if (value.kind !== 'node') return;
-    if (active.has(value.node)) referenceError(`Shader Graph contains a cycle through node ${value.node}.`, path);
-    if (visited.has(value.node)) return;
-    const node = nodes.get(value.node);
-    if (!node) referenceError(`Unknown graph node ${value.node}.`, path);
-    active.add(value.node);
-    for (const [name, input] of Object.entries(node.inputs)) visit(input, `${path}.${value.node}.${name}`);
-    active.delete(value.node);
-    visited.add(value.node);
-  };
-  for (const [slot, output] of Object.entries(graph.outputs).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) visit(output, `outputs.${slot}`);
+  interface Path {readonly parent?: Path; readonly segment: string;}
+  const formatPath = (path: Path): string => {const segments: string[] = []; for (let part: Path | undefined = path; part; part = part.parent) segments.push(part.segment); return segments.reverse().join('');};
+  type Work = {kind: 'value'; value: ShaderGraphValueV1; path: Path} | {kind: 'complete'; id: string};
+  for (const [slot, output] of Object.entries(graph.outputs).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
+    const pending: Work[] = [{kind: 'value', value: output, path: {segment: `outputs.${slot}`}}];
+    while (pending.length) {
+      const work = pending.pop()!;
+      if (work.kind === 'complete') {active.delete(work.id); visited.add(work.id); continue;}
+      const {value, path} = work;
+      if (value.kind === 'semantic') { semantics.add(value.semantic); continue; }
+      if (value.kind !== 'node') continue;
+      if (active.has(value.node)) referenceError(`Shader Graph contains a cycle through node ${value.node}.`, formatPath(path));
+      if (visited.has(value.node)) continue;
+      const node = nodes.get(value.node);
+      if (!node) referenceError(`Unknown graph node ${value.node}.`, formatPath(path));
+      active.add(value.node);
+      pending.push({kind: 'complete', id: value.node});
+      const entries = Object.entries(node.inputs);
+      for (let index = entries.length - 1; index >= 0; index--) {const [name, input] = entries[index]!; pending.push({kind: 'value', value: input, path: {parent: path, segment: `.${value.node}.${name}`}});}
+    }
+  }
   return semantics;
 }
 

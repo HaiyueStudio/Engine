@@ -208,7 +208,6 @@
     "@rollup/plugin-commonjs": "^29.0.2",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
-    "@loaders.gl/textures": "4.4.4",
     "@webgpu/types": "^0.1.40",
     "rollup": "^4.0.0",
     "tslib": "^2.6.0",

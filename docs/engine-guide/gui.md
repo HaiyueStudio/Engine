@@ -110,6 +110,8 @@ See the [color-picker API](../api/gui-controls.md#rgb-color-picker) for events a
 serialization.
 ## Horizontal game shelves
 
+For composed display/feedback and menus/dialogs, see the development [GUI component library](./gui-library.md). It retains the same renderer, style overrides, input domain and activity clock.
+
 `GuiScrollView` accepts `axis: 'horizontal'`, `contentWidth` and `scrollX`. The default
 remains vertical. `scrollTo`, `scrollBy` and fling inertia use the chosen axis;
 `scrollOffset` / `maxScrollOffset` report that axis, while `scrollX` and `scrollY`

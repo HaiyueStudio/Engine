@@ -1,5 +1,6 @@
 import type { ShaderCoordinateSpace } from '../contracts';
 import { shaderError } from '../diagnostics';
+import { isShaderNumericValue } from '../numericValue';
 import {
   genericShaderIrType,
   parseShaderIrDataType,
@@ -175,8 +176,7 @@ function validateScalarLiteral(
     return;
   }
   if (typeof value !== 'number' || !Number.isFinite(value)) throwShaderIrTypeError(moduleId, path, type, String(value));
-  if ((type === 'i32' || type === 'u32') && !Number.isInteger(value)) throwShaderIrTypeError(moduleId, path, type, String(value));
-  if (type === 'u32' && value < 0) throwShaderIrTypeError(moduleId, path, type, String(value));
+  if (!isShaderNumericValue(type, value)) throwShaderIrTypeError(moduleId, path, `${type} representable value`, String(value));
 }
 
 function normalizeNumber(value: boolean | number): boolean | number {

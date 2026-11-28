@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {GUI_LIFETIME_HOVER_CASE_IDS,validateGuiLifetimeHover} from './gui-lifetime-hover-policy.mjs';
+const fixture=()=>({schemaVersion:1,role:'native-gui-interaction-regression',status:'passed',cases:GUI_LIFETIME_HOVER_CASE_IDS.map(id=>({id,passed:true})),failures:[],validationErrors:[],resourceResidue:{resources:0}});
+test('GUI policy requires the entire named interaction matrix',()=>assert.equal(validateGuiLifetimeHover(fixture()).interactions,16));
+for(const[name,mutate]of [['missing',r=>r.cases.pop()],['duplicate',r=>r.cases[0].id=r.cases[1].id],['failed',r=>r.cases[0].passed=false],['GPU error',r=>r.validationErrors.push('bad')],['retained resource',r=>r.resourceResidue.resources=1],['discarded failure',r=>r.failures.push({id:'bad'})]])test('GUI policy rejects '+name,()=>{const r=fixture();mutate(r);assert.throws(()=>validateGuiLifetimeHover(r));});

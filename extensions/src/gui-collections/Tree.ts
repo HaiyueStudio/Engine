@@ -1,7 +1,7 @@
 import type {GuiActionEvent} from '@haiyue/engine/gui';
 import {VirtualList,invalid} from './List.js';
 import type {GuiVirtualTree,GuiVirtualTreeNode,GuiVirtualTreeOptions} from './types.js';
-type Model<T>={nodes:readonly GuiVirtualTreeNode<T>[];byKey:Map<string,GuiVirtualTreeNode<T>>;parents:Map<string,string|null>};
+type Model<T>={nodes:readonly GuiVirtualTreeNode<T>[];byKey:Map<string,GuiVirtualTreeNode<T>>;parents:Map<string,string|null>;depths:Map<string,number>};
 
 class VirtualTree<T> implements GuiVirtualTree<T> {
   readonly element;
@@ -15,7 +15,7 @@ class VirtualTree<T> implements GuiVirtualTree<T> {
     this.maxItems=options.maxItems??100000;
     if(!Number.isInteger(this.maxItems)||this.maxItems<1||this.maxItems>1000000)throw invalid('Invalid tree item limit.');
     this.model=this.validate(options.nodes);this.expanded=this.validateExpanded(options.expandedKeys??[],this.model);
-    this.list=new VirtualList({...options,items:this.flatten(this.model,this.expanded),keyOf:node=>node.key,onSelection:key=>{if(!this.selectionBatch)options.onSelection?.(key);}},node=>!node.disabled,event=>this.action(event));
+    this.list=new VirtualList({...options,items:this.flatten(this.model,this.expanded),keyOf:node=>node.key,onSelection:key=>{if(!this.selectionBatch)options.onSelection?.(key);}},node=>!node.disabled,event=>this.action(event),node=>({depth:this.model.depths.get(node.key)??0,expanded:this.expanded.has(node.key),leaf:!node.children?.length}));
     this.element=this.list.element;
   }
   private alive():void {if(this.dead)throw invalid('Tree is disposed.');}
@@ -26,15 +26,15 @@ class VirtualTree<T> implements GuiVirtualTree<T> {
   }
   private validate(nodes:readonly GuiVirtualTreeNode<T>[]):Model<T> {
     if(!Array.isArray(nodes))throw invalid('Tree nodes must be an array.');
-    const byKey=new Map<string,GuiVirtualTreeNode<T>>(),parents=new Map<string,string|null>();
+    const byKey=new Map<string,GuiVirtualTreeNode<T>>(),parents=new Map<string,string|null>(),depths=new Map<string,number>();
     const stack:{nodes:readonly GuiVirtualTreeNode<T>[];index:number;parent:string|null}[]=[{nodes,index:0,parent:null}];
     while(stack.length){const frame=stack[stack.length-1]!;if(frame.index>=frame.nodes.length){stack.pop();continue;}
       const node=frame.nodes[frame.index++];
       if(!node||typeof node.key!=='string'||!node.key||byKey.has(node.key)||node.disabled!==undefined&&typeof node.disabled!=='boolean'||node.children!==undefined&&!Array.isArray(node.children))throw invalid('Tree keys must be unique, acyclic and nonempty.');
-      byKey.set(node.key,node);parents.set(node.key,frame.parent);if(byKey.size>this.maxItems)throw invalid('Tree logical item limit exceeded.');
+      byKey.set(node.key,node);parents.set(node.key,frame.parent);depths.set(node.key,frame.parent===null?0:(depths.get(frame.parent)??0)+1);if(byKey.size>this.maxItems)throw invalid('Tree logical item limit exceeded.');
       if(node.children?.length)stack.push({nodes:node.children,index:0,parent:node.key});
     }
-    return {nodes:[...nodes],byKey,parents};
+    return {nodes:[...nodes],byKey,parents,depths};
   }
   private validateExpanded(keys:readonly string[],model:Model<T>):Set<string> {
     if(!Array.isArray(keys))throw invalid('Expanded keys must be an array.');const result=new Set<string>();
@@ -75,6 +75,6 @@ class VirtualTree<T> implements GuiVirtualTree<T> {
       else {let parent=this.model.parents.get(node.key);while(parent&&this.model.byKey.get(parent)?.disabled)parent=this.model.parents.get(parent);if(parent)this.list.navigate(parent);}event.consume();
     }
   }
-  dispose():void {if(this.dead)return;this.dead=true;try{this.list.dispose();}finally{this.expanded.clear();this.model={nodes:[],byKey:new Map(),parents:new Map()};}}
+  dispose():void {if(this.dead)return;this.dead=true;try{this.list.dispose();}finally{this.expanded.clear();this.model={nodes:[],byKey:new Map(),parents:new Map(),depths:new Map()};}}
 }
 export function createGuiVirtualTree<T>(options:GuiVirtualTreeOptions<T>):GuiVirtualTree<T> {return new VirtualTree(options);}

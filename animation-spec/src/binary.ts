@@ -31,6 +31,7 @@ import {
   parseBinaryTrackValue,
   parseBinaryTransformValue,
   resolveAnimationParseLimits,
+  validateCompositeGraph,
 } from './validation';
 
 const HEADER_BYTES = 24;
@@ -698,9 +699,10 @@ function decodeCompactMetadata(
       ...(track.length < 7 || track[6] === 0 ? {} : {
         spatialTangents: compactFloatView(floatPool, track[6], `${path}[6]`),
       }),
-    }, index, parsedNodeIds, duration, options.copyFloatData === true);
-    keyframeCount += parsed.times.length;
-    binaryLimit(keyframeCount, limits.maxKeyframes, 'keyframes', `$.tracks[${index}].times`);
+    }, index, parsedNodeIds, duration, options.copyFloatData === true, count => {
+      keyframeCount += count;
+      binaryLimit(keyframeCount, limits.maxKeyframes, 'keyframes', `$.tracks[${index}].times`);
+    });
     return parsed;
   });
   const frameRate = finiteNumber(root[4], '$binary.metadata[4]');
@@ -760,15 +762,7 @@ function validateCompactNodeGraph(encodedNodes: readonly unknown[][], nodeCount:
       cursor = parents[cursor];
     }
   }
-  states.fill(0);
-  const visitComposite = (index: number): void => {
-    if (states[index] === 2) return;
-    if (states[index] === 1) invalidBinary(`Composite graph contains a cycle at $binary.metadata[8][${index}][6].`);
-    states[index] = 1;
-    for (const source of compositeSources[index]!) visitComposite(source);
-    states[index] = 2;
-  };
-  for (let index = 0; index < nodeCount; index++) visitComposite(index);
+  validateCompositeGraph(compositeSources, index => invalidBinary(`Composite graph contains a cycle at $binary.metadata[8][${index}][6].`), states);
   return parents;
 }
 

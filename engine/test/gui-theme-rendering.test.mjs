@@ -27,6 +27,11 @@ function fixture(resource){
  return {device,audit,engine,renderer,root,prepare,draw,measure,close(){root.destroy();renderer.destroy();}};
 }
 
+test('modern explicit large labels keep their raster-size atlas in the original ordered plan across DPR changes',async()=>{
+ const f=fixture();f.root.theme=GuiThemeResource.createTheme('light');
+ try{f.root.add(new GuiLabel({text:'AB',width:180,height:90,fontSize:60}));f.root.add(new GuiButton({text:'AB',y:100}));f.draw();let cache=f.renderer.rootCaches.get(f.root);assert.ok(cache.ordered);assert.ok(cache.extraFonts.size>0);assert.ok(cache.plan.layer(0).some(draw=>draw.kind==='text'&&draw.font.size>=60));f.engine.width=600;f.engine.height=400;f.draw();cache=f.renderer.rootCaches.get(f.root);assert.ok(cache.plan.layer(0).some(draw=>draw.kind==='text'&&draw.font.size>=120));}finally{f.close();}
+});
+
 test('two font families in one root use matching intrinsic metrics and actual retained draw atlases',async()=>{
  const resource=new GuiThemeResource({normal:{fontFamily:'Narrow',fontSize:10}}),f=fixture(resource);
  const narrow=f.root.add(new GuiLabel({text:'AB'})),wide=f.root.add(new GuiLabel({text:'AB',y:30,style:{fontFamily:'Wide',fontSize:20}}));

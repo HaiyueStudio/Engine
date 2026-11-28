@@ -33,13 +33,14 @@ for (const [key, value] of Object.entries(evidence)) {
     if (value > contract.bundle[key]) failures.push(`${key} historical maximum ${contract.bundle[key]}, received ${value}`);
     continue;
   }
-  if (key === 'engineArtifactGzipBytes') continue;
+  if (key === 'engineArtifactGzipBytes') {
+    const error=validateProductionBundleCost(key,value,costBudget);
+    if(error)failures.push(error);
+    continue;
+  }
   // Historical observations remain immutable upper limits; smaller equivalent metadata is valid.
   const error = validateProductionBundleCost(key, value, { productionBundles: contract.bundle });
   if (error) failures.push(error);
-}
-if (evidence.engineArtifactGzipBytes > contract.bundle.engineArtifactGzipBudgetBytes) {
-  failures.push(`engine artifact gzip ${evidence.engineArtifactGzipBytes} exceeds ${contract.bundle.engineArtifactGzipBudgetBytes}`);
 }
 const publicComponentEntries = ['animation.js', 'spine.js', 'tilemap.js', 'canvas-text.js'];
 for (const entry of publicComponentEntries) {
@@ -55,7 +56,7 @@ for (const packageDirectory of ['engine/dist', 'extensions/dist']) {
   }
 }
 if (failures.length > 0) throw new Error(`Stage 9 shader bundle gate failed:\n- ${failures.join('\n- ')}`);
-console.log(`[shader-language:stage9:bundle] passed: engine-gzip=${evidence.engineArtifactGzipBytes}/${contract.bundle.engineArtifactGzipBudgetBytes}, components-evidence-gzip=${evidence.componentsEvidenceArtifactGzipBytes}.`);
+console.log(`[shader-language:stage9:bundle] passed: engine-gzip=${evidence.engineArtifactGzipBytes}/${costBudget.productionBundles.engineArtifactGzipBytes}, historical-total=${contract.bundle.engineArtifactGzipBudgetBytes}, components-evidence-gzip=${evidence.componentsEvidenceArtifactGzipBytes}.`);
 
 async function javascriptFiles(directory) {
   const paths = [];

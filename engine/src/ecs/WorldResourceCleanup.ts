@@ -1,3 +1,4 @@
+import { Cleanup } from '../core/Cleanup';
 type WorldResourceCleanup = () => void;
 
 const cleanupsByWorld = new WeakMap<object, Map<object, WorldResourceCleanup>>();
@@ -29,5 +30,7 @@ export function destroyWorldResources(world: object): void {
   // Delete before invoking callbacks so cleanup remains idempotent and a
   // callback cannot be visited twice if it unregisters itself.
   cleanupsByWorld.delete(world);
-  for (const cleanup of cleanups.values()) cleanup();
+  const collected = new Cleanup();
+  for (const cleanup of cleanups.values()) collected.run(cleanup);
+  collected.complete('World resource cleanup failed.');
 }

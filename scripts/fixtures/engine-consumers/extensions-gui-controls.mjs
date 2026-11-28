@@ -1,1 +1,1 @@
-export{GuiBreadcrumb,GuiBadge,GuiCollapse}from'@haiyue/extensions/gui-controls';
+export{GuiBreadcrumb,GuiBadge,GuiCollapse,GuiExpandable}from'@haiyue/extensions/gui-controls';

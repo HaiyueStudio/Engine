@@ -1,5 +1,3 @@
-override GUI_LINEAR_OUTPUT: bool = false;
-fn gui_to_linear(c:vec3<f32>)->vec3<f32>{return select(c/12.92,pow((c+0.055)/1.055,vec3<f32>(2.4)),c>vec3<f32>(0.04045));}
 struct Viewport {
   size : vec2<f32>,
   _pad : vec2<f32>,
@@ -40,13 +38,19 @@ fn vs_main(input : VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
-  if (
-    input.screenPos.x < input.clip.x ||
-    input.screenPos.y < input.clip.y ||
-    input.screenPos.x > input.clip.z ||
-    input.screenPos.y > input.clip.w
-  ) {
-    discard;
+  let aa=max(0.5,length(fwidth(input.screenPos))*0.5);
+  let clipAlpha=gui_clip(input.screenPos,input.clip,aa);
+  if(clipAlpha<=0.001){discard;}
+  if(input.radius<0.0){
+    let a=gui_paint[u32(-input.radius)];let v0=input.screenPos-input.rect.xy-input.rect.zw*0.5;let p=input.rect.xy+input.rect.zw*0.5+vec2<f32>(dot(v0,a.f.zw),dot(v0,vec2<f32>(-a.f.w,a.f.z)));
+    let d=gui_distance(p,input.rect,a.a);let edge=1.0-smoothstep(-aa,aa,d);
+    var coverage=edge;
+    if(a.c.y>0.0){coverage=1.0-smoothstep(-a.c.y,a.c.y,d);}
+    var color=input.color;
+    if(any(a.e.xy!=vec2<f32>(0.0))){let end=vec4<f32>(select(a.d.rgb,gui_to_linear(a.d.rgb),GUI_LINEAR_OUTPUT),a.d.a);color=mix(color,end,clamp(dot(p-a.e.zw,a.e.xy)+0.5,0.0,1.0));}
+    if(a.c.x>0.0){let border=vec4<f32>(select(a.b.rgb,gui_to_linear(a.b.rgb),GUI_LINEAR_OUTPUT),a.b.a);color=mix(color,border,smoothstep(-a.c.x-aa,-a.c.x+aa,d));}
+    if(a.f.y>0.0){let v=p-input.rect.xy-input.rect.zw*0.5;let angle=atan2(v.y,v.x);let tau=6.283185307;let sweep=clamp(a.c.w-a.c.z,0.0,tau);let offset=(angle-a.c.z+tau*4.0)%tau;coverage*=select(0.0,1.0,offset<=sweep);coverage*=smoothstep(-a.f.x-aa,-a.f.x+aa,d);}
+    return vec4<f32>(color.rgb,color.a*coverage*clipAlpha);
   }
   let halfSize = input.rect.zw * 0.5;
   let center = input.rect.xy + halfSize;
@@ -57,5 +61,5 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   if (alpha <= 0.001) {
     discard;
   }
-  return vec4<f32>(input.color.rgb, input.color.a * alpha);
+  return vec4<f32>(input.color.rgb, input.color.a * alpha * clipAlpha);
 }

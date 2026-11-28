@@ -5,6 +5,13 @@ import {captureGuiLayoutStyle} from './style.js';
 
 const presets = new WeakMap<GuiElement, GuiLayoutStyle>();
 const frames = new WeakMap<GuiElement, GuiLayoutStyle>();
+// Only an owner that controls a subclass's children may opt it into shared flow.
+const contentContainers = new WeakSet<GuiElement>();
+const manualContentViews = new WeakSet<GuiElement>();
+export function admitManualContentView(element:GuiElement):void {manualContentViews.add(element);}
+export function isManualContentView(element:GuiElement):boolean {return manualContentViews.has(element);}
+export function isContentContainer(element:GuiElement):boolean {return element.constructor===GuiElement||contentContainers.has(element);}
+export function setContentContainerStyle(element:GuiElement,style:GuiLayoutStyle):void {setContainerStyle(element,style);contentContainers.add(element);}
 const styles: Readonly<Record<GuiContainerPreset, LayoutStyle>> = Object.freeze({
   row: {direction: 'row'}, column: {direction: 'column'}, flow: {direction: 'row', wrap: 'wrap'},
   grid: {display: 'grid'}, margin: {direction: 'column'}, center: {justifyContent: 'center', alignItems: 'center'},

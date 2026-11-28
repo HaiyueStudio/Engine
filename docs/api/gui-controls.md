@@ -31,7 +31,7 @@ Optional one-level menus use original GUI buttons, scrolling and the modal focus
 | `placement` | Default `top-right`; all four corners supported |
 | `offset` | Finite logical `[x,y]`; positive values move right/down |
 
-Attached decoration is outside content flow and ignores pointer/focus input. Borrowed content keeps its own interaction. Standalone badges participate in normal layout. `setOptions` validates before merging, and unchanged visible text does not invalidate paint. `style` applies to the badge decoration; processing has static status semantics without a timer.
+Attached decoration is outside content flow and ignores pointer/focus input. Borrowed content keeps its own interaction. Standalone badges participate in normal layout. `setOptions` validates before merging, and unchanged visible text does not invalidate paint. `style` applies to the badge decoration; the P1 development implementation animates processing with the original visible activity clock and follows reduced motion.
 
 ## Collapse
 

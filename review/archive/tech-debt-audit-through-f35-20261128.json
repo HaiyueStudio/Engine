@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "archive": "tech-debt-audit-through-f35-20261128.zip",
+  "createdAt": "2026-11-28T06:47:10.370Z",
+  "description": "Exact report before repeat audit 02; original F01-F35 problem/fix records preserved. Current specialization residual and new findings supersede the old F33 status.",
+  "sha256": "e3a9c94e568b79e985e4543d97b0af3d4326d8f30d81dc0ee6444c086ff019bc",
+  "archiveBytes": 12915,
+  "originalBytes": 30975,
+  "files": [
+    {
+      "path": "Engine/TECH_DEBT_AUDIT.md",
+      "bytes": 30975,
+      "sha256": "04a5fb98854f453ecd17fdbdc4c9b2759195b46c6aae9eab991fe0d0d3fe55b3"
+    }
+  ]
+}

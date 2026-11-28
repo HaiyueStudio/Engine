@@ -172,3 +172,8 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 
 - [0139：0.2.3 游戏流程与 GUI 组件合同](0139-engine-023-gameplay-contracts.md)
 - [0140：0.2.4 视觉小说与 HYA 舞台合同](0140-visual-novel-024.md)
+
+- [0141：GUI 视觉底座与可覆盖的组件皮肤](0141-gui-visual-foundation.md)
+- [0142：GUI P1 组件组合与共享浮层](0142-gui-p1-composition-and-overlays.md)
+- [0143：GUI P2 数据、表单与内容组合](0143-gui-p2-data-forms-content.md)
+- [0144：GUI P3 可选专项组件与显式宿主端口](0144-gui-p3-specialty-components.md)

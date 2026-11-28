@@ -6,6 +6,7 @@ import {
 } from '@haiyue/engine/extension-authoring';
 import { EngineError, EngineErrorCode } from '@haiyue/engine';
 import { ErrorDomain, ErrorRecovery } from '@haiyue/engine/core';
+import { createAbortError } from '@haiyue/engine/experimental/async';
 import { Spine2DComponent } from './Spine2DComponent';
 import { SpineFloatBuilder } from './SpineFloatBuilder';
 import { resolveAtlasPageImageUrl, type AtlasRegion } from './SpineAtlasParser';
@@ -116,50 +117,93 @@ export class Spine2DGpuRenderer {
       size: vertexBufferSize,
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
-    const debugVertexBuffer = engine.device.createBuffer({
-      size: debugVertexBufferSize,
-      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-    });
-    getExtensionGPUResourceTracker(engine)?.trackBuffer(vertexBuffer, 'Spine2D.vertexBuffer', vertexBufferSize);
-    getExtensionGPUResourceTracker(engine)?.trackBuffer(debugVertexBuffer, 'Spine2D.debugVertexBuffer', debugVertexBufferSize);
-    return { vertexBuffer, vertexBufferSize, debugVertexBuffer, debugVertexBufferSize };
+    try {
+      getExtensionGPUResourceTracker(engine)?.trackBuffer(vertexBuffer, 'Spine2D.vertexBuffer', vertexBufferSize);
+      const debugVertexBuffer = engine.device.createBuffer({
+        size: debugVertexBufferSize,
+        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      });
+      try {
+        getExtensionGPUResourceTracker(engine)?.trackBuffer(debugVertexBuffer, 'Spine2D.debugVertexBuffer', debugVertexBufferSize);
+      } catch (error) {
+        getExtensionGPUResourceTracker(engine)?.untrackBuffer(debugVertexBuffer);
+        debugVertexBuffer.destroy();
+        throw error;
+      }
+      return { vertexBuffer, vertexBufferSize, debugVertexBuffer, debugVertexBufferSize };
+    } catch (error) {
+      getExtensionGPUResourceTracker(engine)?.untrackBuffer(vertexBuffer);
+      vertexBuffer.destroy();
+      throw error;
+    }
   }
 
   async loadAtlasPages(
     component: Spine2DComponent,
     atlas: Map<string, AtlasRegion>,
+    signal?: AbortSignal,
   ): Promise<Map<string, AtlasPageGpu>> {
     const engine = this.requireEngine();
     const textureGpu = this.requirePrepared().textureGpu;
     const pageNames = Array.from(new Set(Array.from(atlas.values()).map(region => region.page).filter(Boolean)));
     const pages = new Map<string, AtlasPageGpu>();
+    const textures = new Set<GPUTexture>();
+    const tracker = getExtensionGPUResourceTracker(engine);
     const names = pageNames.length ? pageNames : [''];
-    for (const pageName of names) {
-      const imageUrl = resolveAtlasPageImageUrl({
-        atlasUrl: component.atlasUrl,
-        imageUrl: component.imageUrl,
-        imageUrls: component.imageUrls,
-      }, atlas, pageName);
-      const image = await loadImage(imageUrl);
-      const width = Math.max(1, image.naturalWidth || image.width);
-      const height = Math.max(1, image.naturalHeight || image.height);
-      const texture = engine.device.createTexture({
-        size: [width, height],
-        format: 'rgba8unorm',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-      });
-      getExtensionGPUResourceTracker(engine)?.trackTexture(texture, 'Spine2D.atlasTexture', width * height * 4);
-      engine.device.queue.copyExternalImageToTexture({ source: image }, { texture }, [width, height]);
-      const textureBindGroup = engine.device.createBindGroup({
-        layout: textureGpu.layout,
-        entries: [
-          { binding: 0, resource: texture.createView() },
-          { binding: 1, resource: textureGpu.sampler },
-        ],
-      });
-      pages.set(pageName, { image, texture, textureBindGroup, width, height });
+    try {
+      for (const pageName of names) {
+        const imageUrl = resolveAtlasPageImageUrl({
+          atlasUrl: component.atlasUrl,
+          imageUrl: component.imageUrl,
+          imageUrls: component.imageUrls,
+        }, atlas, pageName);
+        const image = await loadImage(imageUrl, signal);
+        if (signal?.aborted) throw createAbortError('Spine load aborted.', signal.reason);
+        if (this.engine !== engine || this.textureGpu !== textureGpu) throw spineRendererStateError();
+        const width = Math.max(1, image.naturalWidth || image.width);
+        const height = Math.max(1, image.naturalHeight || image.height);
+        const texture = engine.device.createTexture({
+          size: [width, height],
+          format: 'rgba8unorm',
+          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+        textures.add(texture);
+        tracker?.trackTexture(texture, 'Spine2D.atlasTexture', width * height * 4);
+        engine.device.queue.copyExternalImageToTexture({ source: image }, { texture }, [width, height]);
+        const textureBindGroup = engine.device.createBindGroup({
+          layout: textureGpu.layout,
+          entries: [
+            { binding: 0, resource: texture.createView() },
+            { binding: 1, resource: textureGpu.sampler },
+          ],
+        });
+        pages.set(pageName, { image, texture, textureBindGroup, width, height });
+      }
+      return pages;
+    } catch (error) {
+      for (const texture of textures) {
+        tracker?.untrackTexture(texture);
+        texture.destroy();
+      }
+      throw error;
     }
-    return pages;
+  }
+
+  /** Own pages and buffers until the runtime factory successfully accepts them. */
+  createRuntime<T>(pages: Map<string, AtlasPageGpu>, build: (buffers: SpineRuntimeGpuBuffers) => T, signal?: AbortSignal): T {
+    let buffers: SpineRuntimeGpuBuffers | undefined;
+    try {
+      if (signal?.aborted) throw createAbortError('Spine load aborted.', signal.reason);
+      buffers = this.createRuntimeBuffers();
+      return build(buffers);
+    } catch (error) {
+      if (buffers) this.destroyRuntime({ ...buffers, pages, batches: [] });
+      else {
+        for (const page of pages.values()) this.releaseAtlasPage(page);
+        pages.clear();
+      }
+      throw error;
+    }
   }
 
   writeVertices(runtime: SpineRuntimeGpu, vertices: SpineFloatBuilder, dirtyRanges: SpineBufferDirtyRange[]): void {
@@ -235,18 +279,18 @@ export class Spine2DGpuRenderer {
     }
   }
 
-  destroyRuntime(runtime: SpineRuntimeGpu): void {
+  destroyRuntime(runtime: Pick<SpineRuntimeGpu, 'vertexBuffer' | 'debugVertexBuffer' | 'pages' | 'batches'>): void {
     const engine = this.requireEngine();
     getExtensionGPUResourceTracker(engine)?.untrackBuffer(runtime.vertexBuffer);
     getExtensionGPUResourceTracker(engine)?.untrackBuffer(runtime.debugVertexBuffer);
     runtime.vertexBuffer.destroy();
     runtime.debugVertexBuffer.destroy();
-    for (const page of runtime.pages.values()) this.destroyAtlasPage(page);
+    for (const page of runtime.pages.values()) this.releaseAtlasPage(page);
     runtime.pages.clear();
     runtime.batches.length = 0;
   }
 
-  private destroyAtlasPage(page: AtlasPageGpu): void {
+  private releaseAtlasPage(page: AtlasPageGpu): void {
     const engine = this.requireEngine();
     getExtensionGPUResourceTracker(engine)?.untrackTexture(page.texture);
     page.texture.destroy();
@@ -425,18 +469,30 @@ function pushMergedRange(
   out.push(range);
 }
 
-function loadImage(url: string): Promise<HTMLImageElement> {
+function loadImage(url: string, signal?: AbortSignal): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(createAbortError('Spine load aborted.', signal.reason)); return; }
     const image = new Image();
+    const finish = (): void => {
+      image.onload = null;
+      image.onerror = null;
+      signal?.removeEventListener('abort', abort);
+    };
+    const abort = (): void => {
+      finish();
+      try { image.src = ''; } catch { /* A host may reject clearing src; cancellation still settles below. */ }
+      reject(createAbortError('Spine load aborted.', signal?.reason));
+    };
     image.crossOrigin = 'anonymous';
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new EngineError(EngineErrorCode.AssetLoadFailed, `Failed to load Spine image: ${url}`, {
+    image.onload = () => { finish(); resolve(image); };
+    image.onerror = () => { finish(); reject(new EngineError(EngineErrorCode.AssetLoadFailed, `Failed to load Spine image: ${url}`, {
       domain: ErrorDomain.Component,
       recovery: ErrorRecovery.Retry,
       context: { url, resourceType: 'skeleton/spine-image' },
       path: 'spine.atlas.pages',
-    }));
-    image.src = url;
+    })); };
+    signal?.addEventListener('abort', abort, { once: true });
+    try { image.src = url; } catch (error) { finish(); reject(error); }
   });
 }
 

@@ -13,6 +13,11 @@
     "webgpu/",
     "performance/",
     "engine-0.2.3/",
+    "engine-0.2.4/",
+    "engine-0.2.2/g11/",
+    "tech-debt-audit/20261128/f33-f42/",
+    "tech-debt-audit/20261128/re-audit-02/",
+    "gui-p3/native/",
     "engine-0.2.2/release-preparation-20261030/",
     "release/",
     "production-release-0.2.1-20261019/"

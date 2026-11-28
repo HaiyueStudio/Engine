@@ -46,6 +46,7 @@ export class Transform3D extends ComponentWithData<Float32Array> {
   private _lastLocalVersion = -1;
   private _worldVersion = 0;
   private _lastParentWorldVersion = Number.NaN;
+  private _lastParentWorldMatrix: Float32Array | undefined;
 
   get localVersion(): number {
     return this._localVersion;
@@ -99,7 +100,8 @@ export class Transform3D extends ComponentWithData<Float32Array> {
   /** Compute worldMatrix from parent chain. Called by the render system. */
   updateWorldMatrix(parentWorldMatrix?: Float32Array, parentWorldVersion = Number.NaN): this {
     const localChanged = this._lastLocalVersion !== this._localVersion;
-    const parentChanged = !sameParentVersion(this._lastParentWorldVersion, parentWorldVersion);
+    const parentChanged = this._lastParentWorldMatrix !== parentWorldMatrix
+      || !sameParentVersion(this._lastParentWorldVersion, parentWorldVersion);
     if (!this.worldMatrixDirty && !localChanged && !parentChanged) {
       return this;
     }
@@ -117,6 +119,7 @@ export class Transform3D extends ComponentWithData<Float32Array> {
     }
     this._lastLocalVersion = this._localVersion;
     this._lastParentWorldVersion = parentWorldVersion;
+    this._lastParentWorldMatrix = parentWorldMatrix;
     this._worldVersion++;
     this.worldMatrixDirty = false;
     return this;

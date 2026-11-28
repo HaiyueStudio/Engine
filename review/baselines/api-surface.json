@@ -11415,6 +11415,104 @@
             }
           ]
         },
+        "./gui-assets": {
+          "source": "extensions/src/gui-assets.ts",
+          "exports": [
+            {
+              "name": "createGuiQrCanvasRasterizer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiQRCode",
+              "kind": "value"
+            },
+            {
+              "name": "GuiQRCodeOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiQrImageLease",
+              "kind": "type"
+            },
+            {
+              "name": "GuiQrMatrix",
+              "kind": "type"
+            },
+            {
+              "name": "GuiUpload",
+              "kind": "value"
+            },
+            {
+              "name": "GuiUploadFile",
+              "kind": "type"
+            },
+            {
+              "name": "GuiUploadHost",
+              "kind": "type"
+            },
+            {
+              "name": "GuiUploadOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-assistive": {
+          "source": "extensions/src/gui-assistive.ts",
+          "exports": [
+            {
+              "name": "GuiHistoryControls",
+              "kind": "value"
+            },
+            {
+              "name": "GuiHistoryControlsOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiHistoryPort",
+              "kind": "type"
+            },
+            {
+              "name": "GuiHistorySnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMentions",
+              "kind": "value"
+            },
+            {
+              "name": "GuiMentionsOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualKey",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualKeyboard",
+              "kind": "value"
+            },
+            {
+              "name": "GuiVirtualKeyboardOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualMouse",
+              "kind": "value"
+            },
+            {
+              "name": "GuiVirtualMouseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualPointerHost",
+              "kind": "type"
+            }
+          ]
+        },
         "./gui-collections": {
           "source": "extensions/src/gui-collections.ts",
           "exports": [
@@ -11428,6 +11526,10 @@
             },
             {
               "name": "GuiCollectionRow",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCollectionRowState",
               "kind": "type"
             },
             {
@@ -11452,6 +11554,172 @@
             },
             {
               "name": "GuiVirtualTreeOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-composition": {
+          "source": "extensions/src/gui-composition.ts",
+          "exports": [
+            {
+              "name": "GuiAffix",
+              "kind": "value"
+            },
+            {
+              "name": "GuiAffixOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiAnchor",
+              "kind": "value"
+            },
+            {
+              "name": "GuiAnchorItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiAnchorOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBorderBeam",
+              "kind": "value"
+            },
+            {
+              "name": "GuiBorderBeamOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMasonry",
+              "kind": "value"
+            },
+            {
+              "name": "GuiMasonryItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMasonryOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTour",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTourOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTourStep",
+              "kind": "type"
+            },
+            {
+              "name": "GuiWatermark",
+              "kind": "value"
+            },
+            {
+              "name": "GuiWatermarkOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-content": {
+          "source": "extensions/src/gui-content.ts",
+          "exports": [
+            {
+              "name": "GuiCarousel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCarouselOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiContentOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDescriptionItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDescriptions",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDescriptionsOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDraggable",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDraggableOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiImagePreview",
+              "kind": "value"
+            },
+            {
+              "name": "GuiImagePreviewOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRate",
+              "kind": "value"
+            },
+            {
+              "name": "GuiRateOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiResizable",
+              "kind": "value"
+            },
+            {
+              "name": "GuiResizableOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiResult",
+              "kind": "value"
+            },
+            {
+              "name": "GuiResultOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRibbon",
+              "kind": "value"
+            },
+            {
+              "name": "GuiRibbonOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiStep",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSteps",
+              "kind": "value"
+            },
+            {
+              "name": "GuiStepsOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTimeline",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTimelineItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTimelineOptions",
               "kind": "type"
             }
           ]
@@ -11506,6 +11774,217 @@
             {
               "name": "GuiCollapseOptions",
               "kind": "type"
+            },
+            {
+              "name": "GuiExpandable",
+              "kind": "value"
+            },
+            {
+              "name": "GuiExpandableOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-data": {
+          "source": "extensions/src/gui-data.ts",
+          "exports": [
+            {
+              "name": "GuiCascader",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCascaderNode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCascaderOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDataOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPagination",
+              "kind": "value"
+            },
+            {
+              "name": "GuiPaginationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTable",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTableColumn",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTableOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTreeSelect",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTreeSelectOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-display": {
+          "source": "extensions/src/gui-display.ts",
+          "exports": [
+            {
+              "name": "GuiAlert",
+              "kind": "value"
+            },
+            {
+              "name": "GuiAlertOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiAvatar",
+              "kind": "value"
+            },
+            {
+              "name": "GuiAvatarOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiButtonGroup",
+              "kind": "value"
+            },
+            {
+              "name": "GuiButtonGroupOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCard",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCardOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDisplayOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDivider",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDividerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiEmpty",
+              "kind": "value"
+            },
+            {
+              "name": "GuiEmptyOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFeedbackStatus",
+              "kind": "type"
+            },
+            {
+              "name": "GuiImageView",
+              "kind": "value"
+            },
+            {
+              "name": "GuiImageViewOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSegmented",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSegmentedOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSelectionItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSkeleton",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSkeletonOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSpin",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSpinOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTag",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTagOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-forms": {
+          "source": "extensions/src/gui-forms.ts",
+          "exports": [
+            {
+              "name": "GuiAutoComplete",
+              "kind": "value"
+            },
+            {
+              "name": "GuiAutoCompleteOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiForm",
+              "kind": "value"
+            },
+            {
+              "name": "GuiFormField",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFormItem",
+              "kind": "value"
+            },
+            {
+              "name": "GuiFormItemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFormOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFormValidation",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInputNumber",
+              "kind": "value"
+            },
+            {
+              "name": "GuiInputNumberOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSuggestion",
+              "kind": "type"
             }
           ]
         },
@@ -11558,6 +12037,112 @@
             },
             {
               "name": "GuiTabPage",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-overlays": {
+          "source": "extensions/src/gui-overlays.ts",
+          "exports": [
+            {
+              "name": "GuiContextMenu",
+              "kind": "value"
+            },
+            {
+              "name": "GuiContextMenuOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDialog",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDialogOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDrawer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDrawerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDropdown",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDropdownOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMenu",
+              "kind": "value"
+            },
+            {
+              "name": "GuiMenuItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMenuOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiNotificationCenter",
+              "kind": "value"
+            },
+            {
+              "name": "GuiNotificationCenterOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiNotificationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiOverlayCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "GuiOverlayOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPopconfirm",
+              "kind": "value"
+            },
+            {
+              "name": "GuiPopconfirmOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPopover",
+              "kind": "value"
+            },
+            {
+              "name": "GuiPopoverOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-pickers": {
+          "source": "extensions/src/gui-pickers.ts",
+          "exports": [
+            {
+              "name": "GuiDatePicker",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDatePickerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTimePicker",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTimePickerOptions",
               "kind": "type"
             }
           ]

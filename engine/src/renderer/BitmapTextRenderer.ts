@@ -7,6 +7,11 @@ import type { LiveIdSet } from './utils';
 import { alignUp4 } from '../utils/align';
 import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { getBuiltin2dUiShader } from '../shader/BuiltinRenderShader';
+import type { AssetHandle } from '../assets/AssetManager';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { EngineError, EngineErrorCode } from '../core/EngineError';
+import { getInstrumentedGPUResourceTracker } from '../core/GPUResourceTracker';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 // ── Text layout ───────────────────────────────────────────────────────────────
 
@@ -105,6 +110,12 @@ interface FontGPUData {
   sampler: GPUSampler;
   bindGroup2: GPUBindGroup;
   loaded: boolean;
+  source: unknown;
+  handle: AssetHandle<GPUTexture> | null;
+  ownsTexture: boolean;
+  controller: AbortController | null;
+  generation: number;
+  disposed: boolean;
 }
 
 interface EntityGPUData {
@@ -119,6 +130,7 @@ interface EntityGPUData {
   paramSmoothing: number;
   paramDirty: boolean;
   bindGroup1: GPUBindGroup;
+  geometry: BitmapTextGeometryState | null;
 }
 
 // ── Renderer ──────────────────────────────────────────────────────────────────
@@ -148,11 +160,19 @@ export class BitmapTextRenderer extends BaseRenderer {
   private readonly _paramDataU32 = new Uint32Array(this._paramData);
 
   private _initialized = false;
+  private epoch = 0;
+  private recorded!: RecordedGpuResources;
+  private readonly legacyResources = new WeakSet<object>();
+  private readonly cameraSnapshot = new Float32Array(16).fill(Number.NaN);
 
   prepare(engine: IEngine): void {
     if (this._initialized) return;
     this._initialized = true;
     this.engine = engine;
+    this.epoch++;
+    this.recorded = new RecordedGpuResources(engine.device);
+    this.cameraSnapshot.fill(Number.NaN);
+    this.clearPipelineCache();
     const { device } = engine;
 
     // Bind group layouts
@@ -183,10 +203,9 @@ export class BitmapTextRenderer extends BaseRenderer {
       size: 64,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    this.cameraBindGroup = device.createBindGroup({
-      layout: this.bgl0,
-      entries: [{ binding: 0, resource: { buffer: this.cameraBuf } }],
-    });
+    const cameraBuf = this.cameraBuf;
+    this._own(cameraBuf, () => cameraBuf.destroy());
+    this.cameraBindGroup = this._createCameraBindGroup();
 
     // 1×1 white placeholder texture
     this.defaultTex = device.createTexture({
@@ -194,6 +213,8 @@ export class BitmapTextRenderer extends BaseRenderer {
       format: 'rgba8unorm',
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
+    const defaultTex = this.defaultTex;
+    this._own(defaultTex, () => defaultTex.destroy());
     device.queue.writeTexture(
       { texture: this.defaultTex },
       new Uint8Array([255, 255, 255, 255]),
@@ -202,13 +223,30 @@ export class BitmapTextRenderer extends BaseRenderer {
     );
   }
 
+  private _createCameraBindGroup(): GPUBindGroup {
+    return this._ownBindGroup(this.engine.device.createBindGroup({
+      layout: this.bgl0,
+      entries: [{ binding: 0, resource: { buffer: this.cameraBuf } }],
+    }));
+  }
+
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
     const key = this._pipelineKey();
     this.addPipelineWarmup(plan, key, 'Bitmap text', () => this._pipelineDescriptor(), this.engine.device);
   }
 
   updateCamera(viewProj: Float32Array): void {
+    if (matrixEquals(this.cameraSnapshot, viewProj)) return;
+    if (this.recorded.pending(this.cameraBuf)) {
+      const previous = this.cameraBuf;
+      const buffer = this.engine.device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      this.cameraBuf = this._own(buffer, () => buffer.destroy());
+      this.recorded.retire(this.cameraBindGroup);
+      this.cameraBindGroup = this._createCameraBindGroup();
+      this.recorded.retire(previous);
+    }
     wrtBuf(this.engine.device.queue, this.cameraBuf, 0, viewProj);
+    this.cameraSnapshot.set(viewProj);
   }
 
   releaseEntitiesNotIn(liveEntities: LiveIdSet): void {
@@ -230,8 +268,11 @@ export class BitmapTextRenderer extends BaseRenderer {
 
     // ── Font / atlas GPU data ─────────────────────────────────────────────────
     let fontData = this.fontCache.get(font.id);
-    if (!fontData) {
+    const source = font.pageImages?.[0] ?? font.pages[0] ?? null;
+    if (!fontData || fontData.source !== source) {
+      if (fontData) this._destroyFontData(fontData);
       fontData = this._initFontGPUData();
+      fontData.source = source;
       this.fontCache.set(font.id, fontData);
       this._loadFontAtlasAsync(font, fontData);
     }
@@ -241,13 +282,15 @@ export class BitmapTextRenderer extends BaseRenderer {
     if (!entData) {
       const modelBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
       const paramBuf = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-      const bindGroup1 = device.createBindGroup({
+      this._own(modelBuf, () => modelBuf.destroy());
+      this._own(paramBuf, () => paramBuf.destroy());
+      const bindGroup1 = this._ownBindGroup(device.createBindGroup({
         layout: this.bgl1,
         entries: [
           { binding: 0, resource: { buffer: modelBuf } },
           { binding: 1, resource: { buffer: paramBuf } },
         ],
-      });
+      }));
       entData = {
         vertexBuf: null,
         vertexCount: 0,
@@ -260,13 +303,14 @@ export class BitmapTextRenderer extends BaseRenderer {
         paramSmoothing: Number.NaN,
         paramDirty: true,
         bindGroup1,
+        geometry: null,
       };
       this.entityCache.set(entityId, entData);
     }
 
     // ── Rebuild vertex buffer if text dirty ───────────────────────────────────
-    if (component.dirty || entData.vertexBuf === null) {
-      entData.vertexBuf?.destroy();
+    if (!bitmapTextGeometryMatches(entData.geometry, component)) {
+      if (entData.vertexBuf) this.recorded.retire(entData.vertexBuf);
       entData.vertexBuf = null;
       entData.vertexCount = 0;
 
@@ -284,17 +328,28 @@ export class BitmapTextRenderer extends BaseRenderer {
           size: alignUp4(mesh.byteLength),
           usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
-        wrtBuf(device.queue, entData.vertexBuf, 0, mesh);
+        const vertexBuf = entData.vertexBuf;
+        this._own(vertexBuf, () => vertexBuf.destroy());
+        wrtBuf(device.queue, vertexBuf, 0, mesh);
         entData.vertexCount = mesh.length / 5;
       }
 
-      component.clearDirty();
+      entData.geometry = captureBitmapTextGeometry(component);
     }
+    // Preserve the public flag, but each consumer owns its own geometry identity.
+    component.clearDirty();
 
     if (!entData.vertexBuf || entData.vertexCount === 0) return;
 
     // ── Update uniforms ───────────────────────────────────────────────────────
     if (!matrixEquals(entData.modelSnapshot, worldMatrix)) {
+      if (this.recorded.pending(entData.modelBuf)) {
+        const previous = entData.modelBuf;
+        const buffer = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+        entData.modelBuf = this._own(buffer, () => buffer.destroy());
+        this._rebuildEntityBindGroup(entData);
+        this.recorded.retire(previous);
+      }
       wrtBuf(device.queue, entData.modelBuf, 0, worldMatrix);
       entData.modelSnapshot.set(worldMatrix);
     }
@@ -320,6 +375,13 @@ export class BitmapTextRenderer extends BaseRenderer {
       pf[5] = component.threshold;
       pf[6] = component.smoothing;
       pf[7] = 0;
+      if (this.recorded.pending(entData.paramBuf)) {
+        const previous = entData.paramBuf;
+        const buffer = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+        entData.paramBuf = this._own(buffer, () => buffer.destroy());
+        this._rebuildEntityBindGroup(entData);
+        this.recorded.retire(previous);
+      }
       device.queue.writeBuffer(entData.paramBuf, 0, pBuf);
       entData.paramColorSnapshot[0] = pf[0]!;
       entData.paramColorSnapshot[1] = pf[1]!;
@@ -330,6 +392,10 @@ export class BitmapTextRenderer extends BaseRenderer {
       entData.paramSmoothing = component.smoothing;
       entData.paramDirty = false;
     }
+
+    // Pin immutable versions until this recording submits or is cancelled.
+    for (const resource of [this.cameraBuf, this.cameraBindGroup, entData.vertexBuf, entData.modelBuf,
+      entData.paramBuf, entData.bindGroup1, fontData.bindGroup2, fontData.handle ?? fontData.texture]) this._retain(resource);
 
     // ── Draw ──────────────────────────────────────────────────────────────────
     passEncoder.setPipeline(this._getPipeline());
@@ -389,83 +455,188 @@ export class BitmapTextRenderer extends BaseRenderer {
   private _initFontGPUData(): FontGPUData {
     const { device } = this.engine;
     const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
-    const bindGroup2 = device.createBindGroup({
+    const bindGroup2 = this._ownBindGroup(device.createBindGroup({
       layout: this.bgl2,
       entries: [
         { binding: 0, resource: this.defaultTex.createView() },
         { binding: 1, resource: sampler },
       ],
-    });
-    return { texture: this.defaultTex, sampler, bindGroup2, loaded: false };
+    }));
+    return { texture: this.defaultTex, sampler, bindGroup2, loaded: false, source: null,
+      handle: null, ownsTexture: false, controller: null, generation: 0, disposed: false };
   }
 
   private _rebuildFontBindGroup(fontData: FontGPUData): void {
-    fontData.bindGroup2 = this.engine.device.createBindGroup({
+    const previous = fontData.bindGroup2;
+    fontData.bindGroup2 = this._ownBindGroup(this.engine.device.createBindGroup({
       layout: this.bgl2,
       entries: [
         { binding: 0, resource: fontData.texture.createView() },
         { binding: 1, resource: fontData.sampler },
       ],
-    });
+    }));
+    this.recorded.retire(previous);
   }
 
   private async _loadFontAtlasAsync(font: BitmapFontData, fontData: FontGPUData): Promise<void> {
-    if (fontData.loaded) return;
-
+    if (fontData.loaded || fontData.disposed || !this._initialized) return;
+    fontData.controller?.abort();
+    const controller = new AbortController();
+    fontData.controller = controller;
+    const generation = ++fontData.generation;
+    const epoch = this.epoch;
+    const { device, assetManager } = this.engine;
+    const current = () => this._initialized && this.epoch === epoch && !fontData.disposed
+      && !controller.signal.aborted && fontData.generation === generation;
+    let ownedBitmap: ImageBitmap | null = null;
+    let pendingTexture: GPUTexture | null = null;
     try {
-      let src: HTMLCanvasElement | ImageBitmap | HTMLImageElement | null = null;
-
-      if (font.pageImages && font.pageImages.length > 0) {
-        src = font.pageImages[0] ?? null;
-      } else if (font.pages[0]) {
-        const res = await fetch(font.pages[0]);
-        const blob = await res.blob();
-        src = await createImageBitmap(blob, { colorSpaceConversion: 'none' });
+      const source = font.pageImages?.[0] ?? font.pages[0] ?? null;
+      if (!source) return;
+      if (assetManager) {
+        const handle = await assetManager.loadTexture(source, { format: 'rgba8unorm', signal: controller.signal });
+        if (!current()) { handle.release(); return; }
+        fontData.handle = this._own(handle, () => handle.release());
+        fontData.texture = handle.value;
+      } else {
+        let image: HTMLCanvasElement | ImageBitmap | HTMLImageElement;
+        if (typeof source === 'string') {
+          const response = await fetch(source, { signal: controller.signal });
+          if (!current()) return;
+          if (!response.ok) throw new EngineError(EngineErrorCode.AssetLoadFailed, `Font atlas request failed: ${response.status}`);
+          const blob = await response.blob();
+          if (!current()) return;
+          ownedBitmap = await createImageBitmap(blob, { colorSpaceConversion: 'none' });
+          image = ownedBitmap;
+        } else image = source;
+        if (!current()) return;
+        const texture = device.createTexture({ size: [image.width, image.height], format: 'rgba8unorm',
+          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT });
+        pendingTexture = this._own(texture, () => texture.destroy());
+        device.queue.copyExternalImageToTexture({ source: image }, { texture }, [image.width, image.height]);
+        fontData.texture = texture;
+        fontData.ownsTexture = true;
+        pendingTexture = null;
       }
-
-      if (!src) return;
-
-      const width  = src instanceof HTMLCanvasElement ? src.width  : (src as ImageBitmap | HTMLImageElement).width;
-      const height = src instanceof HTMLCanvasElement ? src.height : (src as ImageBitmap | HTMLImageElement).height;
-
-      const { device } = this.engine;
-      const texture = device.createTexture({
-        size: [width, height],
-        format: 'rgba8unorm',
-        usage:
-          GPUTextureUsage.TEXTURE_BINDING |
-          GPUTextureUsage.COPY_DST |
-          GPUTextureUsage.RENDER_ATTACHMENT,
-      });
-
-      device.queue.copyExternalImageToTexture(
-        { source: src as ImageBitmap | HTMLCanvasElement | HTMLImageElement },
-        { texture },
-        [width, height],
-      );
-
-      fontData.texture = texture;
       fontData.loaded = true;
       this._rebuildFontBindGroup(fontData);
-    } catch (e) {
-      console.warn('BitmapTextRenderer: failed to load font atlas:', e);
+    } catch (error) {
+      if (current()) console.warn('BitmapTextRenderer: failed to load font atlas:', error);
+    } finally {
+      ownedBitmap?.close();
+      if (pendingTexture) this.recorded.retire(pendingTexture);
     }
   }
 
+  private _own<T extends object>(resource: T, destroy: () => void): T {
+    const device = this.engine.device;
+    const legacy = this.legacyResources;
+    return this.recorded.own(resource, () => {
+      if (!legacy.has(resource)) { destroy(); return; }
+      try { void device.queue.onSubmittedWorkDone().then(destroy, destroy); }
+      catch { destroy(); }
+    });
+  }
+
+  private _ownBindGroup(group: GPUBindGroup): GPUBindGroup {
+    const tracker = getInstrumentedGPUResourceTracker(this.engine.device);
+    return this._own(group, () => tracker?.untrackObject(group));
+  }
+
+  private _retain(resource: object): void {
+    const context = bitmapTextRecordings.get(this);
+    if (context?.afterSubmit) this.recorded.retain(resource, context);
+    else this.legacyResources.add(resource);
+  }
+
+  private _rebuildEntityBindGroup(data: EntityGPUData): void {
+    const previous = data.bindGroup1;
+    data.bindGroup1 = this._ownBindGroup(this.engine.device.createBindGroup({ layout: this.bgl1,
+      entries: [{ binding: 0, resource: { buffer: data.modelBuf } },
+        { binding: 1, resource: { buffer: data.paramBuf } }] }));
+    this.recorded.retire(previous);
+  }
+
   destroy(): void {
-    this.cameraBuf?.destroy();
-    this.defaultTex?.destroy();
+    if (!this._initialized) return;
+    this._initialized = false;
+    this.epoch++;
     this.destroyCacheEntries(this.fontCache, f => this._destroyFontData(f));
     this.destroyCacheEntries(this.entityCache, e => this._destroyEntityData(e));
+    this.recorded.retireAll();
+    this.clearPipelineCache();
   }
 
   private _destroyFontData(data: FontGPUData): void {
-    if (data.texture !== this.defaultTex) data.texture.destroy();
+    if (data.disposed) return;
+    data.disposed = true;
+    data.generation++;
+    data.controller?.abort();
+    data.controller = null;
+    if (data.handle) this.recorded.retire(data.handle);
+    else if (data.ownsTexture) this.recorded.retire(data.texture);
+    this.recorded.retire(data.bindGroup2);
+    data.handle = null;
   }
 
   private _destroyEntityData(data: EntityGPUData): void {
-    data.vertexBuf?.destroy();
-    data.modelBuf.destroy();
-    data.paramBuf.destroy();
+    if (data.vertexBuf) this.recorded.retire(data.vertexBuf);
+    this.recorded.retire(data.modelBuf);
+    this.recorded.retire(data.paramBuf);
+    this.recorded.retire(data.bindGroup1);
+    data.geometry = null;
+  }
+}
+
+const bitmapTextRecordings = new WeakMap<BitmapTextRenderer, RenderCommandContext>();
+/** Private system-to-renderer adapter, deliberately absent from package exports. */
+export function withBitmapTextRecording<T>(renderer: BitmapTextRenderer, context: RenderCommandContext, record: () => T): T {
+  const previous = bitmapTextRecordings.get(renderer);
+  bitmapTextRecordings.set(renderer, context);
+  try { return record(); }
+  finally { if (previous) bitmapTextRecordings.set(renderer, previous); else bitmapTextRecordings.delete(renderer); }
+}
+
+interface BitmapTextGeometryState {
+  component: BitmapText;
+  font: BitmapFontData;
+  text: string;
+  fontSize: number;
+  lineSpacing: number;
+  letterSpacing: number;
+  fontInputs: readonly number[];
+}
+
+function bitmapTextGeometryMatches(state: BitmapTextGeometryState | null, text: BitmapText): boolean {
+  if (!state || state.component !== text || state.font !== text.font || state.text !== text.text
+    || state.fontSize !== text.fontSize || state.lineSpacing !== text.lineSpacing || state.letterSpacing !== text.letterSpacing) return false;
+  let index = 0;
+  let equal = true;
+  visitBitmapFontInputs(text.font, text.text, value => { if (!Object.is(state.fontInputs[index++], value)) equal = false; });
+  return equal && index === state.fontInputs.length;
+}
+
+function captureBitmapTextGeometry(text: BitmapText): BitmapTextGeometryState {
+  const fontInputs: number[] = [];
+  visitBitmapFontInputs(text.font, text.text, value => fontInputs.push(value));
+  return { component: text, font: text.font, text: text.text, fontSize: text.fontSize,
+    lineSpacing: text.lineSpacing, letterSpacing: text.letterSpacing, fontInputs };
+}
+
+/** Font data is publicly mutable; compare only the metrics actually used by this string. */
+function visitBitmapFontInputs(font: BitmapFontData, text: string, visit: (value: number) => void): void {
+  visit(font.size); visit(font.lineHeight); visit(font.scaleW); visit(font.scaleH);
+  let previous: number | null = null;
+  for (const char of text) {
+    if (char === '\n') { previous = null; continue; }
+    const code = char.codePointAt(0)!;
+    const glyph = font.chars.get(code) ?? font.chars.get(63);
+    if (!glyph) visit(Number.NaN);
+    else {
+      visit(glyph.x); visit(glyph.y); visit(glyph.width); visit(glyph.height);
+      visit(glyph.xoffset); visit(glyph.yoffset); visit(glyph.xadvance);
+      visit(previous === null ? 0 : font.kernings.get(bitmapKerningKey(previous, code)) ?? 0);
+    }
+    previous = code;
   }
 }

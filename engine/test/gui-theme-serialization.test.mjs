@@ -16,3 +16,8 @@ test('runtime-only local skin styles and nine-slice primitives fail explicitly i
  assert.throws(()=>serializeGuiElement(new GuiButton({style:{icon:{width:2,height:2}}})),/style|property/i);
  assert.throws(()=>serializeGuiElement(new GuiNineSlice({source:{width:30,height:30},sourceWidth:30,sourceHeight:30,cuts:[4,4,4,4]})),/runtime bindings/i);
 });
+
+test('modern theme, nested parts, states, typography and button variants round trip as plain data',()=>{
+ const root=new GuiRoot({theme:GuiThemeResource.createTheme('light','touch')}),button=root.add(new GuiButton({text:'Open',variant:'link',loading:true,style:{fontWeight:600,lineHeight:24,paddingY:4,cornerRadii:[2,4,6,8],gradient:{from:'#123456',to:'#abcdef'},states:{disabled:{color:'#777777'}},parts:{label:{color:'#ffaa00'}}}}));
+ try{const data=serializeGuiRoot(root),copy=deserializeGuiRoot(JSON.parse(JSON.stringify(data)));try{assert.equal(copy.theme.density,'touch');assert.equal(copy.findById(button.id).variant,'link');assert.equal(copy.findById(button.id).loading,true);assert.deepEqual(copy.findById(button.id).style,button.style);}finally{copy.destroy();}}finally{root.destroy();}
+});

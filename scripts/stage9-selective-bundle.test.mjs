@@ -10,9 +10,13 @@ test('selective GUI exports have bounded current gzip capacity; historical obser
  assert.equal(historical.bundle.engine2dUiArtifactGzipBytes,4742);
  assert.equal(historical.bundle.engine2dUiArtifactRawBytes,53787);
  assert.equal(historical.bundle.engineArtifactGzipBudgetBytes,12000);
- assert.equal(current.productionBundles.engine2dUiArtifactGzipBytes,4800);
- for(const value of [0,4742,4746,4800])assert.equal(validateProductionBundleCost('engine2dUiArtifactGzipBytes',value,current),null);
- for(const value of [4801,-1,NaN,Infinity,4.5,undefined])assert.ok(validateProductionBundleCost('engine2dUiArtifactGzipBytes',value,current));
+ assert.equal(current.productionBundles.engine2dUiArtifactGzipBytes,5600);
+ for(const value of [0,4742,4746,4800,5511,5600])assert.equal(validateProductionBundleCost('engine2dUiArtifactGzipBytes',value,current),null);
+ for(const value of [5601,-1,NaN,Infinity,4.5,undefined])assert.ok(validateProductionBundleCost('engine2dUiArtifactGzipBytes',value,current));
+ assert.equal(current.productionBundles.engineArtifactGzipBytes,12800);
+ assert.equal(validateProductionBundleCost('engineArtifactGzipBytes',12611,current),null);
+ for(const value of [12801,-1,NaN,undefined])assert.ok(validateProductionBundleCost('engineArtifactGzipBytes',value,current));
+ assert.equal(current.productionBundleReviews.guiP0.previous.engineArtifactGzipBytes,12000);
  assert.ok(validateProductionBundleCost('engine2dUiArtifactGzipBytes',4746,{productionBundles:historical.bundle}));
  assert.ok(validateProductionBundleCost('engine2dUiArtifactGzipBytes',4746,{productionBundles:{}}));
 });
@@ -20,5 +24,6 @@ test('bundle gate routes only current gzip admission while retaining raw and tot
  const checker=readFileSync(new URL('../shader-language/scripts/check-stage9-bundle.mjs',import.meta.url),'utf8');
  assert.match(checker,/\['engine2dUiArtifactGzipBytes', 'simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'\]/);
  assert.match(checker,/productionBundles: contract.bundle/);
- assert.match(checker,/engineArtifactGzipBytes > contract.bundle.engineArtifactGzipBudgetBytes/);
+ assert.match(checker,/key === 'engineArtifactGzipBytes'/);
+ assert.match(checker,/validateProductionBundleCost\(key,value,costBudget\)/);
 });

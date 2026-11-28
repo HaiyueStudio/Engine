@@ -1,5 +1,6 @@
 import type { AssetHandle } from '../../assets/AssetManager';
 import { AssetOwnerScope } from '../../assets/AssetJob';
+import { Cleanup } from '../../core/Cleanup';
 import { EngineError, EngineErrorCode } from '../../core/EngineError';
 import type { IEngine } from '../../core/IEngine';
 import type { ScenePluginScene } from '../../core/EnginePlugin';
@@ -57,8 +58,10 @@ export class SceneAssets {
   }
 
   releaseAll(): void {
-    for (const handle of this._handles) handle.release();
+    const handles = [...this._handles], cleanup = new Cleanup();
     this._handles.clear();
+    for (const handle of handles) cleanup.run(() => handle.release());
+    cleanup.complete('Scene asset cleanup failed.');
   }
 
   suspendForDeviceLoss(): void {

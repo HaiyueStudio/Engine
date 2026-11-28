@@ -4,6 +4,7 @@ import type { IEngine } from '../../core/IEngine';
 import { getEngineGPUResourceTracker } from '../../core/EngineDiagnosticsAccess';
 import type { SceneLifecycleState } from '../../core/Lifecycle';
 import { World } from '../../ecs/World';
+import { Cleanup } from '../../core/Cleanup';
 
 export class SceneRuntime {
   readonly world: World;
@@ -41,9 +42,11 @@ export class SceneRuntime {
   }
 
   finishDestroy(): void {
-    this.world.destroy();
-    this._resourceScope?.release();
+    const cleanup = new Cleanup();
+    cleanup.run(() => this.world.destroy());
+    cleanup.run(() => this._resourceScope?.release());
     this._state = 'destroyed';
+    cleanup.complete('Scene runtime cleanup failed.');
   }
 
   assertUsable(operation: string): void {

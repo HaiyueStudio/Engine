@@ -2,7 +2,7 @@ import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
-import {guiLayoutContentHeight, notifyGuiActivity, registerGuiScrollOffset} from '../GuiLayoutState';
+import {guiLayoutContentHeight, layoutGuiElementSelf, notifyGuiActivity, registerGuiScrollOffset} from '../GuiLayoutState';
 import {guiScrollOcclusion} from '../input/GuiScrollViewportState';
 
 export interface GuiScrollViewOptions extends GuiElementOptions {
@@ -120,12 +120,12 @@ export class GuiScrollView extends GuiElement {
   }
   override layout(parentRect: GuiRect): void {
     const previous = {...this.rect}, offset = this.offset;
-    super.layout(parentRect);
+    const visible = layoutGuiElementSelf(this, parentRect, this.x, this.y, this.width, this.height);
     const clamped = Math.max(0, Math.min(this.offset, this.maxScrollOffset));
     if (clamped !== this.offset) this.stopInertia();
     this.offset = clamped;
     if (offset !== clamped || previous.x !== this.rect.x || previous.y !== this.rect.y || previous.width !== this.rect.width || previous.height !== this.rect.height) this.emit('gui:viewport');
-    this.layoutContent();
+    if (visible) this.layoutContent();
   }
   private layoutContent(): void {
     const content = this.axis === 'horizontal' ? {...this.rect, x: this.rect.x - this.offset, width: this.contentWidth}

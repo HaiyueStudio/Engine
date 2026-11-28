@@ -111,6 +111,9 @@ try {
     hya: runHyaRuntimeConsumer(installed),
     layout: runLayoutRuntimeConsumer(installed),
     guiLayout: runGuiLayoutRuntimeConsumer(installed),
+    guiP1: runGuiP1RuntimeConsumer(installed),
+    guiP2: runGuiP2RuntimeConsumer(installed),
+    guiP3: runGuiP3RuntimeConsumer(installed),
     typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
@@ -485,6 +488,26 @@ function runGuiLayoutRuntimeConsumer(installed) {
   return commandCheck(spawnSync(process.execPath, [input], {
     cwd: installed.root, encoding: 'utf8', timeout: 30_000,
   }), 'packed GUI layout and skin constructors');
+}
+
+function runGuiP1RuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'gui-p1-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/gui-p1-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'packed P1 display, overlay and borrowed-content lifecycle');
+}
+
+function runGuiP2RuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'gui-p2-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/gui-p2-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {cwd: installed.root, encoding: 'utf8', timeout: 30_000}), 'packed P2 forms, virtual data and borrowed-content lifecycle');
+}
+
+function runGuiP3RuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'gui-p3-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/gui-p3-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {cwd: installed.root, encoding: 'utf8', timeout: 30_000}), 'packed P3 specialized components, injected hosts, cancellation and borrowed lifecycle');
 }
 
 function runTypeScriptConsumer(installed, packages) {

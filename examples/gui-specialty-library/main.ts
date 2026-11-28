@@ -1,0 +1,3 @@
+import {createGuiSpecialtyExample} from './application.js';
+const result=document.querySelector<HTMLElement>('#result')!;
+void createGuiSpecialtyExample(document.querySelector<HTMLCanvasElement>('canvas')!,new URLSearchParams(location.search).get('theme')==='light'?'light':'dark').then(app=>{addEventListener('pagehide',()=>app.dispose(),{once:true});if(new URLSearchParams(location.search).has('verify')){let frames=0;const ready=()=>{if(++frames<24)return;app.engine.off('after-update',ready);result.textContent=JSON.stringify({status:'passed',scope:'GUI specialty startup'});result.dataset.status='passed';};app.engine.on('after-update',ready);}}).catch(error=>{result.textContent=JSON.stringify({status:'failed',error:String(error)});result.dataset.status='failed';});

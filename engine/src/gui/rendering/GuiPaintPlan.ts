@@ -16,9 +16,9 @@ export class GuiPaintPlan {
   private readonly spans: [Span[], Span[], Span[], Span[]] = [[], [], [], []];
   private readonly draws: [Draw[], Draw[], Draw[], Draw[]] = [[], [], [], []];
   clear(): void {for (const list of [...this.spans, ...this.draws]) list.length = 0;}
-  shapes(batch: GuiBatch, start: number, layer: Layer): void {this.record({kind: 'shape', batch, start, end: batch.commands.length}, layer);}
+  shapes(batch: GuiBatch, start: number, layer: Layer, end = batch.commands.length): void {this.record({kind: 'shape', batch, start, end}, layer);}
   images(batch: GuiImageBatch, start: number, layer: Layer): void {this.record({kind: 'image', batch, start, end: batch.commands.length}, layer);}
-  text(batch: GuiTextBatch, font: BitmapFontData | null, start: number, layer: Layer): void {if (font) this.record({kind: 'text', batch, font, start, end: batch.commands.length}, layer);}
+  text(batch: GuiTextBatch, font: BitmapFontData | null, start: number, layer: Layer, end = batch.commands.length): void {if (font) this.record({kind: 'text', batch, font, start, end}, layer);}
   layer(layer: Layer): readonly Draw[] {return this.draws[layer];}
 
   compile(): void {

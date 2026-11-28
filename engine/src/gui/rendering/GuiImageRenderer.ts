@@ -1,3 +1,4 @@
+import {guiParameterGroup, type GuiParameterGroups} from './GuiPaintParameters';
 import type {RenderCommandContext} from '../../core/RenderCommandContext';
 import {GuiGpuResources} from './GuiGpuResources';
 import {guiLinearSurface,updateGuiViewport,type GuiRenderSurface} from './GuiRenderSurface';
@@ -30,9 +31,9 @@ export class GuiImageRenderer extends BaseRenderer {
   private pipelineLayout!: GPUPipelineLayout;
   private resources!:GuiGpuResources;
   private readonly viewportKey={};
-  private viewportGroups=new WeakMap<GPUBuffer,GPUBindGroup>();
+  private viewportGroups: GuiParameterGroups = new WeakMap();
   private viewportVersion=0;
-  private readonly viewportData = new Float32Array(4);
+  private readonly viewportData = new Float32Array(24);
   private readonly groups=new Map<GuiImageBatch,Set<GuiImageGroup>>();
   private readonly batchVersions=new Map<GuiImageBatch,number>();
   private readonly batchSources=new Map<GuiImageBatch,Set<NonNullable<GuiImageSource>>>();
@@ -52,7 +53,7 @@ export class GuiImageRenderer extends BaseRenderer {
     const { device } = engine;
     try {
       this.viewportBindGroupLayout = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, {binding:1,visibility:GPUShaderStage.FRAGMENT,buffer:{type:'read-only-storage'}}],
     });
     this.imageBindGroupLayout = device.createBindGroupLayout({
       entries: [
@@ -66,8 +67,7 @@ export class GuiImageRenderer extends BaseRenderer {
     ]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
-    const viewport=this.resources.reserve(this.viewportKey,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-image:viewport');
-    this.viewportGroups.set(viewport,device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewport}}]}));
+    this.resources.reserve(this.viewportKey,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-image:viewport');
     this.defaultTexture = device.createTexture({
       size: [1, 1],
       format: 'rgba8unorm',
@@ -96,8 +96,8 @@ export class GuiImageRenderer extends BaseRenderer {
       this.viewportVersion++;
       this.viewportUploaded = true;
     }
-    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-image:viewport',context);
-    let viewportGroup=this.viewportGroups.get(viewportBuffer);if(!viewportGroup){viewportGroup=this.engine.device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewportBuffer}}]});this.viewportGroups.set(viewportBuffer,viewportGroup);}
+    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,96,GPUBufferUsage.UNIFORM|GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST,'gui-image:viewport',context);
+    const viewportGroup = guiParameterGroup(this.resources,this.engine.device,this.viewportBindGroupLayout,viewportBuffer,batch.parameters,context,this.viewportGroups);
 
     passEncoder.setBindGroup(0, viewportGroup);
     for (const group of range ? [range.group] : batch.groups) {
@@ -116,6 +116,7 @@ export class GuiImageRenderer extends BaseRenderer {
 
   syncBatch(batch: GuiImageBatch): void {
     if (!this.initialized) return;
+    if(!batch.groups.length)this.resources.release(batch.parameters);
     if(this.batchVersions.get(batch)!==batch.layoutVersion){
       this.syncSources(batch,new Set(batch.groups.map(group=>group.source)));
       const previous=this.groups.get(batch)??new Set<GuiImageGroup>(),current=new Set(batch.groups);for(const group of previous)if(!current.has(group))this.resources.release(group);this.groups.set(batch,current);
@@ -128,7 +129,7 @@ export class GuiImageRenderer extends BaseRenderer {
     this.addPipelineWarmup(plan, key, 'GUI images', () => this.pipelineDescriptor(), this.engine.device);
   }
 
-  releaseBatch(batch: GuiImageBatch): void {for(const group of this.groups.get(batch)??[])this.resources.release(group);this.groups.delete(batch);this.batchVersions.delete(batch);this.syncSources(batch,new Set());this.batchSources.delete(batch);}
+  releaseBatch(batch: GuiImageBatch): void {this.resources?.release(batch.parameters);for(const group of this.groups.get(batch)??[])this.resources.release(group);this.groups.delete(batch);this.batchVersions.delete(batch);this.syncSources(batch,new Set());this.batchSources.delete(batch);}
 
   destroy(): void {
     if(!this.initialized)return;

@@ -14,6 +14,7 @@ import {
 } from './contracts';
 import { shaderError } from './diagnostics';
 import { isWgslIdentifier } from './naming';
+import { isShaderNumericValue } from './numericValue';
 
 const MODULE_ID = /^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/;
 const RESOURCE_ID = /^[a-z][A-Za-z0-9]*(?:\.[a-z][A-Za-z0-9]*)+$/;
@@ -198,6 +199,7 @@ export function validateSpecializationValue(
   if (typeof value !== 'number' || !Number.isFinite(value)) invalid(moduleId, path, `Specialization ${path} requires a finite number.`);
   if ((type === 'i32' || type === 'u32') && !Number.isInteger(value)) invalid(moduleId, path, `Specialization ${path} requires an integer.`);
   if (type === 'u32' && value < 0) invalid(moduleId, path, `Specialization ${path} requires a non-negative integer.`);
+  if (!isShaderNumericValue(type, value)) invalid(moduleId, path, `Specialization ${path} requires a representable ${type} value.`);
 }
 
 function normalizeStages(

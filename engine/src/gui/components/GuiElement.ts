@@ -1,4 +1,4 @@
-import {consumeGuiChange,consumeGuiStructureChange,markGuiStructureDirty,noteGuiTextDirty} from '../GuiInvalidationState';
+import {markGuiStateDirty,consumeGuiChange,consumeGuiStructureChange,markGuiStructureDirty,noteGuiTextDirty} from '../GuiInvalidationState';
 import {clearGuiOwnDirty} from '../GuiDirtyState';
 import {notifyGuiStructure} from '../GuiLayoutState';
 import {
@@ -10,16 +10,21 @@ import {
   GuiPointerEvent,
   GuiRect,
   GuiStyle,
+  DEFAULT_GUI_THEME,
+  type GuiTheme,
   type GuiFocusOptions,
   type GuiPointerFilter,
   type GuiActionEvent,
-  resolveGuiLength,
 } from '../GuiTypes';
 import { EventEmitter } from '../../core/EventEmitter';
 import { requiredItemAt } from '../../math/arrayAccess';
-import {assignedGuiRect, isGuiLayoutHidden, notifyGuiInvalidation} from '../GuiLayoutState';
-import type {GuiSkin, GuiThemeResourceBinding} from '../GuiThemeTypes';
-import {notifyGuiThemeTree, resolveGuiSkin} from '../GuiThemeResolve';
+import {layoutGuiElementSelf, isGuiLayoutHidden, notifyGuiInvalidation} from '../GuiLayoutState';
+import type {GuiSkin, GuiThemeResourceBinding, GuiThemeState} from '../GuiThemeTypes';
+import {notifyGuiThemeTree, resolveGuiSkin, resolveGuiPart, bindGuiPart, setGuiVisualState, guiThemeState, releaseDetachedGuiParts,bindGuiDefaultSkin,guiElementTheme} from '../GuiThemeResolve';
+import {captureGuiStyle} from '../GuiStyleLayers';
+import {setGuiActivity,guiElementVisible} from '../GuiActivity';
+import {guiControlHeight} from '../GuiControlSize';
+import {positionGuiPopup,type GuiPopupPositionOptions} from '../GuiPopupPosition';
 import {guiContentMetrics} from '../GuiContent';
 import type {GuiDragSource, GuiDropTarget} from '../GuiDragTypes';
 
@@ -68,6 +73,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     this.height = options.height ?? 0;
     this.visible = options.visible ?? true;
     this.disabled = options.disabled ?? false;
+    if(options.style)captureGuiStyle(options.style);
     this.style = options.style ?? {};
     this.localThemeResource = options.themeResource ?? null;
     this.themeControlType = options.themeControlType ?? (this.constructor as typeof GuiElement).themeControlType;
@@ -95,6 +101,31 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     return this.dirtyFlags;
   }
   getResolvedStyle(): GuiSkin {return resolveGuiSkin(this);}
+  /** Borrowed token data as an immutable snapshot, including this element's palette overrides. */
+  getTheme():Readonly<GuiTheme> {
+    const base=guiElementTheme(this)??DEFAULT_GUI_THEME,skin=this.getResolvedStyle();
+    return Object.freeze({...base,fontFamily:skin.fontFamily??base.fontFamily,fontSize:skin.fontSize??base.fontSize,...(skin.fontWeight===undefined?{}:{fontWeight:skin.fontWeight}),...(skin.lineHeight===undefined?{}:{lineHeight:skin.lineHeight}),colors:Object.freeze({...base.colors,...skin.palette})});
+  }
+  /** Default component styling remains below theme resources, named parts and explicit style. */
+  setDefaultSkin(resolve:((theme:Readonly<GuiTheme>,state:GuiThemeState)=>GuiSkin)|null):()=>void {
+    const release=bindGuiDefaultSkin(this,resolve);this.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Layout|GuiDirtyFlags.Text);
+    return()=>{release();this.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Layout|GuiDirtyFlags.Text);};
+  }
+  isEffectivelyVisible():boolean {return guiElementVisible(this);}
+  /** Uses the existing GUI clock; returning false releases this activity. No private RAF is created. */
+  setActivity(tick:((deltaMs:number)=>boolean|void)|null,options:Readonly<{motion?:boolean}>={}):()=>void {return setGuiActivity(this,tick,options);}
+  getPopupRect(size:Readonly<{width:number;height:number}>,options:GuiPopupPositionOptions={}):GuiRect {
+    let root:GuiElement=this;while(root.parent)root=root.parent;
+    const viewport=options.viewport??root.rect;
+    const anchor=options.anchor??this.rect;
+    if(!this.parent&&!options.viewport)return positionGuiPopup(anchor,size,{x:-1e8,y:-1e8,width:2e8,height:2e8},{...options,flip:false,shift:false});
+    return positionGuiPopup(anchor,size,viewport,options);
+  }
+  getPartStyle(name: string, state: Partial<GuiThemeState> = {}): GuiSkin {return resolveGuiPart(this, name, state);}
+  /** A borrowed descendant keeps its own explicit style above the owner's named part. */
+  bindPart(name: string, child: GuiElement): () => void {return bindGuiPart(this, name, child);}
+  getVisualState():GuiThemeState {return Object.freeze(guiThemeState(this));}
+  setVisualState(state: Partial<Pick<GuiThemeState,'checked'|'selected'|'invalid'|'loading'|'readOnly'|'open'>>): void {if(setGuiVisualState(this, state))markGuiStateDirty(this);}
   /** Content padding stays in logical pixels and shrinks proportionally in tiny controls. */
   getContentRect(): GuiRect {
     // A root with the stock resolver and no resource/local skin has no insets.
@@ -158,7 +189,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
       x: this.x,
       y: this.y,
       width: this.width,
-      height: this.height,
+      height: guiControlHeight(this,this.height),
     };
   }
 
@@ -193,6 +224,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (index < 0) return false;
     this.children.splice(index, 1);
     child.parent = null;
+    releaseDetachedGuiParts(child);
     const structure=notifyGuiStructure(this,child,false);
     notifyGuiThemeTree(this, child);
     markGuiStructureDirty(this,structure);
@@ -217,36 +249,28 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   setDisabled(disabled: boolean): void {
     if (this.disabled === disabled) return;
     this.disabled = disabled;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
   }
 
   setStyle(style: GuiStyle): void {
     if(style.iconPosition!==undefined&&!['left','right'].includes(style.iconPosition))throw new TypeError('Invalid GUI icon position.');
     if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
-    this.style = { ...this.style, ...style };
+    this.style = { ...this.style, ...captureGuiStyle(style) };
     notifyGuiThemeTree(this);
-    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconPosition', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
+    const metrics = ['padding', 'paddingY', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'states', 'parts', 'icon', 'iconPosition', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
     this.markDirty(GuiDirtyFlags.Visual | (metrics.some(key => key in style) ? GuiDirtyFlags.Layout | GuiDirtyFlags.Text : GuiDirtyFlags.None));
   }
 
   layout(parentRect: GuiRect): void {
-    const assigned = assignedGuiRect(this);
-    if (assigned) {
-      this.rect = assigned;
-      if (isGuiLayoutHidden(this)) return;
-      for (const child of this.children) child.layout(this.getContentRect());
-      return;
-    }
-    const width = resolveGuiLength(this.width, parentRect.width, this.rect.width);
-    const height = resolveGuiLength(this.height, parentRect.height, this.rect.height);
-    const x = parentRect.x + resolveGuiLength(this.x, parentRect.width, 0);
-    const y = parentRect.y + resolveGuiLength(this.y, parentRect.height, 0);
-    this.rect = { x, y, width, height };
+    if (!layoutGuiElementSelf(this, parentRect, this.x, this.y, this.width, guiControlHeight(this,this.height))) return;
     for (const child of this.children) child.layout(this.getContentRect());
   }
 
   hitTest(x: number, y: number): GuiElement | null {
     if (!this.visible || isGuiLayoutHidden(this) || this.disabled || !containsPoint(this.rect, x, y)) return null;
+    const skin=this.getResolvedStyle();
+    if(skin.clipRadius!==undefined){const r=this.rect,dx=x-r.x-r.width/2,dy=y-r.y-r.height/2,c=skin.cornerRadii??[skin.clipRadius,skin.clipRadius,skin.clipRadius,skin.clipRadius],radius=Math.min(c[dy>0?dx>0?2:3:dx>0?1:0]!,r.width/2,r.height/2),qx=Math.abs(dx)-r.width/2+radius,qy=Math.abs(dy)-r.height/2+radius;
+      if(Math.hypot(Math.max(0,qx),Math.max(0,qy))+Math.min(Math.max(qx,qy),0)-radius>0)return null;}
     for (let i = this.children.length - 1; i >= 0; i--) {
       const hit = requiredItemAt(this.children, i, 'GUI child elements').hitTest(x, y);
       if (hit) return hit;
@@ -256,21 +280,21 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
 
   handlePointerEnter(event: GuiPointerEvent): void {
     this.hovered = true;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
     this.onPointerEnter?.(event);
     this.emitGuiPointerEvent(event, false);
   }
 
   handlePointerLeave(event: GuiPointerEvent): void {
     this.hovered = false;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
     this.onPointerLeave?.(event);
     this.emitGuiPointerEvent(event, false);
   }
 
   handlePointerDown(event: GuiPointerEvent): void {
     this.pressed = true;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
     this.onPointerDown?.(event);
     this.emitGuiPointerEvent(event, true);
   }
@@ -283,7 +307,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   handlePointerUp(event: GuiPointerEvent): void {
     if (this.pressed) {
       this.pressed = false;
-      this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+      markGuiStateDirty(this);
     }
     this.onPointerUp?.(event);
     this.emitGuiPointerEvent(event, true);
@@ -295,7 +319,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   handlePointerCancel(event: GuiPointerEvent): void {
-    if (this.pressed) { this.pressed = false; this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input); }
+    if (this.pressed) { this.pressed = false; markGuiStateDirty(this); }
     this.onPointerCancel?.(event);
     this.emitGuiPointerEvent(event, true);
   }
@@ -303,13 +327,13 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   handleFocus(): void {
     if (this.focused) return;
     this.focused = true;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
   }
 
   handleBlur(): void {
     if (!this.focused) return;
     this.focused = false;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    markGuiStateDirty(this);
   }
 
   private emitGuiPointerEvent(event: GuiPointerEvent, bubbles: boolean): void {

@@ -1,3 +1,4 @@
+import {guiRendererTextMeasure} from '../rendering/GuiRenderer';
 import type {GuiSystemOptions,GuiTextServiceContext} from '../systems/GuiSystem';
 import type {GuiInput} from '../components/GuiInput';
 import type {GuiElement} from '../components/GuiElement';
@@ -31,7 +32,14 @@ const engine=this.owner.engine;
       const host=options.textInputHost==='browser'?new GuiBrowserTextInputHost(browserDocument!,()=>engine.canvas?.focus({preventScroll:true}),()=>{const r=engine.canvas?.getBoundingClientRect();return r?{x:r.left,y:r.top,width:r.width,height:r.height}:{x:0,y:0,width:browserDocument!.defaultView!.innerWidth,height:browserDocument!.defaultView!.innerHeight};}):options.textInputHost;
       this.textConnection=new GuiTextInputConnection(host,{
         valid:target=>this.owner.inputParticipant.enabled()&&this.owner.validPointerTarget(target),
-        keyboard:(event,target)=>this.owner.inputDomain.routeNativeKeyboard(this.owner.inputParticipant,event,target),
+        keyboard:(event,target)=>{
+          if(this.owner.inputDomain.routeNativeKeyboard(this.owner.inputParticipant,event,target))return true;
+          // The browser responder owns text editing, but vertical navigation of
+          // a focused GUI input must use the same action map as canvas/gamepad.
+          // Raw external owners and IME preedit retain priority; no new listener.
+          return event.type==='keydown'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.isComposing&&!this.composing&&!target.isComposing&&
+            (event.key==='ArrowUp'||event.key==='ArrowDown')?this.owner.inputParticipant.keyboard(event):false;
+        },
         caretRect:target=>this.textCaretRect(target),
         viewportInset:inset=>{this.textViewportInset={...inset};if(!inset.top&&!inset.right&&!inset.bottom&&!inset.left)this.textViewport.clear();this.textConnection?.target?.markDirty(GuiDirtyFlags.Input);options.onViewportInset?.(inset);},
         blur:target=>{if(this.owner.focus.focused===target)this.owner.focus.blur();},
@@ -103,7 +111,7 @@ onPaste = (event: ClipboardEvent): void => {
 updateInputCaretFromPointer(input: GuiInput, pending: PendingGuiPointerEvent, extendSelection: boolean): void {
     const fontSize = this.findThemeFontSize(input);
     const root = [...this.owner.roots].find(root => root.findById(input.id) === input);
-    const presentation=guiInputPresentation(input,text=>this.owner.renderer.measureTextWidth(text,fontSize,root,input),fontSize,this.owner.renderer.measureTextLineHeight(fontSize,root,input));
+    const presentation=guiInputPresentation(input,guiRendererTextMeasure(this.owner.renderer,fontSize,root,input),fontSize,this.owner.renderer.measureTextLineHeight(fontSize,root,input));
     const index=presentation.indexAt(pending.x,pending.y);
     if (extendSelection) input.setCaret(index, true);
     else input.setSelection(index, index);
@@ -145,7 +153,7 @@ getInputPresentation(input:GuiInput):GuiInputPresentation {
     const roots=new Set(this.owner.inputWorld?[]:this.owner.roots);
     for(const world of this.owner.inputWorld?[this.owner.inputWorld]:this.owner.usedBy)if(!world.destroyed)for(const entity of world.iterQueryCandidates(this.owner.queryDescriptor!)){const candidate=entity.getComponent(GuiRoot);if(candidate&&!candidate.destroyed&&(!this.owner.rootFilter||this.owner.rootFilter.has(candidate)))roots.add(candidate);}
     const root=[...roots].find(root=>root.findById(input.id)===input);if(!root)throw new Error('Input belongs to another GUI owner.');
-    const size=input.getResolvedStyle().fontSize??root.theme.fontSize;return guiInputPresentation(input,text=>this.owner.renderer.measureTextWidth(text,size,root,input),size,this.owner.renderer.measureTextLineHeight(size,root,input));
+    const size=input.getResolvedStyle().fontSize??root.theme.fontSize;return guiInputPresentation(input,guiRendererTextMeasure(this.owner.renderer,size,root,input),size,this.owner.renderer.measureTextLineHeight(size,root,input));
   }
 
 synchronizeTextInput():void {
@@ -157,7 +165,7 @@ synchronizeTextInput():void {
 
 textCaretRect(input:GuiInput){
     const root=[...this.owner.roots].find(root=>root.findById(input.id)===input),size=this.findThemeFontSize(input);
-    const presentation=()=>guiInputPresentation(input,text=>this.owner.renderer.measureTextWidth(text,size,root,input),size,this.owner.renderer.measureTextLineHeight(size,root,input));
+    const presentation=()=>guiInputPresentation(input,guiRendererTextMeasure(this.owner.renderer,size,root,input),size,this.owner.renderer.measureTextLineHeight(size,root,input));
     let local=presentation().caret;
     const projection=this.owner.inputProjection(),canvas=this.owner.engine.canvas;
     if(!projection||!canvas)return local;
@@ -174,7 +182,7 @@ textCaretRect(input:GuiInput){
     if (isGuiControl<GuiInput>(focused, 'GuiInput') && (this.composing || focused.isComposing || event.isComposing)) return true;
     if(isGuiControl<GuiInput>(focused, 'GuiInput')&&focused.multiline&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&(event.key==='ArrowUp'||event.key==='ArrowDown')){
       const root=[...this.owner.roots].find(root=>root.findById(focused.id)===focused),size=this.findThemeFontSize(focused);
-      const presentation=guiInputPresentation(focused,text=>this.owner.renderer.measureTextWidth(text,size,root,focused),size,this.owner.renderer.measureTextLineHeight(size,root,focused));
+      const presentation=guiInputPresentation(focused,guiRendererTextMeasure(this.owner.renderer,size,root,focused),size,this.owner.renderer.measureTextLineHeight(size,root,focused));
       focused.setCaret(presentation.indexAt(presentation.caret.x,presentation.caret.y+(event.key==='ArrowUp'?-1:1)*presentation.lineHeight+presentation.lineHeight/2),event.shiftKey);return true;
     }
     return false;

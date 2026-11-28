@@ -39,6 +39,7 @@ npm run api:check
 只有经过 API 评审后才运行 `npm run api:update`。后续引入自动 API 页面生成时，应从构建后的声明文件生成到本目录的生成子目录，手写入口和错误码页面继续保留。
 
 - [GUI controls](./gui-controls.md)
+- [GUI display and overlays](./gui-library.md)
 
 - [GPU 实例、Toon、LOD 与模拟（experimental）](gpu-instances.md)
 - [Deferred Lighting（experimental）](deferred-lighting.md)
@@ -51,3 +52,5 @@ npm run api:check
 
 - [Achievements (development candidate)](achievements.md): event rules, durable progress and optional GPU GUI.
 - [Game audio (development candidate)](audio.md): original mixer, profiles, fades and bounded 2D emitters.
+- [GUI data, forms and content (development)](gui-data-content.md): P2 controllers, parts, async and virtual-row contracts.
+- [GUI specialized tools (development)](gui-specialty.md): P3 date/time, assets, composition and input-aid contracts.

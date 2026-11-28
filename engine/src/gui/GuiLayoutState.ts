@@ -1,5 +1,5 @@
 import type {GuiElement} from './components/GuiElement';
-import {GuiDirtyFlags, type GuiRect} from './GuiTypes';
+import {GuiDirtyFlags, resolveGuiLength, type GuiRect, type GuiLength} from './GuiTypes';
 
 type Sink = (element: GuiElement, flags: GuiDirtyFlags, reason?: 'resource' | 'animation',kind?:number,structure?:number) => void;
 type StructureSink=(parent:GuiElement,child:GuiElement,added:boolean,version:number)=>void;
@@ -58,6 +58,15 @@ export function assignedGuiRect(element: GuiElement): GuiRect | undefined {
     if (scrollAxes.get(ancestor)?.() === 'horizontal') x += offset; else y += offset;
   }
   return {...rect, x: rect.x - x, y: rect.y - y};
+}
+/** Arrange only this rectangle; each container owns its one traversal in final content coordinates. */
+export function layoutGuiElementSelf(element: GuiElement, parent: GuiRect, x: GuiLength, y: GuiLength, width: GuiLength, height: GuiLength): boolean {
+  const assigned = assignedGuiRect(element);
+  element.rect = assigned ?? {
+    x: parent.x + resolveGuiLength(x, parent.width, 0), y: parent.y + resolveGuiLength(y, parent.height, 0),
+    width: resolveGuiLength(width, parent.width, element.rect.width), height: resolveGuiLength(height, parent.height, element.rect.height),
+  };
+  return !assigned || !isGuiLayoutHidden(element);
 }
 export function isGuiLayoutManaged(element: GuiElement): boolean {return managed.has(element);}
 export function isGuiLayoutHidden(element: GuiElement): boolean {return hidden.has(element);}

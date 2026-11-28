@@ -52,6 +52,27 @@ const stringTask = overrides => ({
   ...overrides,
 });
 
+test('WorkerChannel owns request identity even when payload contains envelope keys', async () => {
+  const worker=new ControlledWorker(),channel=createChannel(worker);
+  const payload={version:999,id:99,type:'foreign',value:'kept'};
+  const pending=channel.request('decode',payload,stringTask());
+  const message=worker.messages[0].message;
+  assert.equal(message.version,WORKER_CHANNEL_PROTOCOL_VERSION);
+  assert.equal(message.type,'decode');assert.notEqual(message.id,99);assert.equal(message.value,'kept');
+  assert.deepEqual(payload,{version:999,id:99,type:'foreign',value:'kept'});
+  worker.respond(message.id,'done');assert.equal(await pending,'done');assert.equal(channel.pendingCount,0);assert.equal(channel.isFaulted,false);channel.dispose();
+});
+
+test('payload envelope collisions cannot evade cancellation or leave pending tasks on disposal', async () => {
+  const worker=new ControlledWorker(),channel=createChannel(worker),controller=new AbortController();
+  const cancelled=channel.request('decode',{id:99,version:999,type:'foreign'},stringTask({signal:controller.signal}));
+  const checked=assert.rejects(cancelled,e=>e.name==='AbortError');
+  const id=worker.messages[0].message.id;controller.abort();await checked;
+  assert.equal(channel.pendingCount,0);worker.respond(id,'late');assert.equal(channel.isFaulted,false);
+  const pending=channel.request('decode',{id:100},stringTask());const disposed=assert.rejects(pending);channel.dispose();await disposed;
+  assert.equal(channel.pendingCount,0);assert.equal(worker.terminateCalls,1);
+});
+
 test('WorkerChannel validates versioned responses and transferable ownership', async () => {
   const worker = new ControlledWorker();
   const channel = createChannel(worker);

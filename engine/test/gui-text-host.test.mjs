@@ -16,6 +16,19 @@ function fixture({finish=null,reenterClose=false}={}){
 }
 const composition=(request,phase,text='',extra={})=>request.onComposition({generation:request.generation,phase,text,selectionUtf16:[text.length,text.length],...extra});
 
+test('native vertical input keys use the original action route once, defer to raw owners and leave IME alone',()=>{
+ const f=fixture();let count=0;class CustomInput extends GuiInput{handleAction(event){if(event.action==='up'||event.action==='down'){count++;event.consume();}else super.handleAction(event);}}
+ const input=f.root.add(new CustomInput({value:'value'}));f.root.layout(200,100);f.focus(input);const q=f.records.at(-1).request;
+ const key=(type='keydown',extra={})=>{const event=new Event(type,{cancelable:true});Object.assign(event,{key:'ArrowDown',code:'ArrowDown',repeat:false,...extra});return event;};
+ assert.equal(q.onKeyboard(key()),true);assert.equal(count,1);q.onKeyboard(key('keyup'));assert.equal(count,1);
+ assert.equal(q.onKeyboard(key('keydown',{ctrlKey:true})),false);q.onKeyboard(key('keyup'));assert.equal(count,1);
+ composition(q,'start');composition(q,'update','ni');q.onKeyboard(key());q.onKeyboard(key('keyup'));assert.equal(count,1);composition(q,'cancel');
+ const release=f.system.bindExternalElement(input,{keyboard:()=>true});const current=f.records.at(-1).request;assert.equal(current.onKeyboard(key()),true);current.onKeyboard(key('keyup'));assert.equal(count,1);release();f.close();
+});
+test('native multiline vertical navigation synchronizes the same host selection before returning',()=>{
+ const f=fixture(),input=f.root.add(new GuiInput({value:'a\nb',multiline:true,width:200,height:80}));f.root.layout(300,200);f.focus(input);const record=f.records.at(-1),event=new Event('keydown',{cancelable:true});Object.assign(event,{key:'ArrowUp',code:'ArrowUp',repeat:false});assert.equal(input.caretIndex,3);assert.equal(record.request.onKeyboard(event),true);assert.equal(input.caretIndex,1);assert.deepEqual(record.selections.at(-1),[1,1]);f.close();
+});
+
 test('host composition preview commits once, is synchronized, and duplicate transaction edits are ignored',()=>{
  const f=fixture();f.focus(f.a);const r=f.records[0],q=r.request;
  composition(q,'start');composition(q,'update','中');assert.equal(f.a.value,'ab');assert.equal(f.a.displayValue,'ab中');

@@ -2,7 +2,7 @@ import type {GuiElement} from './components/GuiElement';
 import type {GuiInvalidation} from './GuiLayoutTypes';
 import {GuiDirtyFlags} from './GuiTypes';
 
-const enum Change {Unknown=0,Paint=1,TextContent=2,LayoutStyle=3}
+const enum Change {Unknown=0,Paint=1,TextContent=2,LayoutStyle=3,State=4}
 const current=new WeakMap<GuiElement,Change>(),manualStable=new WeakSet<GuiElement>(),metricsDirty=new WeakSet<GuiElement>();
 const structureChanges=new WeakMap<GuiElement,number>();
 const notifications=new WeakMap<GuiInvalidation,Change>();
@@ -15,12 +15,19 @@ export function markGuiStructureDirty(element:GuiElement,version:number):void {
   try{element.markDirty(GuiDirtyFlags.Children|GuiDirtyFlags.Layout);}finally{if(before===undefined)structureChanges.delete(element);else structureChanges.set(element,before);}
 }
 export function guiTextContentChange(kind:number):boolean {return kind===Change.TextContent;}
-export function guiLocalChange(kind:number):boolean {return kind===Change.Paint||kind===Change.TextContent;}
+export function guiLocalChange(kind:number):boolean {return kind===Change.Paint||kind===Change.TextContent||kind===Change.State;}
 export function rememberGuiInvalidation(change:GuiInvalidation,kind:number):void {notifications.set(change,kind);}
-export function guiPaintOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.Paint;}
+export function guiPaintOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.Paint||notifications.get(change)===Change.State;}
+export function guiStateOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.State;}
 export function guiTextContentOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.TextContent;}
 export function guiLayoutStyleOnly(change:GuiInvalidation):boolean {return notifications.get(change)===Change.LayoutStyle;}
 export function guiLayoutStyleChange():number {return Change.LayoutStyle;}
+/** Exact cache inputs; an absent snapshot always means the provider is live/uncacheable. */
+export function sameGuiInputs(a:readonly unknown[]|undefined,b:readonly unknown[]|undefined):boolean {
+  if(!a||!b||a.length!==b.length)return false;
+  for(let i=0;i<a.length;i++)if(!Object.is(a[i],b[i]))return false;
+  return true;
+}
 export function noteGuiTextDirty(element:GuiElement,flags:GuiDirtyFlags,kind:number):void {
   if(flags&GuiDirtyFlags.Text&&kind!==Change.TextContent)metricsDirty.add(element);
 }
@@ -31,6 +38,7 @@ function mark(element:GuiElement,flags:GuiDirtyFlags,kind:Change):void {
   try{element.markDirty(flags);}finally{if(before===undefined)current.delete(element);else current.set(element,before);}
 }
 export function markGuiPaintDirty(element:GuiElement):void {mark(element,GuiDirtyFlags.Visual,Change.Paint);}
+export function markGuiStateDirty(element:GuiElement):void {mark(element,GuiDirtyFlags.Visual|GuiDirtyFlags.Input,Change.State);}
 /** Only stock leaf painters opt in; custom layout/skin code keeps conservative invalidation. */
 export function guiStockTextControl(element:GuiElement,prototype:GuiElement,base:GuiElement):boolean {
   if(Object.getPrototypeOf(element)!==prototype||element.markDirty!==base.markDirty||element.layout!==prototype.layout||element.getResolvedStyle!==base.getResolvedStyle||element.getContentRect!==base.getContentRect||element.getLayoutOptions!==base.getLayoutOptions)return false;

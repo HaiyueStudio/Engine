@@ -1,0 +1,15 @@
+import type {GuiElement,GuiElementOptions,GuiRoot,GuiFocusManager,GuiImageSource,GuiRect,GuiDragSource} from '@haiyue/engine/gui';
+export interface GuiContentOptions extends GuiElementOptions {readonly root?:GuiRoot;readonly focusManager?:GuiFocusManager;}
+export interface GuiStep {readonly key:string;readonly title:string;readonly description?:string;readonly content?:GuiElement;readonly status?:'wait'|'process'|'finish'|'error';readonly disabled?:boolean;}
+export interface GuiStepsOptions extends GuiContentOptions {readonly items:readonly GuiStep[];readonly currentKey?:string;readonly direction?:'horizontal'|'vertical';readonly onChange?:(key:string)=>void;}
+export interface GuiTimelineItem {readonly key:string;readonly title:string;readonly description?:string;readonly status?:'info'|'success'|'warning'|'error';}
+export interface GuiTimelineOptions extends Omit<GuiContentOptions,'height'> {readonly items:readonly GuiTimelineItem[];readonly height?:number;readonly rowHeight?:number;readonly createRow?:()=>import('../gui-collections.js').GuiCollectionRow<GuiTimelineItem>;}
+export interface GuiDescriptionItem {readonly key:string;readonly label:string;readonly value?:string;readonly content?:GuiElement;}
+export interface GuiDescriptionsOptions extends GuiContentOptions {readonly items:readonly GuiDescriptionItem[];readonly columns?:number;readonly rowHeight?:number;readonly direction?:'horizontal'|'vertical';readonly emptyText?:string;}
+export interface GuiRateOptions extends GuiContentOptions {readonly value?:number;readonly count?:number;readonly allowHalf?:boolean;readonly allowClear?:boolean;readonly readOnly?:boolean;readonly onChange?:(value:number)=>void;}
+export interface GuiResultOptions extends GuiContentOptions {readonly title:string;readonly description?:string;readonly status?:'info'|'success'|'warning'|'error';readonly icon?:GuiImageSource;readonly actions?:GuiElement;}
+export interface GuiRibbonOptions extends GuiContentOptions {readonly text:string;readonly content:GuiElement;readonly placement?:'start'|'end';readonly color?:string;}
+export interface GuiImagePreviewOptions extends GuiContentOptions {readonly root:GuiRoot;readonly focusManager:GuiFocusManager;readonly images:readonly GuiImageSource[];readonly index?:number;readonly onChange?:(index:number)=>void;}
+export interface GuiCarouselOptions extends GuiContentOptions {readonly slides:readonly GuiElement[];readonly index?:number;readonly autoplayMs?:number;readonly onChange?:(index:number)=>void;}
+export interface GuiDraggableOptions extends GuiContentOptions {readonly content:GuiElement;readonly data:()=>unknown;readonly createPreview?:GuiDragSource['createPreview'];readonly disposePreview?:GuiDragSource['disposePreview'];readonly onEnd?:GuiDragSource['onEnd'];readonly handleLabel?:string;}
+export interface GuiResizableOptions extends GuiContentOptions {readonly content:GuiElement;readonly initialWidth:number;readonly initialHeight:number;readonly minWidth?:number;readonly minHeight?:number;readonly maxWidth?:number;readonly maxHeight?:number;readonly onResize?:(size:Readonly<{width:number;height:number}>)=>void;}

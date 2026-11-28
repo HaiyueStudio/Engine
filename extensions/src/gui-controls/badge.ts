@@ -1,8 +1,10 @@
-import{GuiElement,GuiLabel,GuiDirtyFlags}from'@haiyue/engine/gui';
+import{GuiElement,GuiLabel,GuiProgress,GuiDirtyFlags}from'@haiyue/engine/gui';
 import type{GuiStyle}from'@haiyue/engine/gui';
 import{createGuiContainer,ownContentFrame,setContainerStyle}from'../gui-layout/presets.js';
 import{invalid,live}from'./common.js';
 import type{GuiBadgeOptions,GuiBadgeValue,GuiBadgeStatus}from'./types.js';
+import {statusColor,show} from '../gui-common/composite.js';
+import {GuiCleanup} from '../gui-layout/panel-cleanup.js';
 const colors:Readonly<Record<GuiBadgeStatus,string>>={default:'#64748b',processing:'#2563eb',success:'#16a34a',warning:'#d97706',error:'#dc2626'};
 type State=Required<Omit<GuiBadgeOptions,'content'|'style'>> & {readonly style:GuiStyle};
 function snapshot(value:Omit<GuiBadgeOptions,'content'>,base?:State):State{
@@ -21,6 +23,8 @@ export class GuiBadge{
  private readonly count:GuiLabel;
  private readonly statusText:GuiLabel;
  private readonly content:GuiElement|undefined;
+ private readonly pulse:GuiProgress;
+ private readonly parts:(()=>void)[]=[];
  private readonly release:()=>void;
  private dead=false;
  constructor(options:GuiBadgeOptions={}){
@@ -30,8 +34,11 @@ export class GuiBadge{
   this.element=createGuiContainer('row',{style:{width:'auto',height:'auto',alignItems:'center'}});this.element.pointerFilter='ignore';
   if(content)this.element.add(content);
   this.decoration=this.element.add(createGuiContainer('row',{style:{width:'auto',height:20,alignItems:'center',columnGap:6}}));this.decoration.pointerFilter='ignore';
-  this.count=this.decoration.add(new GuiLabel({text:'',autoWidth:true,textAlign:'center',pointerFilter:'ignore',themeControlType:'GuiBadge',style:{fontSize:12,padding:4,radius:10,color:'#ffffff'}}));
+  this.count=this.decoration.add(new GuiLabel({text:'',autoWidth:true,textAlign:'center',pointerFilter:'ignore',themeControlType:'GuiBadge'}));
   this.statusText=this.decoration.add(new GuiLabel({text:'',autoWidth:true,pointerFilter:'ignore',themeControlType:'GuiBadgeStatusText'}));
+  setContainerStyle(this.statusText,{width:'auto',height:20});
+  this.pulse=this.decoration.add(new GuiProgress({variant:'circle',indeterminate:false,strokeWidth:1.5,pointerFilter:'ignore'}));setContainerStyle(this.pulse,{position:'absolute',width:16,height:16,inset:{left:-4,top:2}});
+  this.parts.push(this.element.bindPart('indicator',this.count),this.element.bindPart('statusText',this.statusText),this.element.bindPart('processing',this.pulse));if(content)this.parts.push(this.element.bindPart('content',content));
   this.paint(true);
  }
  setValue(value:GuiBadgeValue):void{this.setOptions({value});}
@@ -39,13 +46,16 @@ export class GuiBadge{
  private paint(initial:boolean,previous?:State):void{
   const s=this.state,count=s.variant==='count',status=s.variant==='status',shown=!count||s.value!==0||s.showZero;
   const label=count?typeof s.value==='number'&&s.value>s.overflowCount?s.overflowCount+'+':String(s.value):'';
-  this.decoration.setVisible(shown);this.count.setText(label);this.statusText.setText(status?s.statusText:'');this.statusText.setVisible(status&&!!s.statusText);
-  this.count.setStyle({backgroundColor:count?colors.error:colors[s.status],radius:count?10:4,padding:count?4:0,...s.style});
+  show(this.decoration,shown);this.count.setText(label);this.statusText.setText(status?s.statusText:'');show(this.statusText,status&&!!s.statusText);
+  const styleChanged=initial||!previous||Object.keys(s.style).length!==Object.keys(previous.style).length||Object.entries(s.style).some(([key,value])=>value!==previous.style[key as keyof GuiStyle]);
+  if(initial||previous?.variant!==s.variant||previous?.status!==s.status){this.count.setDefaultSkin(theme=>({backgroundColor:count?theme.colors.danger:statusColor(theme,s.status==='processing'?'info':s.status==='error'?'error':s.status),radius:count?10:4,padding:count?4:0,fontSize:12,fontWeight:600,color:theme.colors.onPrimary??'#fff',borderColor:theme.colors.elevated??theme.colors.surface,borderWidth:1}));this.statusText.setDefaultSkin(theme=>({color:theme.colors.textMuted,fontSize:12}));}
+  if(styleChanged){const{parts,...indicatorStyle}=s.style;this.count.setStyle(indicatorStyle);if(parts)this.element.setStyle({parts});}
+  const processing=s.variant!=='count'&&s.status==='processing';show(this.pulse,processing);this.pulse.setIndeterminate(processing);
   if(initial||previous?.variant!==s.variant){setContainerStyle(this.count,{width:count?'auto':8,height:count?20:8,minWidth:count?20:8,shrink:0});this.count.setAutoWidth(count);this.count.markDirty();}
   if(initial||previous?.placement!==s.placement||previous.offset[0]!==s.offset[0]||previous.offset[1]!==s.offset[1]){
    const[x,y]=s.offset;
    setContainerStyle(this.decoration,this.content?{position:'absolute',width:'auto',height:20,inset:{...(s.placement.endsWith('left')?{left:x}:{right:-x}),...(s.placement.startsWith('top')?{top:y}:{bottom:-y})}}:{width:'auto',height:20,margin:{left:x,top:y}});this.decoration.markDirty(GuiDirtyFlags.Layout);
   }
  }
- dispose():void{if(this.dead)return;this.dead=true;this.element.parent?.remove(this.element);if(this.content?.parent===this.element)this.element.remove(this.content);this.release();for(const child of [...this.element.children])this.element.remove(child);}
+ dispose():void{if(this.dead)return;this.dead=true;const cleanup=new GuiCleanup();cleanup.run(()=>this.pulse.setIndeterminate(false));for(const off of this.parts.splice(0))cleanup.run(off);cleanup.run(()=>this.element.parent?.remove(this.element));cleanup.run(()=>{if(this.content?.parent===this.element)this.element.remove(this.content);});cleanup.run(this.release);for(const child of [...this.element.children])cleanup.run(()=>this.element.remove(child));cleanup.complete('GUI badge cleanup failed.');}
 }

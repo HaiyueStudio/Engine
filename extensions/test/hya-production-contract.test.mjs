@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,existsSync,readdirSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import ts from 'typescript';
 import {loadHyaProductionSource} from '../../animation-spec/test/helpers/hya-production-source.mjs';
+import {assertFoundationModuleCensus} from './helpers/hya-foundation-module-census.mjs';
 
 const root=fileURLToPath(new URL('../..',import.meta.url));
 const read=path=>JSON.parse(readFileSync(resolve(root,path),'utf8'));
@@ -16,7 +17,7 @@ const sourceFile=path=>ts.createSourceFile(path,readFileSync(resolve(root,path),
 test('HYA capability census separates format, runtime, public examples and evidence with explicit ownership',()=>{
  assert.equal(contract.capabilities.length,40);assert.deepEqual(contract.unclassifiedCapabilities,[]);
  assert.equal(new Set(contract.capabilities.map(c=>c.id)).size,40);assert.equal(new Set(contract.capabilities.map(c=>c.negotiationId)).size,40);
- assert.deepEqual(Object.keys(contract.foundationModules).sort(),readdirSync(resolve(root,'animation-spec/src')).sort());
+ assertFoundationModuleCensus(resolve(root,'animation-spec/src'),contract.foundationModules);
  const classified=new Set(contract.capabilities.map(c=>c.id));
  for(const rows of Object.values(contract.foundationModules))for(const id of rows)assert.ok(classified.has(id),id);
  const components=sourceFile('animation-spec/src/types.ts').statements.filter(s=>ts.isInterfaceDeclaration(s)&&s.name.text.endsWith('Component')).map(s=>s.name.text);

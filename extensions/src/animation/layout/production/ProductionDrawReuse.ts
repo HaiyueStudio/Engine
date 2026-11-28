@@ -20,7 +20,7 @@ export function reuseProductionDrawStorage(plan: ProductionDrawPlan, previous?: 
   }
   const visuals = plan.visuals.map(visual => {
     const prior = old.get(visual.nodeKey);
-    if (!prior || duplicates.has(visual.nodeKey) || !same(visual.geometry.positions,prior.geometry.positions)
+    if (!prior || duplicates.has(visual.nodeKey) || visual.geometry.topology !== prior.geometry.topology || !same(visual.geometry.positions,prior.geometry.positions)
       || !same(visual.geometry.indices,prior.geometry.indices)) return visual;
     return visual.clone({geometry:prior.geometry,...(visual.uvs && same(visual.uvs,prior.uvs) ? {uvs:prior.uvs!} : {})});
   });

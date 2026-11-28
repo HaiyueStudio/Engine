@@ -5,6 +5,7 @@ import { AssetManager } from '../assets/AssetManager';
 import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
+import { getInstrumentedGPUResourceTracker } from '../core/GPUResourceTracker';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
 import type { Geometry3D } from '../geometry/Geometry3D';
 import type { MaterialTextureSource, SampleableTextureSource } from '../material/BasicMaterial';
@@ -27,6 +28,7 @@ import type { LiveIdSet } from './utils';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { ParameterizedRendererCore, SharedGeometryRendererOwner } from './ParameterizedRendererCore';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 const OBJECT_BASE_FLOATS = 32;
 const OBJECT_FLOATS = OBJECT_BASE_FLOATS;
@@ -54,6 +56,7 @@ interface ToonMaterialGpuData {
   samplerKeys: string[];
   sources: unknown[];
   handles: Array<AssetHandle<GPUTexture> | null>;
+  requestGenerations: number[];
   loaded: boolean[];
   f32: Float32Array;
   snapshotKey: string;
@@ -67,6 +70,8 @@ export class ToonRenderer extends BaseRenderer {
   private _engine!: IEngine;
   private _assetManager!: AssetManager;
   private _ownsAssetManager = false;
+  private _recorded!: RecordedGpuResources;
+  private _commandContext: RenderCommandContext | undefined;
   private _shader!: GPUShaderModule;
   private _shaderKey = '';
   private _pipelineLayout!: GPUPipelineLayout;
@@ -93,6 +98,7 @@ export class ToonRenderer extends BaseRenderer {
   private readonly _materials = new RendererCacheMap<ToonMaterialGpuData>(data => this._destroyMaterial(data));
   private readonly _samplers = new Map<string, GPUSampler>();
   private readonly _shadowData = new Float32Array(SHADOW_FLOATS);
+  private readonly _shadowSnapshot = new Float32Array(SHADOW_FLOATS).fill(Number.NaN);
   private readonly _inverseScratch = mat4.identity() as Float32Array;
   private readonly _normalScratch = mat4.identity() as Float32Array;
   private _initialized = false;
@@ -103,8 +109,11 @@ export class ToonRenderer extends BaseRenderer {
     this._initialized = true;
     this._engine = engine;
     const device = engine.device;
+    this._recorded = new RecordedGpuResources(device);
+    this._shadowSnapshot.fill(Number.NaN);
     this._assetManager = engine.assetManager ?? new AssetManager(device, getEngineGPUResourceTracker(engine), engine.defaults?.assetManager);
     this._ownsAssetManager = !engine.assetManager;
+    if (this._ownsAssetManager) { const assets = this._assetManager; this._recorded.own(assets, () => assets.dispose()); }
     this._sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
     this._objectLayout = device.createBindGroupLayout({ entries: [
       { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
@@ -142,7 +151,11 @@ export class ToonRenderer extends BaseRenderer {
       geometry: new SharedGeometryRendererOwner(device, this, getEngineGPUResourceTracker(engine)),
     });
     this._lightUniforms = new ViewLightUniformBuffer(device, 'ToonRenderer.lights');
+    const lights = this._lightUniforms;
+    this._recorded.own(lights, () => lights.destroy());
     this._shadowBuffer = device.createBuffer({ label: 'ToonRenderer.shadow', size: SHADOW_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    const shadowBuffer = this._shadowBuffer;
+    this._recorded.own(shadowBuffer, () => shadowBuffer.destroy());
     this._defaultSampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' });
     this._defaultTexture = this._createSolidTexture();
     this._defaultShadowSampler = device.createSampler({ compare: 'less-equal' });
@@ -152,6 +165,8 @@ export class ToonRenderer extends BaseRenderer {
       format: 'depth32float',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
+    const shadowTexture = this._defaultShadowTexture;
+    this._recorded.own(shadowTexture, () => shadowTexture.destroy());
     this._defaultShadowView = this._defaultShadowTexture.createView({
       dimension: '2d-array',
       baseArrayLayer: 0,
@@ -164,6 +179,7 @@ export class ToonRenderer extends BaseRenderer {
   }
 
   beginView(context: MaterialRendererViewContext): void {
+    this._commandContext = context.commandContext;
     this.reverseZ = context.reverseZ;
     this.msaaSamples = context.msaaSamples;
     this._rendererCore.beginUploads(context.commandContext);
@@ -204,6 +220,7 @@ export class ToonRenderer extends BaseRenderer {
 
   endView(): void {
     this._rendererCore.endView();
+    this._commandContext = undefined;
   }
 
   render(
@@ -233,6 +250,7 @@ export class ToonRenderer extends BaseRenderer {
         const geometryData = this._geometryCache.ensure(item.geometry, this);
         const materialData = this._materials.ensure(item.material.id, () => this._createMaterial());
         if (!this._uploadsPrepared) this._syncMaterial(item.material, materialData);
+        this._retainBindings(materialData);
         const bindings = batchBuffer.gpuUploadEnabled ? this.indirectBatches.begin() : pass;
         bindings.setPipeline(this._getPipeline(item.geometry, item.material));
         bindings.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
@@ -296,6 +314,7 @@ export class ToonRenderer extends BaseRenderer {
     if (!this._uploadsPrepared) this._writeObject(object, clippingPlanes, worldMatrix, objectSlot, table, batchSlot === undefined);
     const materialData = this._materials.ensure(this._rendererCore.materialIdentity(material), () => this._createMaterial());
     if (!this._uploadsPrepared) this._syncMaterial(material, materialData);
+    this._retainBindings(materialData);
 
     pass.setPipeline(this._getPipeline(geometry, material));
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
@@ -341,7 +360,7 @@ export class ToonRenderer extends BaseRenderer {
   }
 
   private _createMaterial(): ToonMaterialGpuData {
-    const buffer = this._engine.device.createBuffer({ label: 'ToonRenderer.material', size: MATERIAL_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    const buffer = this._createMaterialBuffer();
     const data: ToonMaterialGpuData = {
       buffer,
       bindGroup: null as unknown as GPUBindGroup,
@@ -350,6 +369,7 @@ export class ToonRenderer extends BaseRenderer {
       samplerKeys: LAYER_INDICES.map(() => 'default'),
       sources: LAYER_INDICES.map(() => null),
       handles: LAYER_INDICES.map(() => null),
+      requestGenerations: LAYER_INDICES.map(() => 0),
       loaded: LAYER_INDICES.map(() => false),
       f32: new Float32Array(MATERIAL_FLOATS),
       snapshotKey: '',
@@ -372,7 +392,6 @@ export class ToonRenderer extends BaseRenderer {
         bindingsChanged = true;
       }
     }
-    if (bindingsChanged) data.bindGroup = this._buildMaterialBindGroup(data);
     const snapshotKey = `${material.revision}|${data.loaded.map(value => value ? 1 : 0).join('')}`;
     if (data.snapshotKey === snapshotKey) return;
     data.snapshotKey = snapshotKey;
@@ -394,12 +413,35 @@ export class ToonRenderer extends BaseRenderer {
     data.f32[25] = material.bandSoftness;
     data.f32[26] = textureMask;
     data.f32[27] = material.alphaMode === 'opaque' ? 1 : 0;
+    // queue.writeBuffer precedes all later submissions, even those sharing this encoder.
+    if (this._recorded.pending(data.buffer)) {
+      const previous = data.buffer;
+      data.buffer = this._createMaterialBuffer();
+      bindingsChanged = true;
+      this._recorded.retire(previous);
+    }
+    if (bindingsChanged) this._rebuildMaterialBindGroup(data);
     writeBuffer(this._engine.device.queue, data.buffer, 0, data.f32);
+  }
+
+  private _createMaterialBuffer(): GPUBuffer {
+    const buffer = this._engine.device.createBuffer({ label: 'ToonRenderer.material', size: MATERIAL_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    return this._recorded.own(buffer, () => buffer.destroy());
+  }
+
+  private _retainBindings(data: ToonMaterialGpuData): void {
+    const context = this._commandContext;
+    for (const resource of [data.buffer, data.bindGroup, this._sceneBindGroup, this._lightUniforms, this._shadowBuffer, this._defaultTexture, this._defaultShadowTexture]) this._recorded.retain(resource, context);
+    for (const handle of data.handles) if (handle) this._recorded.retain(handle, context);
+    if (this._ownsAssetManager) this._recorded.retain(this._assetManager, context);
   }
 
   private _syncTexture(index: number, source: MaterialTextureSource, data: ToonMaterialGpuData): boolean {
     if (data.sources[index] === source) return false;
-    data.handles[index]?.release();
+    const generation = (data.requestGenerations[index] ?? 0) + 1;
+    data.requestGenerations[index] = generation;
+    const previousHandle = data.handles[index];
+    if (previousHandle) this._recorded.retire(previousHandle);
     data.handles[index] = null;
     data.sources[index] = source;
     data.loaded[index] = false;
@@ -416,14 +458,15 @@ export class ToonRenderer extends BaseRenderer {
       source as string | ImageBitmap | HTMLCanvasElement | HTMLImageElement | CompressedTextureSourceDescriptor,
       { format: 'rgba8unorm-srgb', mipmaps: 'generate', signal: this._rendererCore.signal },
     ).then(handle => {
-      if (this._rendererCore.destroyed || data.disposed || data.sources[index] !== source) {
+      if (this._rendererCore.destroyed || data.disposed || data.sources[index] !== source || data.requestGenerations[index] !== generation) {
         handle.release();
         return;
       }
       data.handles[index] = handle;
+      this._recorded.own(handle, () => handle.release());
       data.textures[index] = handle.value;
       data.loaded[index] = true;
-      data.bindGroup = this._buildMaterialBindGroup(data);
+      this._rebuildMaterialBindGroup(data);
       data.snapshotKey = '';
     }).catch(error => {
       if (!this._rendererCore.destroyed) console.warn(`[ToonRenderer] Failed to load layer ${index} texture.`, error);
@@ -446,24 +489,46 @@ export class ToonRenderer extends BaseRenderer {
     this._shadowData[17] = shadow?.bias ?? 0;
     this._shadowData[18] = shadow?.normalBias ?? 0;
     this._shadowData[19] = shadow ? 1 / shadow.mapSize : 1;
+    if (this._shadowData.every((value, index) => value === this._shadowSnapshot[index])) return;
+    if (this._recorded.pending(this._shadowBuffer)) {
+      const previous = this._shadowBuffer;
+      const buffer = this._engine.device.createBuffer({ label: 'ToonRenderer.shadow', size: SHADOW_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      this._shadowBuffer = this._recorded.own(buffer, () => buffer.destroy());
+      this._rebuildSceneBindGroup();
+      this._recorded.retire(previous);
+    }
     writeBuffer(this._engine.device.queue, this._shadowBuffer, 0, this._shadowData);
+    this._shadowSnapshot.set(this._shadowData);
   }
 
   private _rebuildSceneBindGroup(): void {
+    const previous = this._sceneBindGroup;
     this._sceneBindGroup = this._engine.device.createBindGroup({ layout: this._sceneLayout, entries: [
       { binding: 0, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
       { binding: 5, resource: { buffer: this._shadowBuffer } },
       { binding: 6, resource: this._shadowView },
       { binding: 7, resource: this._shadowSampler },
     ] });
+    const group = this._sceneBindGroup;
+    const tracker = getInstrumentedGPUResourceTracker(this._engine.device);
+    this._recorded.own(group, () => tracker?.untrackObject(group));
+    if (previous) this._recorded.retire(previous);
   }
 
   private _buildMaterialBindGroup(data: ToonMaterialGpuData): GPUBindGroup {
-    return this._engine.device.createBindGroup({ layout: this._materialLayout, entries: [
+    const group = this._engine.device.createBindGroup({ layout: this._materialLayout, entries: [
       { binding: 0, resource: { buffer: data.buffer } },
       ...LAYER_INDICES.map(index => ({ binding: index + 1, resource: data.textures[index]!.createView() })),
       ...LAYER_INDICES.map(index => ({ binding: index + 1 + TOON_MAX_LAYERS, resource: data.samplers[index]! })),
     ] });
+    const tracker = getInstrumentedGPUResourceTracker(this._engine.device);
+    return this._recorded.own(group, () => tracker?.untrackObject(group));
+  }
+
+  private _rebuildMaterialBindGroup(data: ToonMaterialGpuData): void {
+    const previous = data.bindGroup;
+    data.bindGroup = this._buildMaterialBindGroup(data);
+    this._recorded.retire(previous);
   }
 
   private _getPipeline(geometry: Geometry3D, material: ToonMaterial): GPURenderPipeline {
@@ -532,25 +597,23 @@ export class ToonRenderer extends BaseRenderer {
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
     this._engine.device.queue.writeTexture({ texture }, new Uint8Array([255, 255, 255, 255]), { bytesPerRow: 4 }, [1, 1, 1]);
-    return texture;
+    return this._recorded.own(texture, () => texture.destroy());
   }
 
   private _destroyMaterial(data: ToonMaterialGpuData): void {
     data.disposed = true;
-    data.buffer.destroy();
-    for (const handle of data.handles) handle?.release();
+    this._recorded.retire(data.buffer);
+    this._recorded.retire(data.bindGroup);
+    for (const handle of data.handles) if (handle) this._recorded.retire(handle);
   }
 
   destroy(): void {
     this._sceneFrameBinding?.destroy();
-    this._lightUniforms?.destroy();
-    this._shadowBuffer?.destroy();
-    this._defaultTexture?.destroy();
-    this._defaultShadowTexture?.destroy();
     this._rendererCore?.destroy();
     this._materials.clear();
     this._samplers.clear();
-    if (this._ownsAssetManager) this._assetManager?.dispose();
+    this._recorded?.retireAll();
+    this._commandContext = undefined;
     this.clearPipelineCache();
     this._initialized = false;
   }

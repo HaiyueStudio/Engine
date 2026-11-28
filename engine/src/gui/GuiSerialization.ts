@@ -1,3 +1,4 @@
+import {captureGuiStyle} from './GuiStyleLayers';
 import { GuiColorPicker } from './components/GuiColorPicker';
 import { GuiToast } from './components/GuiToast';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
@@ -247,7 +248,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'color-picker':
       return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
-      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant), hoverTransition: booleanProp(props.hoverTransition, false), hoverTransitionMs: numberProp(props.hoverTransitionMs, 180) });
+      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant),loading:booleanProp(props.loading,false),iconOnly:booleanProp(props.iconOnly,false), hoverTransition: booleanProp(props.hoverTransition, false), hoverTransitionMs: numberProp(props.hoverTransitionMs, 180) });
     case 'label': {
       const fontSize = optionalNumberProp(props.fontSize);
       return new GuiLabel({
@@ -278,7 +279,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'input':
       return new GuiInput({
         ...base,
-        value: stringProp(props.value, ''),
+        value: stringProp(props.value, ''),prefix:stringProp(props.prefix,''),suffix:stringProp(props.suffix,''),clearable:booleanProp(props.clearable,false),helpText:stringProp(props.helpText,''),invalid:booleanProp(props.invalid,false),
         placeholder: stringProp(props.placeholder, ''),
         readOnly: booleanProp(props.readOnly, false),
         ...(props.maxLength===undefined?{}:{maxLength:numberProp(props.maxLength,Infinity)}),
@@ -286,9 +287,9 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         multiline:booleanProp(props.multiline,false),
       });
     case 'checkbox':
-      return new GuiCheckbox({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
+      return new GuiCheckbox({ ...base, indeterminate:booleanProp(props.indeterminate,false),checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
     case 'switch':
-      return new GuiSwitch({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, ''), thumbTransitionMs: numberProp(props.thumbTransitionMs, 0), colorTransitionMs: numberProp(props.colorTransitionMs, 0) });
+      return new GuiSwitch({ ...base, loading:booleanProp(props.loading,false),checkedLabel:stringProp(props.checkedLabel,''),uncheckedLabel:stringProp(props.uncheckedLabel,''),checked: booleanProp(props.checked, false), label: stringProp(props.label, ''), thumbTransitionMs: numberProp(props.thumbTransitionMs, 0), colorTransitionMs: numberProp(props.colorTransitionMs, 0) });
     case 'radio':
       return new GuiRadio({
         ...base,
@@ -304,6 +305,9 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         min: numberProp(props.min, 0),
         max: numberProp(props.max, 100),
         step: numberProp(props.step, 1),
+        orientation:props.orientation==='vertical'?'vertical':'horizontal',tooltip:props.tooltip==='hover'||props.tooltip==='always'?props.tooltip:'none',thumbSize:numberProp(props.thumbSize,16),
+        ...(Array.isArray(props.range)?{range:[props.range[0] as number,props.range[1] as number]as const}:{}),
+        marks:Array.isArray(props.marks)?props.marks.map(item=>{const mark=item as {value:number;label?:string};return {...mark};}):[],
       });
     case 'progress':
       return new GuiProgress({
@@ -312,6 +316,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         min: numberProp(props.min, 0),
         max: numberProp(props.max, 100),
         showText: booleanProp(props.showText, false),
+        variant:props.variant==='circle'?'circle':'line',status:props.status==='success'||props.status==='exception'||props.status==='active'?props.status:'normal',strokeWidth:numberProp(props.strokeWidth,4),indeterminate:booleanProp(props.indeterminate,false),
       });
     case 'select':
       return new GuiSelect({
@@ -350,6 +355,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         source: sourceKey ? options.resolveImageSource?.(sourceKey) ?? null : null,
         uv: uvProp(props.uv),
         tint: stringProp(props.tint, '#ffffff'),
+        fit:props.fit==='contain'||props.fit==='cover'||props.fit==='none'?props.fit:'fill',
       });
     }
     default:
@@ -396,7 +402,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       backdropColor: element.backdropColor,
     };
   }
-  if (element instanceof GuiButton) return { text: element.text, variant: element.variant, hoverTransition: element.hoverTransition, hoverTransitionMs: element.hoverTransitionMs };
+  if (element instanceof GuiButton) return { text: element.text, variant: element.variant,loading:element.loading,iconOnly:element.iconOnly, hoverTransition: element.hoverTransition, hoverTransitionMs: element.hoverTransitionMs };
   if (element instanceof GuiLabel) {
     return {
       text: element.text,
@@ -405,12 +411,12 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       autoWidth: element.autoWidth,
     };
   }
-  if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly, ...(Number.isFinite(element.maxLength)?{maxLength:element.maxLength}:{}), inputType:element.inputType, multiline:element.multiline };
-  if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label, thumbTransitionMs: element.thumbTransitionMs, colorTransitionMs: element.colorTransitionMs };
-  if (element instanceof GuiCheckbox) return { checked: element.checked, label: element.label };
+  if (element instanceof GuiInput) return { value: element.value,prefix:element.prefix,suffix:element.suffix,clearable:element.clearable,helpText:element.helpText,invalid:element.getVisualState().invalid??false, placeholder: element.placeholder, readOnly: element.readOnly, ...(Number.isFinite(element.maxLength)?{maxLength:element.maxLength}:{}), inputType:element.inputType, multiline:element.multiline };
+  if (element instanceof GuiSwitch) return { loading:element.loading,checkedLabel:element.checkedLabel,uncheckedLabel:element.uncheckedLabel,checked: element.checked, label: element.label, thumbTransitionMs: element.thumbTransitionMs, colorTransitionMs: element.colorTransitionMs };
+  if (element instanceof GuiCheckbox) return { indeterminate:element.indeterminate,checked: element.checked, label: element.label };
   if (element instanceof GuiRadio) return { checked: element.checked, label: element.label, group: element.group, value: scalarProp(element.value, null) };
-  if (element instanceof GuiSlider) return { value: element.value, min: element.min, max: element.max, step: element.step };
-  if (element instanceof GuiProgress) return { value: element.value, min: element.min, max: element.max, showText: element.showText };
+  if (element instanceof GuiSlider) return { value: element.value, min: element.min, max: element.max, step: element.step,orientation:element.orientation,range:element.range,tooltip:element.tooltip,thumbSize:element.thumbSize,marks:element.marks.map(mark=>({...mark})) };
+  if (element instanceof GuiProgress) return { value: element.value, min: element.min, max: element.max, showText: element.showText,variant:element.variant,status:element.status,strokeWidth:element.strokeWidth,indeterminate:element.indeterminate };
   if (element instanceof GuiSelect) {
     return {
       value: scalarProp(element.value, null),
@@ -437,7 +443,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       delay: element.delay,
     };
   }
-  if (element instanceof GuiImage) return { sourceKey: element.sourceKey ?? null, uv: [...element.uv], tint: element.tint };
+  if (element instanceof GuiImage) return { sourceKey: element.sourceKey ?? null, uv: [...element.uv], tint: element.tint,fit:element.fit };
   return {};
 }
 
@@ -460,16 +466,11 @@ function cloneStyle(style: GuiStyle | undefined): GuiStyle | undefined {
   // v1 keeps its existing wire format. Resource bindings are intentionally
   // outside it, and local runtime-only styles must never leak GPU handles.
   if (style) validateStyle(Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)), '$.style');
-  return style ? Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)) : undefined;
+  return style ? JSON.parse(JSON.stringify(style)) as GuiStyle : undefined;
 }
 
 function cloneTheme(theme: GuiTheme): Partial<GuiTheme> {
-  return {
-    fontFamily: theme.fontFamily,
-    fontSize: theme.fontSize,
-    radius: theme.radius,
-    colors: { ...theme.colors },
-  };
+  return {...theme,colors:{...theme.colors}};
 }
 
 function stringProp(value: unknown, fallback: string): string {
@@ -500,8 +501,8 @@ function scalarProp(value: unknown, fallback: GuiSerializedValue): GuiSerialized
   return fallback;
 }
 
-function variantProp(value: unknown): 'default' | 'primary' | 'danger' | 'outline' {
-  return value === 'primary' || value === 'danger' || value === 'outline' ? value : 'default';
+function variantProp(value: unknown): 'default' | 'primary' | 'danger' | 'outline' | 'text' | 'link' {
+  return value === 'primary' || value === 'danger' || value === 'outline' || value === 'text' || value === 'link' ? value : 'default';
 }
 
 function textAlignProp(value: unknown): GuiLabelTextAlign {
@@ -555,14 +556,27 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
   'progress', 'select', 'tree', 'tooltip', 'toast', 'image', 'modal', 'help-dialog', 'scroll-view', 'color-picker',
 ]);
 
-const STRING_PROPS = new Set(['iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
+const STRING_PROPS = new Set(['prefix','suffix','helpText','checkedLabel','uncheckedLabel','iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
 const NUMBER_PROPS = new Set(['contentWidth', 'scrollX', 'hoverTransitionMs', 'durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['hoverTransition', 'inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const BOOLEAN_PROPS = new Set(['loading','iconOnly','indeterminate','clearable','invalid','hoverTransition', 'inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
   for (const [key, prop] of Object.entries(props)) {
     const propPath = `${path}.${key}`;
+    const enums=type==='progress'?{variant:['line','circle'],status:['normal','success','exception','active']}:type==='image'?{fit:['fill','contain','cover','none']}:type==='slider'?{orientation:['horizontal','vertical'],tooltip:['none','hover','always']}:{};
+    if(Object.hasOwn(enums,key)){if(!(enums as Record<string,readonly unknown[]>)[key]!.includes(prop))invalidGuiData('Unknown GUI appearance variant.',propPath);continue;}
+    if(type==='progress'&&key==='strokeWidth'||type==='slider'&&key==='thumbSize'){
+      if(typeof prop!=='number'||!Number.isFinite(prop)||prop<(key==='thumbSize'?8:Number.MIN_VALUE)||prop>(key==='thumbSize'?48:128))invalidGuiData('Invalid GUI stroke or thumb size.',propPath);continue;
+    }
+    if(type==='slider'&&key==='range'){
+      if(prop===null)continue;if(!Array.isArray(prop)||prop.length!==2||!prop.every(value=>typeof value==='number'&&Number.isFinite(value))||prop[0]>prop[1])invalidGuiData('Invalid GUI slider range.',propPath);continue;
+    }
+    if(type==='slider'&&key==='marks'){
+      if(!Array.isArray(prop)||prop.length>100)invalidGuiData('Invalid GUI slider marks.',propPath);const values=new Set<number>(),min=numberProp(props.min,0),max=numberProp(props.max,100);
+      for(const item of prop){const mark=recordAt(item,propPath);if(typeof mark.value!=='number'||!Number.isFinite(mark.value)||mark.value<min||mark.value>max||values.has(mark.value)||mark.label!==undefined&&typeof mark.label!=='string'||Object.keys(mark).some(k=>k!=='value'&&k!=='label'))invalidGuiData('Invalid GUI slider mark.',propPath);values.add(mark.value);}
+      continue;
+    }
     if(type==='scroll-view'&&key==='axis'){
       if(prop!=='vertical'&&prop!=='horizontal')invalidGuiData('Unknown GUI scroll axis.',propPath);
       continue;
@@ -582,7 +596,7 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
     if (STRING_PROPS.has(key)) {
       if (key === 'sourceKey' && prop === null) continue;
       else if (typeof prop !== 'string') invalidGuiData(`GUI ${key} must be a string.`, propPath);
-      if (key === 'variant' && prop !== 'default' && prop !== 'primary' && prop !== 'danger' && prop !== 'outline') {
+      if (key === 'variant' && prop !== 'default' && prop !== 'primary' && prop !== 'danger' && prop !== 'outline' && prop !== 'text' && prop !== 'link') {
         invalidGuiData('GUI button variant is invalid.', propPath, { receivedVariant: prop });
       }
       if (key === 'textAlign' && prop !== 'left' && prop !== 'center' && prop !== 'right') {
@@ -631,6 +645,7 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
     }
     invalidGuiData('Unknown GUI serialized property.', propPath, { elementType: type, property: key });
   }
+  if(type==='slider'&&(numberProp(props.min,0)>numberProp(props.max,100)||numberProp(props.step,1)<0))invalidGuiData('Invalid GUI slider bounds or step.',path);
 }
 
 function validateSelectOption(value: unknown, path: string): void {
@@ -659,25 +674,32 @@ function validateScalar(value: unknown, path: string): void {
   invalidGuiData('GUI serialized values are limited to string, finite number, boolean, or null.', path);
 }
 
-function validateStyle(value: unknown, path: string): void {
+function validateStyle(value: unknown, path: string, depth=0): void {
+  if(depth>16)invalidGuiData('GUI style exceeds nesting bounds.',path);
   const style = recordAt(value, path);
-  for (const [key, item] of Object.entries(style)) {
-    if (key === 'cursor' || key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
-      if (typeof item !== 'string') invalidGuiData(`GUI style ${key} must be a string.`, `${path}.${key}`);
-    } else if (key === 'iconPosition') {
-      if(item!=='left'&&item!=='right')invalidGuiData('Invalid GUI icon position.',`${path}.${key}`);
-    } else if (key === 'opacity' || key === 'radius' || key === 'padding') {
-      if (typeof item !== 'number' || !Number.isFinite(item)) invalidGuiData(`GUI style ${key} must be a finite number.`, `${path}.${key}`);
-    } else {
-      invalidGuiData('Unknown GUI style property.', `${path}.${key}`, { property: key });
-    }
+  const strings=['cursor','fontFamily','backgroundColor','hoverBackgroundColor','borderColor','color','hoverColor','focusColor','iconTint'];
+  const numbers=['opacity','radius','padding','paddingY','fontSize','fontWeight','lineHeight','borderWidth','focusWidth','clipRadius','iconRotation','iconSize','iconGap'];
+  for(const [key,item]of Object.entries(style)){
+    const at=path+'.'+key;
+    if(strings.includes(key)){if(typeof item!=='string')invalidGuiData('GUI style value must be a string.',at);}
+    else if(numbers.includes(key)){if(typeof item!=='number'||!Number.isFinite(item))invalidGuiData('GUI style value must be finite.',at);}
+    else if(key==='iconPosition'){if(item!=='left'&&item!=='right')invalidGuiData('Invalid GUI icon position.',at);}
+    else if(key==='textOverflow'){if(item!=='clip'&&item!=='ellipsis')invalidGuiData('Invalid GUI text overflow.',at);}
+    else if(key==='cornerRadii'){if(!Array.isArray(item)||item.length!==4||item.some(n=>typeof n!=='number'||!Number.isFinite(n)))invalidGuiData('Invalid GUI corners.',at);}
+    else if(key==='parts'||key==='states'){const parts=recordAt(item,at);for(const [name,part]of Object.entries(parts)){if(['__proto__','constructor','prototype'].includes(name)||key==='states'&&!['hover','focus','pressed','disabled','checked','selected','invalid','loading','readOnly','open'].includes(name))invalidGuiData('Invalid GUI part/state name.',at+'.'+name);validateStyle(part,at+'.'+name,depth+1);}}
+    else if(key==='gradient'||key==='shadow'){const config=recordAt(item,at),allowed=key==='gradient'?['from','to','angle']:['color','blur','x','y','spread'];for(const [name,v]of Object.entries(config)){if(!allowed.includes(name))invalidGuiData('Unknown GUI box parameter.',at+'.'+name);if(['from','to','color'].includes(name)?typeof v!=='string':typeof v!=='number'||!Number.isFinite(v))invalidGuiData('Invalid GUI box parameter.',at+'.'+name);}}
+    else if(key==='palette'){for(const [name,color]of Object.entries(recordAt(item,at)))if(typeof color!=='string')invalidGuiData('Invalid GUI palette color.',at+'.'+name);}
+    else invalidGuiData('Unknown GUI style property.',at,{property:key});
   }
+  try{captureGuiStyle(style as GuiStyle);}catch{invalidGuiData('Invalid GUI style configuration.',path);}
 }
 
 function validateTheme(value: unknown, path: string): void {
   const theme = recordAt(value, path);
   optional(theme.fontFamily, 'string', `${path}.fontFamily`);
   finiteOptional(theme.fontSize, `${path}.fontSize`);
+  if(theme.density!==undefined&&!['compact','comfortable','touch'].includes(String(theme.density)))invalidGuiData('Invalid GUI density.',path+'.density');
+  for(const key of ['fontWeight','lineHeight','spacing','motionScale'])finiteOptional(theme[key],path+'.'+key);
   finiteOptional(theme.radius, `${path}.radius`);
   if (theme.colors !== undefined) {
     const colors = recordAt(theme.colors, `${path}.colors`);

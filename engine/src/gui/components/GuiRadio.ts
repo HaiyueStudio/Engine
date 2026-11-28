@@ -1,3 +1,4 @@
+import {registerGuiControlSize} from '../GuiControlSize';
 import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
 import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
@@ -14,7 +15,7 @@ export interface GuiRadioOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiRadio<T = string> extends GuiElement {
-  private static readonly __controlIdentityGuiRadio = /* @__PURE__ */ (() => admitGuiControl(GuiRadio.prototype, 'GuiRadio', {rebuild:GuiRadio.rebuildGroupRegistry,ensure:GuiRadio.ensureGroupRegistry}, paintGuiRadio))();
+  private static readonly __controlIdentityGuiRadio = /* @__PURE__ */ (() => admitGuiControl(GuiRadio.prototype, 'GuiRadio', {rebuild:GuiRadio.rebuildGroupRegistry,ensure:GuiRadio.ensureGroupRegistry}, paintGuiRadio, (_control,theme,state)=>({focusWidth:2,focusColor:theme.colors.focus??theme.colors.primary,...(state.disabled?{color:theme.colors.disabledText??theme.colors.textMuted}:{})})))();
   static override readonly themeControlType: string = 'GuiRadio';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
@@ -30,7 +31,8 @@ export class GuiRadio<T = string> extends GuiElement {
 
   constructor(options: GuiRadioOptions<T> = {}) {
     super({ width: 120, height: 28, focus: {mode: 'all'}, ...options });
-    this.checked = options.checked ?? false;
+    registerGuiControlSize(this,options,28);
+    this.checked = options.checked ?? false;this.setVisualState({checked:this.checked});
     this.label = options.label ?? '';
     this.group = options.group ?? 'default';
     this.value = (options.value ?? this.label) as T;
@@ -55,7 +57,7 @@ export class GuiRadio<T = string> extends GuiElement {
 
   setChecked(checked: boolean, emit = false): void {
     if (this.checked === checked) return;
-    this.checked = checked;
+    this.checked = checked;this.setVisualState({checked});
     this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
     if (emit && checked) this.onChange?.(this.value);
   }
@@ -97,6 +99,12 @@ export class GuiRadio<T = string> extends GuiElement {
 
 /** Original built-in painter; retained with this control, not every GUI owner. */
 function paintGuiRadio(context:GuiPaint.GuiControlPaintContext, radio: GuiRadio, theme: GuiPaint.GuiTheme): void {
+    if(theme.density){
+      const skin=context.styleFor(radio),part=GuiPaint.guiPartStyle(context,radio,'indicator'),label=GuiPaint.guiPartStyle(context,radio,'label'),r=radio.rect,size=Math.max(0,Math.min(18,r.height-4)),x=r.x+2,y=r.y+(r.height-size)/2;
+      GuiPaint.paintGuiBox(context.currentBatch,{x,y,width:size,height:size},{...skin,radius:skin.radius??size/2,...part},GuiPaint.colorToRgba(part.backgroundColor??skin.backgroundColor,theme.colors.input??theme.colors.surface),GuiPaint.colorToRgba(part.borderColor??skin.borderColor,radio.checked?theme.colors.primary:theme.colors.border),context.currentClip,size/2);
+      if(radio.checked)context.addRect(x+5,y+5,size-10,size-10,(size-10)/2,GuiPaint.colorToRgba(part.color,radio.disabled?theme.colors.disabledText??theme.colors.textMuted:theme.colors.primary));
+      if(radio.label)context.addText(radio.label,x+size+8,r.y,Math.max(0,r.width-size-10),r.height,label.fontSize??theme.fontSize,GuiPaint.colorToRgba(label.color??skin.color,theme.colors.text),true);return;
+    }
     const skin = context.styleFor(radio), r = skin.contentInsets || skin.nineSlice || skin.icon ? GuiPaint.guiContentBox(radio, 0, theme.fontSize).text : radio.rect;
     const size = Math.max(0, Math.min(18, r.height - 6, r.width - 4));
     const x = r.x + 2;

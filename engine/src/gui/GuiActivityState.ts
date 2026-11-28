@@ -1,3 +1,4 @@
+import {guiHasActivity,advanceGuiActivity} from './GuiActivity';
 import {GuiElement} from './components/GuiElement';
 import {GuiDirtyFlags} from './GuiTypes';
 import {guiControlAnimationGetter,guiControlPrototype} from './GuiControlIdentity';
@@ -23,7 +24,7 @@ export class GuiActivityState {
   private local(entry:Entry):boolean {
     const element=entry.element;
     return element.visible&&!isGuiLayoutHidden(element)&&!element.disabled&&
-      (('animating' in element&&element.animating===true)||entry.childrenActive>0);
+      ((guiHasActivity(element)||'animating' in element&&element.animating===true)||entry.childrenActive>0);
   }
   private collect(element:GuiElement,parent:Entry|null):boolean {
     const order:Entry[]=[],pending:{element:GuiElement;parent:Entry|null}[]=[{element,parent}];

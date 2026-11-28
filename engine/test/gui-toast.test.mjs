@@ -58,7 +58,7 @@ test('toast text, icon and background share popup layer and opacity without chan
   toast.show(); toast.advanceAnimation(0); toast.advanceAnimation(50); root.layout(320,480);
   const cache=renderer.getRootCache(root); renderer.rebuildRoot(root,cache);
   assert.equal(cache.batch.commands.length,0);
-  assert.equal(cache.popupBatch.commands[0].color[3],.5);
+  const body=cache.popupBatch.commands.find(c=>!c.appearance?.blur);assert.equal(body.color[3],.5);assert.ok(cache.popupBatch.commands.every(c=>c.color[3]<=.5),'shadow and body obey the same transition opacity');
   assert.equal(cache.popupImageBatch.commands[0].color[3],.5);
   assert.equal(cache.popupTextBatch.commands[0].color[3],.5);
   assert.equal(cache.popupTextBatch.commands[0].height,48);
